@@ -1,0 +1,19 @@
+.linkContainer {
+  display: flex;
+  margin-top: 8px;
+  color: var(--color-brand-primary);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  gap: 12px;
+}
+
+.linkContainer > a {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--color-brand-primary);
+}
+
+.linkContainer > a:hover {
+  text-decoration: underline;
+}

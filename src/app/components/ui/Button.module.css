@@ -1,0 +1,81 @@
+.button {
+  height: 44px;
+  padding: 13px 16px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+/* 기존 focus 제거 */
+.button:focus {
+  box-shadow: none;
+}
+
+/* 마우스 누르고 있는 동안만 */
+.button:active:not(:disabled) {
+  box-shadow: 0 0 0 1.5px var(--btn-border-focus);
+}
+
+/* disabled */
+.button:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* primary */
+.variant_primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+.variant_primary:disabled {
+  background: var(--btn-primary-disabled-bg);
+  color: var(--btn-primary-disabled-text);
+}
+.variant_primary:hover:not(:disabled) {
+  background: var(--btn-primary-hover-bg);
+}
+.variant_primary:active:not(:disabled) {
+  background: var(--btn-primary-active-bg);
+}
+
+/* secondary */
+.variant_secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+}
+.variant_secondary:disabled {
+  background: var(--btn-secondary-disabled-bg);
+  color: var(--btn-secondary-disabled-text);
+}
+.variant_secondary:hover:not(:disabled) {
+  background: var(--btn-secondary-hover-bg);
+}
+.variant_secondary:active:not(:disabled) {
+  background: var(--btn-secondary-active-bg);
+}
+
+/* tertiary */
+.variant_tertiary {
+  background: var(--btn-tertiary-bg);
+  color: var(--btn-tertiary-text);
+}
+
+.variant_tertiary:disabled {
+  background: var(--btn-tertiary-disabled-bg);
+  color: var(--btn-tertiary-disabled-text);
+}
+
+.variant_tertiary:hover:not(:disabled) {
+  background: var(--btn-tertiary-hover-bg);
+}
+
+.variant_tertiary:active:not(:disabled) {
+  background: var(--btn-tertiary-active-bg);
+}

@@ -1,0 +1,26 @@
+/* Logo.module.css */
+.logo {
+  display: inline-block;
+  line-height: 0; /* svg 아래 여백 방지 */
+}
+
+/* svg를 inline으로 넣든, img로 넣든 동일하게 */
+.logo svg,
+.logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== 방향별 크기/비율 ===== */
+/* 가로형: 원본 148x40 */
+.horizontal {
+  height: var(--logo-h, 40px);
+  aspect-ratio: 148 / 40;
+}
+
+/* 세로형: 원본 132x100 */
+.vertical {
+  height: var(--logo-h, 100px);
+  aspect-ratio: 132 / 100;
+}
