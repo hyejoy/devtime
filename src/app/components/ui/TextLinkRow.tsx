@@ -3,16 +3,17 @@ import styles from './TextLinkRow.module.css';
 
 type RoutePath = `/${string}`;
 type TextLink = {
-  message: string;
+  question?: string;
+  label: string;
   href: RoutePath;
 };
 
-export default function TextLinkRow({ message, href }: TextLink) {
+export default function TextLinkRow({ question, label, href }: TextLink) {
   return (
     <div className={styles.linkContainer}>
-      <div>회원이신가요?</div>
+      <div>{question}</div>
       <Link className="link" href={href}>
-        {message}
+        {label}
       </Link>
     </div>
   );

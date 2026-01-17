@@ -1,9 +1,10 @@
 .label {
   user-select: none;
-  width: 420px;
+  width: 100%;
   height: 18px;
   font-weight: 500;
   font-size: 14px;
   line-height: 18px;
   color: var(--color-gray-600);
+  margin-bottom: 0.4rem;
 }

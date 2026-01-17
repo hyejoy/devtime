@@ -2,14 +2,13 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   user-select: none;
 }
 
 .textField {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .input:focus {

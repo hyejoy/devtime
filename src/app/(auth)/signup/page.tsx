@@ -6,10 +6,11 @@ import TextField from '@/app/components/ui/TextField';
 import CheckBox from '@/app/components/ui/CheckBox';
 import Button from '@/app/components/ui/Button';
 import TextLinkRow from '@/app/components/ui/TextLinkRow';
-import { termOfUse } from '@/contants/terms';
+
 import styles from './page.module.css';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
 import TextLabel from '@/app/components/ui/TextLabel';
+import { TERMS_OF_SERVICE } from '@/contants/DevTime_terms';
 
 export const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 export const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
@@ -185,13 +186,17 @@ export default function Page() {
             />
           </div>
 
-          <div className={styles.termContent}>{termOfUse}</div>
-
-          <div className={styles.signUpBtn}>
+          <div className={styles.signUpBtnForm}>
+            <p className={styles.termForm}>{TERMS_OF_SERVICE}</p>
             <Button>회원가입</Button>
+            <div className={styles.signupFooter}>
+              <TextLinkRow
+                href="/login"
+                question="회원이신가요?"
+                label="로그인 바로가기"
+              />
+            </div>
           </div>
-
-          <TextLinkRow href="/login" message="로그인 바로가기" />
         </div>
       </div>
     </div>
