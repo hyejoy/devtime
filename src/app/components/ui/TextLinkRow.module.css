@@ -1,11 +1,12 @@
 .linkContainer {
   display: flex;
-  margin-top: 8px;
+  margin-top: 0.5rem;
   color: var(--color-brand-primary);
   font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
+  font-size: 1rem;
+  line-height: 1.25rem;
   gap: 12px;
+  justify-content: center;
 }
 
 .linkContainer > a {
