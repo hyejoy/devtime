@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  EMAIL_FORMAT_REQUIRED_MESSAGE,
-  NICKNAME_REQUIRED_MESSAGE,
-  PASSWORD_MISMATCH_MESSAGE,
-  PASSWORD_POLICY_MESSAGE,
-  SignInput,
-  SignValid,
-} from '@/app/(auth-form)/signup/page';
+import { SignInput, SignValid } from '@/app/(auth-form)/signup/page';
 import Button from '@/app/components/ui/Button';
 import TextLabel from '@/app/components/ui/TextLabel';
 import { useRef } from 'react';
@@ -37,17 +30,15 @@ export default function SignupFields({
   feedbackMessages,
   // validation,
   onChangeValue,
-  onChangeValidation,
 }: Props) {
   /* refs */
-  const idRef = useRef<HTMLInputElement>(null);
-  const nickNameRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const checkPasswordRef = useRef<HTMLInputElement>(null);
+  const inputRefs = {
+    id: useRef<HTMLInputElement>(null),
+    nickName: useRef<HTMLInputElement>(null),
+    password: useRef<HTMLInputElement>(null),
+    checkPassword: useRef<HTMLInputElement>(null),
+  } as const;
 
-  // 이미 사용 중인 이메일입니다.
-  // 사용 가능한 이메일입니다.
-  // 사용 가능한 닉네임 입니다.
   const LABEL_MAP: Record<keyof SignInput, string> = {
     id: '아이디',
     nickName: '닉네임',
@@ -56,10 +47,10 @@ export default function SignupFields({
   };
 
   const PLACEHOLDER_MAP: Record<keyof SignInput, string> = {
-    id: EMAIL_FORMAT_REQUIRED_MESSAGE,
-    nickName: NICKNAME_REQUIRED_MESSAGE,
-    password: PASSWORD_POLICY_MESSAGE,
-    checkPassword: PASSWORD_MISMATCH_MESSAGE,
+    id: '이메일 주소 형식으로 입력해 주세요.',
+    nickName: '닉네임을 입력해 주세요.',
+    password: '비밀번호를 입력해 주세요.',
+    checkPassword: '비밀번호를 다시 입력해 주세요.',
   };
 
   return (
@@ -71,9 +62,9 @@ export default function SignupFields({
               <TextLabel name={key} label={LABEL_MAP[key]} />
               <div className={styles.textField}>
                 <TextFieldInput
+                  ref={inputRefs[key]}
                   value={values[key]}
-                  onChangeValue={onChangeValue}
-                  // ref={ref}
+                  onChange={(e) => onChangeValue(key, e.target.value)}
                   name={key}
                   placeholder={PLACEHOLDER_MAP[key]}
                   type={
@@ -82,7 +73,7 @@ export default function SignupFields({
                       : 'text'
                   }
                   feedbackMessage={feedbackMessages[key]}
-                  validState={validState[key]}
+                  isValid={validState[key]}
                 />
                 {buttonLabel[key] && (
                   <Button variant="secondary" disabled={!validState[key]}>
