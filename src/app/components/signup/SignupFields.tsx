@@ -1,163 +1,99 @@
 'use client';
 
-import { useRef, useState, ChangeEvent } from 'react';
-import TextField from './../ui/TextField';
-import TextFieldInput from '../ui/TextFieldInput';
+import {
+  EMAIL_FORMAT_REQUIRED_MESSAGE,
+  NICKNAME_REQUIRED_MESSAGE,
+  PASSWORD_MISMATCH_MESSAGE,
+  PASSWORD_POLICY_MESSAGE,
+  SignInput,
+  SignValid,
+} from '@/app/(auth-form)/signup/page';
+import Button from '@/app/components/ui/Button';
 import TextLabel from '@/app/components/ui/TextLabel';
+import { useRef } from 'react';
+import TextFieldInput from '../ui/TextFieldInput';
+import styles from './SignupFields.module.css';
 export const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 export const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
-export default function SignupFields() {
+/** buttonLabel */
+const buttonLabel: any = {
+  id: '중복확인',
+  nickName: '중복확인',
+};
+
+type Props = {
+  values: SignInput;
+  validState: SignValid;
+  feedbackMessages: SignInput;
+  /* handlers */
+  onChangeValue: (name: keyof SignInput, value: string) => void;
+  onChangeValidation: (name: keyof SignValid, value: boolean) => void;
+};
+
+export default function SignupFields({
+  values,
+  validState,
+  feedbackMessages,
+  // validation,
+  onChangeValue,
+  onChangeValidation,
+}: Props) {
   /* refs */
   const idRef = useRef<HTMLInputElement>(null);
   const nickNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const checkPasswordRef = useRef<HTMLInputElement>(null);
 
-  /* state */
-  const [id, setId] = useState('');
-  const [nickName, setNickName] = useState('');
-  const [password, setPassword] = useState('');
-  const [checkPassword, setCheckPassword] = useState('');
-
-  /* feedback Message */
-  const [idFeedback, setIdFeedback] = useState('');
-  const [nickNameFeedback, setNickNameFeedback] = useState('');
-  const [passwordFeedback, setPasswordFeedback] = useState('');
-  const [checkPasswordFeedback, setCheckPasswordFeedback] = useState('');
-
-  /* validCheck */
-  const [duplicateId, setDuplicateId] = useState(false);
-  const [duplicateNickName, setDuplicateNickName] = useState(false);
-  const [validPassword, setValidPassword] = useState(false);
-  const [validCheckPassword, setValidCheckPassword] = useState(false);
-  const [termCheck, setTermCheck] = useState(false);
-
-  const DUPLICATE_CHECK_REQUIRED_MESSAGE = '중복을 확인해 주세요.';
-  const PASSWORD_MISMATCH_MESSAGE = '비밀번호가 일치하지 않습니다.';
-  /* handlers */
-  const handleId = (e: ChangeEvent<HTMLInputElement>) => {
-    const id = e.target.value;
-    const feedback = '이메일 형식으로 작성해 주세요.';
-    setId(e.target.value);
-    if (!id) {
-      setIdFeedback(feedback);
-    } else {
-      const isValid = emailRegex.test(id);
-      if (isValid) {
-        if (!duplicateId) {
-          setIdFeedback(DUPLICATE_CHECK_REQUIRED_MESSAGE);
-        } else {
-          setIdFeedback('');
-        }
-      } else {
-        setIdFeedback(feedback);
-      }
-    }
+  // 이미 사용 중인 이메일입니다.
+  // 사용 가능한 이메일입니다.
+  // 사용 가능한 닉네임 입니다.
+  const LABEL_MAP: Record<keyof SignInput, string> = {
+    id: '아이디',
+    nickName: '닉네임',
+    password: '비밀번호',
+    checkPassword: '비밀번호 확인',
   };
 
-  const handleNickName = (e: ChangeEvent<HTMLInputElement>) => {
-    const nickName = e.target.value;
-    setNickName(e.target.value);
-    if (!nickName) {
-      setNickNameFeedback('닉네임을 입력해 주세요.');
-    } else {
-      if (!duplicateNickName) {
-        setNickNameFeedback(DUPLICATE_CHECK_REQUIRED_MESSAGE);
-      } else {
-        setNickNameFeedback('');
-      }
-    }
+  const PLACEHOLDER_MAP: Record<keyof SignInput, string> = {
+    id: EMAIL_FORMAT_REQUIRED_MESSAGE,
+    nickName: NICKNAME_REQUIRED_MESSAGE,
+    password: PASSWORD_POLICY_MESSAGE,
+    checkPassword: PASSWORD_MISMATCH_MESSAGE,
   };
 
-  const handlePassword = (e: ChangeEvent<HTMLInputElement>) => {
-    const password = e.target.value;
-    const feedback = '비밀번호는 8자 이상, 영문과 숫자 조합이어야 합니다.';
-    setPassword(e.target.value);
-
-    if (checkPassword.trim() !== '') {
-      if (password !== checkPassword) {
-        setCheckPasswordFeedback(PASSWORD_MISMATCH_MESSAGE);
-      } else {
-        setCheckPasswordFeedback('');
-      }
-    }
-    if (!password) {
-      setPasswordFeedback(feedback);
-    } else {
-      const isValid = passwordRegex.test(password);
-      setPasswordFeedback(isValid ? '' : feedback);
-      if (isValid) {
-        setPasswordFeedback('');
-      } else {
-        setPasswordFeedback(feedback);
-      }
-    }
-  };
-
-  const handleCheckPassword = (e: ChangeEvent<HTMLInputElement>) => {
-    const checkPassword = e.target.value;
-    setCheckPassword(e.target.value);
-    if (checkPassword !== password) {
-      setCheckPasswordFeedback(PASSWORD_MISMATCH_MESSAGE);
-    } else {
-      setCheckPasswordFeedback('');
-    }
-  };
-
-  const onToggleCheck = (e: ChangeEvent<HTMLInputElement>) => {
-    const isCheck = e.currentTarget.checked;
-    setTermCheck(isCheck);
-  };
   return (
     <>
-      <TextField
-        ref={idRef}
-        name="id"
-        label="아이디"
-        type="email"
-        value={id}
-        onChangeValue={handleId}
-        placeholder="이메일 주소 형식으로 입력해 주세요."
-        buttonName="중복 확인"
-        feedbackMessage={idFeedback}
-        valiConfirm={duplicateId}
-      />
-
-      <TextField
-        ref={nickNameRef}
-        name="nickName"
-        label="닉네임"
-        value={nickName}
-        onChangeValue={handleNickName}
-        placeholder="닉네임을 입력해 주세요."
-        buttonName="중복 확인"
-        feedbackMessage={nickNameFeedback}
-        valiConfirm={duplicateNickName}
-      />
-
-      <TextLabel label="비밀번호" name="password" />
-      <TextFieldInput
-        name="password"
-        value={password}
-        onChangeValue={handlePassword}
-        placeholder="비밀번호를 입력해주세요."
-        type="password"
-        feedbackMessage={passwordFeedback}
-        valiConfirm={validPassword}
-        ref={passwordRef}
-      />
-      <TextLabel label="비밀번호 확인" name="checkPassword" />
-      <TextFieldInput
-        name="checkPassword"
-        value={checkPassword}
-        onChangeValue={handleCheckPassword}
-        placeholder="비밀번호를 다시 입력해 주세요."
-        type="password"
-        feedbackMessage={checkPasswordFeedback}
-        valiConfirm={validCheckPassword}
-        ref={checkPasswordRef}
-      />
+      <div className={styles.textFieldContainer}>
+        {(Object.keys(values) as Array<keyof typeof values>).map((key) => {
+          return (
+            <>
+              <TextLabel name={key} label={LABEL_MAP[key]} />
+              <div className={styles.textField}>
+                <TextFieldInput
+                  value={values[key]}
+                  onChangeValue={onChangeValue}
+                  // ref={ref}
+                  name={key}
+                  placeholder={PLACEHOLDER_MAP[key]}
+                  type={
+                    key === 'password' || key === 'checkPassword'
+                      ? 'password'
+                      : 'text'
+                  }
+                  feedbackMessage={feedbackMessages[key]}
+                  validState={validState[key]}
+                />
+                {buttonLabel[key] && (
+                  <Button variant="secondary" disabled={!validState[key]}>
+                    {buttonLabel[key]}
+                  </Button>
+                )}
+              </div>
+            </>
+          );
+        })}
+      </div>
     </>
   );
 }

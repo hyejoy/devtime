@@ -3,20 +3,24 @@ import CheckBox from '@/app/components/ui/CheckBox';
 import { useState, ChangeEvent } from 'react';
 import styles from './SignupTerms.module.css';
 import { TERMS_OF_SERVICE } from '@/contants/DevTime_terms';
+type Props = {
+  checked: boolean;
+  onChangeChecked: (checked: boolean) => void;
+};
 
-export default function SignupTerms() {
-  const [termCheck, setTermCheck] = useState(false);
+export default function SignupTerms({ checked, onChangeChecked }: Props) {
   const onToggleCheck = (e: ChangeEvent<HTMLInputElement>) => {
-    const isCheck = e.currentTarget.checked;
-    setTermCheck(isCheck);
+    const chekced = e.currentTarget.checked;
+    onChangeChecked(chekced);
   };
+
   return (
     <>
       <div className={styles.termForm}>
         <div>이용약관</div>
         <CheckBox
           id="signup-term-checkbox"
-          checked={termCheck}
+          checked={checked}
           label="동의함"
           onToggleCheck={onToggleCheck}
         />

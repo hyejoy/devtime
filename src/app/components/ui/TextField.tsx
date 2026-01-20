@@ -7,10 +7,10 @@ import TextFieldInput, { FeedbackMessageType } from './TextFieldInput';
 import Button from './Button';
 
 type Props = {
-  name: string;
+  htmlFor: string;
   placeholder: string;
   value: string;
-  onChangeValue: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChangeValue: (text: string) => void;
   type?: HTMLInputTypeAttribute;
   label: string;
   buttonName?: string;
@@ -21,7 +21,7 @@ type Props = {
 const TextField = forwardRef<HTMLInputElement, Props>(
   (
     {
-      name,
+      htmlFor,
       placeholder,
       value,
       onChangeValue,
@@ -33,15 +33,18 @@ const TextField = forwardRef<HTMLInputElement, Props>(
     },
     ref
   ) => {
+    const handleValue = (value: string) => {
+      onChangeValue(value);
+    };
     return (
       <div className={styles.textFieldContainer}>
-        <TextLabel name={name} label={label} />
+        <TextLabel htmlFor={htmlFor} label={label} />
         <div className={styles.textField}>
           <TextFieldInput
             value={value}
-            onChangeValue={(e) => onChangeValue(e)}
+            onChangeValue={handleValue}
             ref={ref}
-            name={name}
+            htmlFor={htmlFor}
             placeholder={placeholder}
             type={type}
             feedbackMessage={feedbackMessage}

@@ -1,55 +1,61 @@
 'use client';
 
-import { ChangeEvent, HTMLInputTypeAttribute, forwardRef } from 'react';
+import React, { ChangeEvent, HTMLInputTypeAttribute, forwardRef } from 'react';
 import styles from './TextFieldInput.module.css';
-export type FeedbackMessageType = boolean | null;
 
-type Props = {
-  name: string;
+type Props<T extends string> = {
+  name: T;
   value: string;
-  onChangeValue: (e: ChangeEvent<HTMLInputElement>) => void;
   placeholder: string;
   type?: HTMLInputTypeAttribute;
+  validState?: boolean;
   feedbackMessage?: string;
-  valiConfirm?: boolean;
+  onChangeValue: (name: T, value: string) => void;
 };
 
-const TextFieldInput = forwardRef<HTMLInputElement, Props>(
-  (
-    {
-      name,
-      value,
-      onChangeValue,
-      placeholder,
-      type = 'text',
-      feedbackMessage,
-      valiConfirm,
-    },
-    ref
-  ) => {
-    const messageInputType = valiConfirm || !feedbackMessage ? '' : 'negative';
-    const messageTextType = valiConfirm ? '' : 'negative_text';
+/** 1️⃣ 내부 구현 (제네릭 유지) */
+function TextFieldInputInner<T extends string>(
+  {
+    name,
+    value,
+    onChangeValue,
+    placeholder,
+    type = 'text',
+    feedbackMessage,
+    validState,
+  }: Props<T>,
+  ref: React.Ref<HTMLInputElement>
+) {
+  const messageInputType = validState || !feedbackMessage ? '' : 'negative';
+  const messageTextType = validState ? '' : 'negative_text';
 
-    return (
-      <>
-        <div className={styles.inputBox}>
-          <input
-            ref={ref}
-            name={name}
-            value={value}
-            onChange={(e) => onChangeValue(e)}
-            placeholder={placeholder}
-            type={type}
-            className={`${styles.input} ${styles[messageInputType]}`}
-          />
-          <div className={`${styles.feedback} ${styles[messageTextType]}`}>
-            {feedbackMessage}
-          </div>
-        </div>
-      </>
-    );
-  }
-);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChangeValue(name, e.target.value);
+  };
+
+  return (
+    <div className={styles.inputBox}>
+      <input
+        ref={ref}
+        name={name}
+        value={value}
+        onChange={handleInputChange}
+        placeholder={placeholder}
+        type={type}
+        className={`${styles.input} ${styles[messageInputType]}`}
+      />
+      <div className={`${styles.feedback} ${styles[messageTextType]}`}>
+        {feedbackMessage}
+      </div>
+    </div>
+  );
+}
+
+/** 2️⃣ forwardRef로 감싸고 JSX 컴포넌트 타입으로 캐스팅 */
+const TextFieldInput = forwardRef(TextFieldInputInner) as <T extends string>(
+  props: Props<T> & { ref?: React.Ref<HTMLInputElement> }
+) => jsx.Element;
 
 TextFieldInput.displayName = 'TextFieldInput';
+
 export default TextFieldInput;
