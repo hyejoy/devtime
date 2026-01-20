@@ -8,7 +8,7 @@ type Props<T extends string> = {
   value: string;
   placeholder: string;
   type?: HTMLInputTypeAttribute;
-  validState?: boolean;
+  isValid?: boolean;
   feedbackMessage?: string;
   onChangeValue: (name: T, value: string) => void;
 };
@@ -18,16 +18,16 @@ function TextFieldInputInner<T extends string>(
   {
     name,
     value,
-    onChangeValue,
     placeholder,
     type = 'text',
+    isValid,
     feedbackMessage,
-    validState,
+    onChangeValue,
   }: Props<T>,
   ref: React.Ref<HTMLInputElement>
 ) {
-  const messageInputType = validState || !feedbackMessage ? '' : 'negative';
-  const messageTextType = validState ? '' : 'negative_text';
+  const messageInputType = isValid || !feedbackMessage ? '' : 'negative';
+  const messageTextType = isValid ? '' : 'negative_text';
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChangeValue(name, e.target.value);
