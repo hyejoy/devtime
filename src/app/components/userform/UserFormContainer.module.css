@@ -5,13 +5,9 @@
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  /* max-width: 420px; */
   max-width: 50vh;
   max-height: 80vh;
   padding: 0px 2rem;
-  /* overflow-y: scroll; /* 스크롤 기능 유지 */
-  /* scrollbar-width: none; /* Firefox */
-  /* -ms-overflow-style: none; /* IE, Edge Legacy */
 }
 .formTitle {
   font-weight: 700;
