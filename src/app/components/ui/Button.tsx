@@ -1,4 +1,5 @@
 import styles from './Button.module.css';
+import classNames from 'classnames/bind';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'tertiary';
@@ -9,11 +10,10 @@ export default function Button({
   className = '',
   ...props
 }: ButtonProps) {
+  const cx = classNames.bind(styles);
   return (
     <button
-      className={[styles.button, styles[`variant_${variant}`], className].join(
-        ' '
-      )}
+      className={cx('button', `variant_${variant}`, className)}
       {...props}
     />
   );
