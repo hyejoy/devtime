@@ -1,0 +1,7 @@
+.bottomButtonField {
+  margin-bottom: 2rem;
+}
+
+.bottomButtonField > button {
+  width: 100%;
+}
