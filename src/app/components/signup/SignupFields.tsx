@@ -1,35 +1,45 @@
 'use client';
 
-import { SignInput, SignValid } from '@/app/(auth-form)/signup/page';
 import Button from '@/app/components/ui/Button';
 import TextLabel from '@/app/components/ui/TextLabel';
+import {
+  DuplicateField,
+  DuplicateState,
+  SignInput,
+  SignValid,
+} from '@/types/signup';
 import { useRef } from 'react';
 import TextFieldInput from '../ui/TextFieldInput';
 import styles from './SignupFields.module.css';
+import { MESSAGE } from '@/constants/signupMessage';
 export const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 export const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
 /** buttonLabel */
-const buttonLabel: any = {
+const buttonLabel: Record<DuplicateField, '중복확인'> = {
   id: '중복확인',
   nickName: '중복확인',
 };
 
 type Props = {
   values: SignInput;
-  validState: SignValid;
+  isValid: SignValid;
+  isDuplicateConfirm: DuplicateState;
   feedbackMessages: SignInput;
   /* handlers */
   onChangeValue: (name: keyof SignInput, value: string) => void;
   onChangeValidation: (name: keyof SignValid, value: boolean) => void;
+  onConfirmDuplicate: (field: DuplicateField) => void;
 };
 
 export default function SignupFields({
   values,
-  validState,
+  isValid,
+  isDuplicateConfirm,
   feedbackMessages,
   // validation,
   onChangeValue,
+  onConfirmDuplicate,
 }: Props) {
   /* refs */
   const inputRefs = {
@@ -47,18 +57,18 @@ export default function SignupFields({
   };
 
   const PLACEHOLDER_MAP: Record<keyof SignInput, string> = {
-    id: '이메일 주소 형식으로 입력해 주세요.',
-    nickName: '닉네임을 입력해 주세요.',
-    password: '비밀번호를 입력해 주세요.',
-    checkPassword: '비밀번호를 다시 입력해 주세요.',
+    id: MESSAGE.REQUIRED.id,
+    nickName: MESSAGE.REQUIRED.nickName,
+    password: MESSAGE.REQUIRED.password,
+    checkPassword: MESSAGE.REQUIRED.checkPassword,
   };
 
   return (
     <>
       <div className={styles.textFieldContainer}>
-        {(Object.keys(values) as Array<keyof typeof values>).map((key) => {
+        {(Object.keys(values) as Array<keyof SignInput>).map((key) => {
           return (
-            <>
+            <div key={key}>
               <TextLabel name={key} label={LABEL_MAP[key]} />
               <div className={styles.textField}>
                 <TextFieldInput
@@ -73,15 +83,20 @@ export default function SignupFields({
                       : 'text'
                   }
                   feedbackMessage={feedbackMessages[key]}
-                  isValid={validState[key]}
+                  isValid={isValid[key]}
                 />
-                {buttonLabel[key] && (
-                  <Button variant="secondary" disabled={!validState[key]}>
+                {(key === 'id' || key === 'nickName') && (
+                  <Button
+                    id={key}
+                    variant="secondary"
+                    disabled={Boolean(!values[key]) && !isDuplicateConfirm[key]}
+                    onClick={() => onConfirmDuplicate(key)}
+                  >
                     {buttonLabel[key]}
                   </Button>
                 )}
               </div>
-            </>
+            </div>
           );
         })}
       </div>
