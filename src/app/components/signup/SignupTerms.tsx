@@ -1,14 +1,14 @@
 'use client';
 import CheckBox from '@/app/components/ui/CheckBox';
-import { useState, ChangeEvent } from 'react';
+import { TERMS_OF_SERVICE } from '@/constants/termsOfService.ts';
+import { ChangeEvent } from 'react';
 import styles from './SignupTerms.module.css';
-import { TERMS_OF_SERVICE } from '@/contants/DevTime_terms';
 type Props = {
-  checked: boolean;
+  isChecked: boolean;
   onChangeChecked: (checked: boolean) => void;
 };
 
-export default function SignupTerms({ checked, onChangeChecked }: Props) {
+export default function SignupTerms({ isChecked, onChangeChecked }: Props) {
   const onToggleCheck = (e: ChangeEvent<HTMLInputElement>) => {
     const chekced = e.currentTarget.checked;
     onChangeChecked(chekced);
@@ -20,7 +20,7 @@ export default function SignupTerms({ checked, onChangeChecked }: Props) {
         <div>이용약관</div>
         <CheckBox
           id="signup-term-checkbox"
-          checked={checked}
+          isChecked={isChecked}
           label="동의함"
           onToggleCheck={onToggleCheck}
         />

@@ -1,6 +1,6 @@
 'use client';
 
-import { HelperLink } from '@/app/types/common';
+import { HelperLink } from '@/types/common';
 import TextLinkRow from '../ui/TextLinkRow';
 import styles from './AuthFormContainer.module.css';
 
