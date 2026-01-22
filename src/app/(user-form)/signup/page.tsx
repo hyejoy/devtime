@@ -258,7 +258,6 @@ export default function Page() {
   async function handleDuplicateCheck(name: DuplicateField) {
     // 이미 중복 확인된 경우 실행하지 않음
     if (duplicateConfirm[name]) return;
-    console.log('실행 확인');
 
     const value = values[name];
     const checkApi = duplicateCheckApiMap[name];

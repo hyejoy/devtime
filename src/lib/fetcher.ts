@@ -1,12 +1,9 @@
 import { API_BASE_URL } from '@/config/env';
+
 export async function fetcher<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
-  if (!API_BASE_URL) {
-    throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined');
-  }
-
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -15,8 +12,10 @@ export async function fetcher<T>(
   });
 
   if (!res.ok) {
-    throw new Error('API Error');
+    const errorData = await res
+      .json()
+      .catch(() => ({ message: 'An unknown API error occurred' }));
+    throw new Error(errorData.message || `API Error: ${res.status}`);
   }
-
   return res.json() as Promise<T>;
 }
