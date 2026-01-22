@@ -13,8 +13,6 @@ import {
 import { ChangeEvent, useRef } from 'react';
 import TextFieldInput from '../ui/TextFieldInput';
 import styles from './SignupFields.module.css';
-export const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-export const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
 /** buttonLabel */
 const buttonLabel: Record<DuplicateField, '중복확인'> = {
