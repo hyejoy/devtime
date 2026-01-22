@@ -30,7 +30,7 @@ export default function Page() {
   });
 
   /* validation (regex level) */
-  const [validCheck, setValidCheck] = useState<
+  const [regexValidity, setRegexValidity] = useState<
     Pick<SignValid, 'id' | 'password'>
   >({
     id: false,
@@ -38,7 +38,7 @@ export default function Page() {
   });
 
   /* duplicate check */
-  const [duplicateConfirm, setDuplicateConfirm] = useState<DuplicateState>({
+  const [duplicateChecked, setDuplicateChecked] = useState<DuplicateState>({
     id: false,
     nickName: false,
   });
@@ -51,20 +51,19 @@ export default function Page() {
     checkPassword: '',
   });
 
+  const [isTermChecked, setTermChecked] = useState(false);
+
   /* final validation state */
   const validState = {
-    id: validCheck.id && duplicateConfirm.id,
-    nickName: duplicateConfirm.nickName,
-    password: validCheck.password,
+    id: regexValidity.id && duplicateChecked.id,
+    nickName: duplicateChecked.nickName,
+    password: regexValidity.password,
     checkPassword:
       values.checkPassword === values.password &&
       values.checkPassword.length > 0,
   };
-
-  const [isTermChecked, setTermChecked] = useState(false);
-
-  const setDuplicateCheck = (name: DuplicateField, isCheck: boolean) => {
-    setDuplicateConfirm((prev) => {
+  const updateDuplicateStatus = (name: DuplicateField, isCheck: boolean) => {
+    setDuplicateChecked((prev) => {
       const valid = {
         ...prev,
         [name]: isCheck,
@@ -75,33 +74,31 @@ export default function Page() {
   };
 
   /* handlers */
-  const handleValid = (name: keyof SignValid, isValid: boolean) => {
-    setValidCheck((prev) => {
+  const updateFieldValidity = (name: keyof SignValid, isValid: boolean) => {
+    setRegexValidity((prev) => {
       const next = { ...prev, [name]: isValid };
       return next;
     });
   };
 
-  const handleValidCheck = (name: keyof SignValid, nextValues: SignInput) => {
-    const value = nextValues[name];
-    const validators: Record<keyof SignValid, () => boolean> = {
-      id: () => emailRegex.test(value),
-      nickName: () => Boolean(duplicateConfirm.nickName),
-      password: () => passwordRegex.test(value),
-      checkPassword: () => Boolean(value) && value === nextValues.password,
-    };
-
-    handleValid(name, validators[name]());
-  };
-
-  const handleFeedbackMessage = (name: keyof SignInput, value: string) => {
+  const updateFieldMessage = (name: keyof SignInput, value: string) => {
     setFeedbackMessage((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleMessage = useCallback(
+  function updateDuplicateChecked(name: DuplicateField, value: boolean) {
+    setDuplicateChecked((prev) => {
+      const next = {
+        ...prev,
+        [name]: value,
+      };
+      return next;
+    });
+  }
+
+  const handleFeedbackMessage = useCallback(
     (
       name: keyof SignValid,
       values: SignInput,
@@ -113,36 +110,36 @@ export default function Page() {
       switch (name) {
         case 'id': {
           if (!values.id) {
-            handleFeedbackMessage('id', MESSAGE.EMAIL_INVALID);
+            updateFieldMessage('id', MESSAGE.EMAIL_INVALID);
             return;
           }
 
           if (!isValid) {
-            handleFeedbackMessage('id', MESSAGE.EMAIL_INVALID);
+            updateFieldMessage('id', MESSAGE.EMAIL_INVALID);
             return;
           }
 
           if (!isDuplicateConfirmed) {
-            handleFeedbackMessage('id', MESSAGE.EMAIL_DUPLICATE_REQUIRED);
+            updateFieldMessage('id', MESSAGE.EMAIL_DUPLICATE_REQUIRED);
             return;
           }
 
-          handleFeedbackMessage('id', MESSAGE.EMAIL_AVAILABLE);
+          updateFieldMessage('id', MESSAGE.EMAIL_AVAILABLE);
           return;
         }
 
         case 'nickName': {
           if (!value) {
-            handleFeedbackMessage(name, MESSAGE.REQUIRED.nickName);
+            updateFieldMessage(name, MESSAGE.REQUIRED.nickName);
             return;
           }
 
           if (!isDuplicateConfirmed) {
-            handleFeedbackMessage(name, MESSAGE.EMAIL_DUPLICATE_REQUIRED);
+            updateFieldMessage(name, MESSAGE.EMAIL_DUPLICATE_REQUIRED);
             return;
           }
 
-          handleFeedbackMessage(
+          updateFieldMessage(
             name,
             isDuplicateConfirmed
               ? MESSAGE.NICKNAME_AVAILABLE
@@ -153,16 +150,16 @@ export default function Page() {
 
         case 'password': {
           if (!value) {
-            handleFeedbackMessage(name, MESSAGE.PASSWORD_INVALID);
+            updateFieldMessage(name, MESSAGE.PASSWORD_INVALID);
             return;
           }
           const isValid = passwordRegex.test(values.password);
-          handleFeedbackMessage(
+          updateFieldMessage(
             'password',
             isValid ? '' : MESSAGE.PASSWORD_INVALID
           );
 
-          handleFeedbackMessage(
+          updateFieldMessage(
             'checkPassword',
             value === values.checkPassword ? '' : MESSAGE.PASSWORD_MISMATCH
           );
@@ -171,11 +168,11 @@ export default function Page() {
 
         case 'checkPassword': {
           if (!value) {
-            handleFeedbackMessage(name, '');
+            updateFieldMessage(name, '');
             return;
           }
 
-          handleFeedbackMessage(
+          updateFieldMessage(
             name,
             value === values.password ? '' : MESSAGE.PASSWORD_MISMATCH
           );
@@ -183,42 +180,70 @@ export default function Page() {
         }
       }
     },
-    [validCheck, duplicateConfirm]
+    [regexValidity, duplicateChecked]
   );
 
-  const onChangeValue = (name: SignField, value: string) => {
+  const handleFieldChange = (name: SignField, value: string) => {
     setValues((prev) => {
       const next = { ...prev, [name]: value };
 
-      const isEmailValid =
-        name === 'id' ? emailRegex.test(next.id) : validCheck.id;
+      // 1️⃣ 필드별 유효성 계산
+      const fieldValidMap: Record<SignField, boolean> = {
+        id: emailRegex.test(next.id),
+        nickName: true, // 닉네임은 regex 검증 없음 (중복확인만)
+        password: passwordRegex.test(next.password),
+        checkPassword:
+          next.checkPassword.length > 0 && next.checkPassword === next.password,
+      };
 
-      const isIdDuplicateChecked = name === 'id' ? false : duplicateConfirm.id;
+      const isValid = fieldValidMap[name];
 
-      const isNickDuplicateChecked =
-        name === 'nickName' ? false : duplicateConfirm.nickName;
-
-      const isDuplicateChecked =
-        name === 'id' ? isIdDuplicateChecked : isNickDuplicateChecked;
-
-      // id, nickname 수정하는 경우 중복확인 false로 변경
-      handleValid(name, isEmailValid);
+      // 2️⃣ 중복확인 상태 리셋
       if (name === 'id' || name === 'nickName') {
-        handleDuplicateConfirmValue(name, false);
+        updateDuplicateChecked(name, false);
       }
 
-      // 메시지는 계산값 기준
-      handleMessage(name, next, isEmailValid, isDuplicateChecked);
+      // 3️⃣ 유효성 반영
+      updateFieldValidity(name, isValid);
+
+      // 4️⃣ 메시지 계산용 중복확인 상태
+      const isDuplicateChecked =
+        name === 'id'
+          ? duplicateChecked.id
+          : name === 'nickName'
+            ? duplicateChecked.nickName
+            : true;
+
+      handleFeedbackMessage(name, next, isValid, isDuplicateChecked);
 
       return next;
     });
   };
 
-  const onChangeValidation = (name: keyof SignValid, value: boolean) => {
-    setValidCheck((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const duplicateCheckApiMap: Record<DuplicateField, DuplicateCheckApi> = {
+    id: checkEmail,
+    nickName: checkNickname,
+  };
+
+  async function handleDuplicateCheck(name: DuplicateField) {
+    // 이미 중복 확인된 경우 실행하지 않음
+    if (duplicateChecked[name]) return;
+
+    const value = values[name];
+    const checkApi = duplicateCheckApiMap[name];
+
+    if (!checkApi) return;
+
+    const { success, available, message } = await checkApi(value);
+
+    if (!success) return;
+
+    updateDuplicateStatus(name, available);
+    updateFieldMessage(name, message);
+  }
+
+  const onToggleCheck = () => {
+    setTermChecked((prev) => !prev);
   };
 
   const SignupButton = () => {
@@ -234,43 +259,6 @@ export default function Page() {
     label: '회원이신가요?',
     text: '로그인 바로가기',
   };
-
-  const onToggleCheck = () => {
-    setTermChecked((prev) => !prev);
-  };
-
-  function handleDuplicateConfirmValue(name: DuplicateField, value: boolean) {
-    setDuplicateConfirm((prev) => {
-      const next = {
-        ...prev,
-        [name]: value,
-      };
-      return next;
-    });
-  }
-  //⭐⭐⭐⭐
-  const duplicateCheckApiMap: Record<DuplicateField, DuplicateCheckApi> = {
-    id: checkEmail,
-    nickName: checkNickname,
-  };
-
-  async function handleDuplicateCheck(name: DuplicateField) {
-    // 이미 중복 확인된 경우 실행하지 않음
-    if (duplicateConfirm[name]) return;
-
-    const value = values[name];
-    const checkApi = duplicateCheckApiMap[name];
-
-    if (!checkApi) return;
-
-    const { success, available, message } = await checkApi(value);
-
-    if (!success) return;
-
-    setDuplicateCheck(name, available);
-    handleFeedbackMessage(name, message);
-  }
-
   return (
     <UserFormContainer
       title="회원가입"
@@ -279,10 +267,10 @@ export default function Page() {
           <SignupFields
             values={values}
             isValid={validState}
-            isDuplicateConfirm={duplicateConfirm}
+            isDuplicateCheckedMap={duplicateChecked}
             feedbackMessages={feedbackMessage}
-            onChangeValue={onChangeValue}
-            onChangeValidation={onChangeValidation}
+            onChangeValue={handleFieldChange}
+            onChangeValidation={updateFieldValidity}
             onConfirmDuplicate={handleDuplicateCheck}
           />
         </>

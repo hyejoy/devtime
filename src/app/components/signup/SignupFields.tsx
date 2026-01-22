@@ -24,7 +24,7 @@ const buttonLabel: Record<DuplicateField, '중복확인'> = {
 type Props = {
   values: SignInput;
   isValid: SignValid;
-  isDuplicateConfirm: DuplicateState;
+  isDuplicateCheckedMap: DuplicateState;
   feedbackMessages: SignInput;
   /* handlers */
   onChangeValue: (name: keyof SignInput, value: string) => void;
@@ -35,7 +35,7 @@ type Props = {
 export default function SignupFields({
   values,
   isValid,
-  isDuplicateConfirm,
+  isDuplicateCheckedMap,
   feedbackMessages,
   // validation,
   onChangeValue,
@@ -89,7 +89,7 @@ export default function SignupFields({
                   <Button
                     id={key}
                     variant="secondary"
-                    disabled={!values[key] || !isDuplicateConfirm[key]}
+                    disabled={!values[key] || !isDuplicateCheckedMap[key]}
                     onClick={() => onConfirmDuplicate(key)}
                   >
                     {buttonLabel[key]}
