@@ -5,7 +5,7 @@ import UserFormContainer from '@/app/components/userform/UserFormContainer';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
 import { checkEmail, checkNickname } from '@/services/signup';
-import { DuplicateCheckApi } from '@/types/api';
+import { DuplicateCheckApi, duplicateCheckApiMap } from '@/types/api';
 import { HelperLink } from '@/types/common';
 import {
   DuplicateField,
@@ -54,7 +54,7 @@ export default function Page() {
   const [isTermChecked, setTermChecked] = useState(false);
 
   /* final validation state */
-  const fieldValidityMap = {
+  const fieldValidityMap: SignValid = {
     id: regexValidity.id && duplicateChecked.id,
     nickName: duplicateChecked.nickName,
     password: regexValidity.password,
@@ -168,16 +168,13 @@ export default function Page() {
         }
 
         case 'checkPassword': {
-          if (!value) {
+          if (!value || value !== values.password) {
+            updateFieldMessage(name, MESSAGE.PASSWORD_MISMATCH);
+            return;
+          } else {
             updateFieldMessage(name, '');
             return;
           }
-
-          updateFieldMessage(
-            name,
-            value === values.password ? '' : MESSAGE.PASSWORD_MISMATCH
-          );
-          return;
         }
       }
     },
@@ -200,24 +197,21 @@ export default function Page() {
       const isValid = fieldValidMap[name];
 
       // 2️⃣ 유효성 반영
-      updateFieldValidity(name, isValid);
 
       // 3️⃣ 중복확인 상태 리셋
       if (name === 'id' || name === 'nickName') {
         updateDuplicateChecked(name, false);
         handleFeedbackMessage(name, next, isValid, false);
-      } else {
+      } else if (name === 'password') {
         // 다른 필드는 중복 확인 상태가 메시지에 영향을 주지 않으므로 true로 설정합니다.
         handleFeedbackMessage(name, next, isValid, true);
+      } else {
+        handleFeedbackMessage(name, next, true, true);
+        updateFieldValidity(name, true);
       }
-
+      updateFieldValidity(name, isValid);
       return next;
     });
-  };
-
-  const duplicateCheckApiMap: Record<DuplicateField, DuplicateCheckApi> = {
-    id: checkEmail,
-    nickName: checkNickname,
   };
 
   async function handleDuplicateCheck(name: DuplicateField) {
@@ -241,10 +235,55 @@ export default function Page() {
     setTermChecked((prev) => !prev);
   };
 
+  const validateAndMarkInvalidFields = () => {
+    const invalidFieldKeys = Object.entries(fieldValidityMap)
+      .filter(([_, isValid]) => !isValid)
+      .map(([key]) => key as keyof SignInput);
+
+    invalidFieldKeys.map((key) => {
+      if (key === 'id') {
+        handleFeedbackMessage(
+          key,
+          values,
+          regexValidity['id'],
+          duplicateChecked['id']
+        );
+        return;
+      }
+      if (key === 'nickName') {
+        handleFeedbackMessage(key, values, true, duplicateChecked['nickName']);
+        return;
+      }
+      if (key === 'password') {
+        handleFeedbackMessage(key, values, regexValidity['password'], true);
+        return;
+      }
+      if (key === 'checkPassword') {
+        handleFeedbackMessage(key, values, true, true);
+        return;
+      }
+    });
+  };
+
   const SignupButton = () => {
+    /** 회원가입 버튼 */
+    async function onSignup() {
+      validateAndMarkInvalidFields(); // helper message 설정
+
+      // false 값있는지 확인
+      const invalidFields = Object.entries(fieldValidityMap).filter(
+        ([_, isValid]) => !isValid
+      );
+      // false 하나라도 있으면 리턴
+      if (invalidFields.length) return;
+
+      // 모든 유효성 통과
+
+      console.log(invalidFields);
+    }
     return (
       <div className={cx('bottomButtonField')}>
-        <Button>회원가입</Button>
+        <Button onClick={onSignup}>회원가입</Button>
       </div>
     );
   };
