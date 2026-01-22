@@ -89,7 +89,7 @@ export default function SignupFields({
                   <Button
                     id={key}
                     variant="secondary"
-                    disabled={Boolean(!values[key]) && !isDuplicateConfirm[key]}
+                    disabled={!values[key] || !isDuplicateConfirm[key]}
                     onClick={() => onConfirmDuplicate(key)}
                   >
                     {buttonLabel[key]}
