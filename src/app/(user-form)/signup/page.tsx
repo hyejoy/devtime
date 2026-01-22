@@ -84,7 +84,6 @@ export default function Page() {
 
   const handleValidCheck = (name: keyof SignValid, nextValues: SignInput) => {
     const value = nextValues[name];
-
     const validators: Record<keyof SignValid, () => boolean> = {
       id: () => emailRegex.test(value),
       nickName: () => Boolean(duplicateConfirm.nickName),
@@ -184,7 +183,7 @@ export default function Page() {
         }
       }
     },
-    [validCheck, duplicateConfirm, duplicateConfirm]
+    [validCheck, duplicateConfirm]
   );
 
   const onChangeValue = (name: SignField, value: string) => {
