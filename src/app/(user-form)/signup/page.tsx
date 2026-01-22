@@ -1,9 +1,11 @@
 'use client';
-import UserFormContainer from '@/app/components/userform/UserFormContainer';
 import SignupTerms from '@/app/components/signup/SignupTerms';
 import Button from '@/app/components/ui/Button';
+import UserFormContainer from '@/app/components/userform/UserFormContainer';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
+import { checkEmail, checkNickname } from '@/services/signup';
+import { DuplicateCheckApi } from '@/types/api';
 import { HelperLink } from '@/types/common';
 import {
   DuplicateField,
@@ -13,11 +15,9 @@ import {
   SignValid,
 } from '@/types/signup';
 import classNames from 'classnames/bind';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import SignupFields from './../../components/signup/SignupFields';
 import styles from './page.module.css';
-import { checkEmail, checkNickname } from '@/services/signup';
-import { DuplicateCheckApi } from '@/types/api';
 const cx = classNames.bind(styles);
 
 export default function Page() {
@@ -214,7 +214,6 @@ export default function Page() {
     });
   };
 
-  useEffect(() => {}, [values]);
   const onChangeValidation = (name: keyof SignValid, value: boolean) => {
     setValidCheck((prev) => ({
       ...prev,
