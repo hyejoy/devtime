@@ -54,7 +54,7 @@ export default function Page() {
   const [isTermChecked, setTermChecked] = useState(false);
 
   /* final validation state */
-  const validState = {
+  const fieldValidityMap = {
     id: regexValidity.id && duplicateChecked.id,
     nickName: duplicateChecked.nickName,
     password: regexValidity.password,
@@ -62,6 +62,7 @@ export default function Page() {
       values.checkPassword === values.password &&
       values.checkPassword.length > 0,
   };
+
   const updateDuplicateStatus = (name: DuplicateField, isCheck: boolean) => {
     setDuplicateChecked((prev) => {
       const valid = {
@@ -100,10 +101,10 @@ export default function Page() {
 
   const handleFeedbackMessage = useCallback(
     (
-      name: keyof SignValid,
-      values: SignInput,
-      isValid: boolean,
-      isDuplicateConfirmed: boolean
+      name: keyof SignValid, //field
+      values: SignInput, // input value
+      isValid: boolean, // regx (id, pw)
+      isDuplicateConfirmed: boolean //중복(id,nick)
     ) => {
       const value = values[name];
 
@@ -183,7 +184,7 @@ export default function Page() {
     [regexValidity, duplicateChecked]
   );
 
-  const handleFieldChange = (name: SignField, value: string) => {
+  const handleFieldChange = (name: keyof SignInput, value: string) => {
     setValues((prev) => {
       const next = { ...prev, [name]: value };
 
@@ -198,23 +199,17 @@ export default function Page() {
 
       const isValid = fieldValidMap[name];
 
-      // 2️⃣ 중복확인 상태 리셋
-      if (name === 'id' || name === 'nickName') {
-        updateDuplicateChecked(name, false);
-      }
-
-      // 3️⃣ 유효성 반영
+      // 2️⃣ 유효성 반영
       updateFieldValidity(name, isValid);
 
-      // 4️⃣ 메시지 계산용 중복확인 상태
-      const isDuplicateChecked =
-        name === 'id'
-          ? duplicateChecked.id
-          : name === 'nickName'
-            ? duplicateChecked.nickName
-            : true;
-
-      handleFeedbackMessage(name, next, isValid, isDuplicateChecked);
+      // 3️⃣ 중복확인 상태 리셋
+      if (name === 'id' || name === 'nickName') {
+        updateDuplicateChecked(name, false);
+        handleFeedbackMessage(name, next, isValid, false);
+      } else {
+        // passworkd, checkPassword duplicate true 고정
+        handleFeedbackMessage(name, next, isValid, true);
+      }
 
       return next;
     });
@@ -266,8 +261,9 @@ export default function Page() {
         <>
           <SignupFields
             values={values}
-            isValid={validState}
+            fieldValidity={fieldValidityMap}
             isDuplicateCheckedMap={duplicateChecked}
+            isRegexValidityMap={regexValidity}
             feedbackMessages={feedbackMessage}
             onChangeValue={handleFieldChange}
             onChangeValidation={updateFieldValidity}
