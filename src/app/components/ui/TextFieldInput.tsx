@@ -13,21 +13,18 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
   ({ isValid, feedbackMessage, className, ...rest }, ref) => {
-    const messageInputType = isValid || !feedbackMessage ? '' : 'negative';
-    const messageTextType = isValid ? '' : 'negative_text';
+    const InputBorer =
+      !isValid && Boolean(feedbackMessage) ? 'negativeBorder' : '';
+    const messageTextType = isValid ? 'positive' : 'negative';
 
     return (
       <div className={cx('inputBox')}>
         <input
           ref={ref}
-          className={cx('input', messageInputType, className)}
+          className={cx('input', InputBorer, className)}
           {...rest}
         />
-        {feedbackMessage && (
-          <div className={cx('feedback', messageTextType)}>
-            {feedbackMessage}
-          </div>
-        )}
+        <div className={cx('feedback', messageTextType)}>{feedbackMessage}</div>
       </div>
     );
   }
