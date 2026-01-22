@@ -4,8 +4,8 @@ import Button from '@/app/components/ui/Button';
 import UserFormContainer from '@/app/components/userform/UserFormContainer';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import { checkEmail, checkNickname } from '@/services/signup';
-import { DuplicateCheckApi, duplicateCheckApiMap } from '@/types/api';
+import { signup } from '@/services/signup';
+import { duplicateCheckApiMap, SignupRequest } from '@/types/api';
 import { HelperLink } from '@/types/common';
 import {
   DuplicateField,
@@ -15,12 +15,14 @@ import {
   SignValid,
 } from '@/types/signup';
 import classNames from 'classnames/bind';
+import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import SignupFields from './../../components/signup/SignupFields';
 import styles from './page.module.css';
 const cx = classNames.bind(styles);
 
 export default function Page() {
+  const router = useRouter();
   /* input values */
   const [values, setValues] = useState<SignInput>({
     id: '',
@@ -52,6 +54,7 @@ export default function Page() {
   });
 
   const [isTermChecked, setTermChecked] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   /* final validation state */
   const fieldValidityMap: SignValid = {
@@ -194,9 +197,8 @@ export default function Page() {
           next.checkPassword.length > 0 && next.checkPassword === next.password,
       };
 
-      const isValid = fieldValidMap[name];
-
       // 2️⃣ 유효성 반영
+      const isValid = fieldValidMap[name];
 
       // 3️⃣ 중복확인 상태 리셋
       if (name === 'id' || name === 'nickName') {
@@ -206,10 +208,12 @@ export default function Page() {
         // 다른 필드는 중복 확인 상태가 메시지에 영향을 주지 않으므로 true로 설정합니다.
         handleFeedbackMessage(name, next, isValid, true);
       } else {
+        // 다른 필드는 중복 확인 상태가 메시지에 영향을 주지 않으므로 true로 설정합니다.
         handleFeedbackMessage(name, next, true, true);
         updateFieldValidity(name, true);
       }
       updateFieldValidity(name, isValid);
+
       return next;
     });
   };
@@ -268,6 +272,7 @@ export default function Page() {
   const SignupButton = () => {
     /** 회원가입 버튼 */
     async function onSignup() {
+      setIsSubmitted(true);
       validateAndMarkInvalidFields(); // helper message 설정
 
       // false 값있는지 확인
@@ -275,15 +280,31 @@ export default function Page() {
         ([_, isValid]) => !isValid
       );
       // false 하나라도 있으면 리턴
-      if (invalidFields.length) return;
+      if (invalidFields.length || !isTermChecked) return;
 
+      const signupInfo: SignupRequest = {
+        email: values['id'],
+        nickname: values['nickName'],
+        password: values['password'],
+        confirmPassword: values['checkPassword'],
+      };
       // 모든 유효성 통과
-
-      console.log(invalidFields);
+      const res = await signup(signupInfo);
+      if (res.success) {
+        router.replace('/login');
+      }
     }
+
+    // 아이디/닉네임 중복 확인, 네 가지 입력 정보의 유효성 검증,
+    // 이용 약관의 동의함 체크까지 모두 이루어져야 '회원가입' 버튼이 활성화
+    const isSignupEnabled =
+      !Object.values(fieldValidityMap).some((v) => !v) && isTermChecked;
+
     return (
       <div className={cx('bottomButtonField')}>
-        <Button onClick={onSignup}>회원가입</Button>
+        <Button onClick={onSignup} disabled={!isSignupEnabled}>
+          회원가입
+        </Button>
       </div>
     );
   };
@@ -313,6 +334,7 @@ export default function Page() {
       extra={
         <SignupTerms
           isChecked={isTermChecked}
+          isSubmitted={isSubmitted}
           onChangeChecked={onToggleCheck}
         />
       }
