@@ -181,7 +181,7 @@ export default function Page() {
         }
       }
     },
-    [regexValidity, duplicateChecked]
+    []
   );
 
   const handleFieldChange = (name: keyof SignInput, value: string) => {
@@ -207,7 +207,7 @@ export default function Page() {
         updateDuplicateChecked(name, false);
         handleFeedbackMessage(name, next, isValid, false);
       } else {
-        // passworkd, checkPassword duplicate true 고정
+        // 다른 필드는 중복 확인 상태가 메시지에 영향을 주지 않으므로 true로 설정합니다.
         handleFeedbackMessage(name, next, isValid, true);
       }
 
