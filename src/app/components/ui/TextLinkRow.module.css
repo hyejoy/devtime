@@ -8,8 +8,14 @@
   justify-content: center;
 }
 
-.linkContainer > a {
+.linkContainer > .bold {
   font-weight: 700;
+  text-decoration: none;
+  color: var(--color-brand-primary);
+}
+.linkContainer > .notBold {
+  font-weight: 500;
+  font-size: 14px;
   text-decoration: none;
   color: var(--color-brand-primary);
 }
