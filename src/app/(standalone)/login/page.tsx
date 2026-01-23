@@ -120,6 +120,13 @@ export default function Page() {
       /** accessToekn 메모리 저장 → setAccessToken(res.accessToken) */
       /** 서버가 refreshToken을 cookie에 심어줬다고 가정 →  분기*/
 
+      /**
+       * TODO :저희 프로젝트에서는 서버가 토큰을 쿠키에 심어주지 않습니다
+       * 그리고 쿠키를 지금처럼 document.cookie 방식으로 저장하면
+       * httpOnly 쿠키가 아니기 때문에 로컬스토리지와 다른 점이 없어집니다
+       * 쿠키 사용하고 싶으시다면 next.js 에서 api route 활용하여
+       * 토큰을 직접 쿠키에 저장하는 방법에 대해 찾아보세요!
+       */
       // 이미 로그인 된 계정
       if (res.isDuplicateLogin && res.accessToken) {
         // 먼저 토큰 저장

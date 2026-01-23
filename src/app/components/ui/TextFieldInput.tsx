@@ -15,6 +15,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
   ({ isValid, feedbackMessage, placeholder, className, ...rest }, ref) => {
+    // TODO: InputBorder 오타로 인식하심
     const InputBorer =
       !isValid && Boolean(feedbackMessage) ? 'negativeBorder' : '';
     const messageTextType = isValid ? 'positive' : 'negative';
