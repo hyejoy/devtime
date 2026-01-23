@@ -13,6 +13,7 @@ interface Props extends ComponentProps<'input'> {
 }
 const cx = classNames.bind(styles);
 
+// TODO:체크박스인데 이미 제출됐다는게 무슨 용도의 prop인지 모르겠어요!
 const CheckBox = forwardRef<HTMLInputElement, Props>(
   (
     {

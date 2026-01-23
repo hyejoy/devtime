@@ -345,7 +345,23 @@ export default function Page() {
         />
       }
       footerAction={<SignupButton />}
+      // TODO:링크에 대한 요구사항 변경시 HelperLink 객체 구조 계속 변해야함
+      // 수정할 필요는 없지만 패턴을 개선한다면 어떻게 해볼수 있을지 고민
       helperLink={helperLink}
     />
   );
 }
+
+/**
+ * TODO:
+ * 여기 로직이 많이 긴데,
+ * 전반적인 느낌은 SignupFields 사용하면서 하나의 컴포넌트로 모든 케이스를 처리하려다보니
+ * 과도하게 추상화된 느낌이 드는 것 같습니다!
+ * 오히려 각 케이스마다 작성하면 중복이 일부 있더라도 코드 자체의 복잡도가 낮아서 이해하기 쉬운데,
+ * 오히려 동일하지 않은 여러 케이스들의 중복을 줄이고 추상화하는 과정에서 조건 분기가 많아서 이해해야 하는 맥락이 많아 읽기가 어려워요 ㅜㅜ
+ * 다른 코멘트에서도 공유드렸지만 토스 펀더멘탈 문서 몇개 더 공유드립니다
+ * → https://frontend-fundamentals.com/code-quality/code/examples/submit-button.html
+ *   > 이 외에 '맥락 줄이기' 쪽 글들 쭉 읽어보세요!
+ * → https://frontend-fundamentals.com/code-quality/code/examples/form-fields.html
+ * → https://frontend-fundamentals.com/code-quality/code/examples/use-bottom-sheet.html
+ */
