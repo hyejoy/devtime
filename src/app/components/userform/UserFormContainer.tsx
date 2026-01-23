@@ -2,10 +2,7 @@
 
 import { HelperLink } from '@/types/common';
 import TextLinkRow from '../ui/TextLinkRow';
-import styles from './AuthFormContainer.module.css';
-
-export const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-export const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+import styles from './UserFormContainer.module.css';
 
 type Props = {
   title: string;
@@ -15,7 +12,7 @@ type Props = {
   helperLink?: HelperLink; // 하단 helper 링크
   /** 하단 helper 링크 */
 };
-export default function AuthFormContainer({
+export default function UserFormContainer({
   title,
   body,
   extra,

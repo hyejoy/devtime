@@ -27,11 +27,7 @@ const TextFieldInput = forwardRef<HTMLInputElement, Props>(
           placeholder={placeholder}
           {...rest}
         />
-        {feedbackMessage && (
-          <div className={cx('feedback', messageTextType)}>
-            {feedbackMessage}
-          </div>
-        )}
+        <div className={cx('feedback', messageTextType)}>{feedbackMessage}</div>
       </div>
     );
   }

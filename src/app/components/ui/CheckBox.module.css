@@ -11,8 +11,12 @@
   background: transparent;
 }
 
+.errorBorder {
+  border: 1px solid var(--color-feedback-negative);
+}
+
 .checkbox::after {
-  content: '';
+  content: "";
   width: 4px;
   height: 7px;
   border-right: 2px solid var(--color-brand-primary);

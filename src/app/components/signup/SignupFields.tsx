@@ -2,18 +2,17 @@
 
 import Button from '@/app/components/ui/Button';
 import TextLabel from '@/app/components/ui/TextLabel';
+import { MESSAGE } from '@/constants/signupMessage';
 import {
   DuplicateField,
   DuplicateState,
+  SignField,
   SignInput,
   SignValid,
 } from '@/types/signup';
-import { useRef } from 'react';
+import { ChangeEvent, useRef } from 'react';
 import TextFieldInput from '../ui/TextFieldInput';
 import styles from './SignupFields.module.css';
-import { MESSAGE } from '@/constants/signupMessage';
-export const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-export const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
 /** buttonLabel */
 const buttonLabel: Record<DuplicateField, '중복확인'> = {
@@ -23,8 +22,9 @@ const buttonLabel: Record<DuplicateField, '중복확인'> = {
 
 type Props = {
   values: SignInput;
-  isValid: SignValid;
-  isDuplicateConfirm: DuplicateState;
+  fieldValidity: SignValid;
+  isDuplicateCheckedMap: DuplicateState;
+  isRegexValidityMap: Pick<SignValid, 'id' | 'password'>;
   feedbackMessages: SignInput;
   /* handlers */
   onChangeValue: (name: keyof SignInput, value: string) => void;
@@ -34,10 +34,10 @@ type Props = {
 
 export default function SignupFields({
   values,
-  isValid,
-  isDuplicateConfirm,
+  fieldValidity,
+  isDuplicateCheckedMap,
+  isRegexValidityMap,
   feedbackMessages,
-  // validation,
   onChangeValue,
   onConfirmDuplicate,
 }: Props) {
@@ -63,6 +63,29 @@ export default function SignupFields({
     checkPassword: MESSAGE.REQUIRED.checkPassword,
   };
 
+  const isDuplicateButtonDisabled = (key: 'id' | 'nickName') => {
+    if (key === 'id') {
+      return (
+        !values.id || // 값 없음
+        !isRegexValidityMap.id || // ❗ 정규식 실패
+        isDuplicateCheckedMap.id // 이미 중복확인 완료
+      );
+    }
+
+    if (key === 'nickName') {
+      return !values.nickName || isDuplicateCheckedMap.nickName;
+    }
+
+    return true;
+  };
+
+  const onChangeFieldValue = (
+    e: ChangeEvent<HTMLInputElement>,
+    key: SignField
+  ) => {
+    const value = e.target.value;
+    onChangeValue(key, value);
+  };
   return (
     <>
       <div className={styles.textFieldContainer}>
@@ -74,7 +97,7 @@ export default function SignupFields({
                 <TextFieldInput
                   ref={inputRefs[key]}
                   value={values[key]}
-                  onChange={(e) => onChangeValue(key, e.target.value)}
+                  onChange={(e) => onChangeFieldValue(e, key)}
                   name={key}
                   placeholder={PLACEHOLDER_MAP[key]}
                   type={
@@ -83,13 +106,13 @@ export default function SignupFields({
                       : 'text'
                   }
                   feedbackMessage={feedbackMessages[key]}
-                  isValid={isValid[key]}
+                  isValid={fieldValidity[key]}
                 />
                 {(key === 'id' || key === 'nickName') && (
                   <Button
                     id={key}
                     variant="secondary"
-                    disabled={!values[key] || !isDuplicateConfirm[key]}
+                    disabled={isDuplicateButtonDisabled(key)}
                     onClick={() => onConfirmDuplicate(key)}
                   >
                     {buttonLabel[key]}

@@ -23,22 +23,16 @@
 .feedback {
   user-select: none;
   min-height: 1rem;
+  line-height: 1rem;
   font-weight: 500;
   font-size: 12px;
-  line-height: 1rem;
   opacity: 1;
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  /* margin-top: 8px;
-  margin-bottom: 1rem; */
 }
 
-.negative {
+.negativeBorder {
   border: 1px solid var(--color-feedback-negative);
-}
-
-.negative_text {
-  color: var(--color-feedback-negative);
 }
 
 .input::placeholder {

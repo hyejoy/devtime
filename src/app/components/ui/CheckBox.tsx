@@ -1,20 +1,33 @@
 'use client';
 
-import classNames from 'classnames/bind';
 import { ChangeEvent, forwardRef, InputHTMLAttributes } from 'react';
 import styles from './CheckBox.module.css';
+import classNames from 'classnames/bind';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   id: string;
   isChecked: boolean;
+  isSubmitted: boolean;
   onToggleCheck: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const cx = classNames.bind(styles);
 
 const CheckBox = forwardRef<HTMLInputElement, Props>(
-  ({ label, id, isChecked = false, onToggleCheck, ...rest }, ref) => {
+  (
+    {
+      label,
+      id,
+      isChecked = false,
+      isSubmitted = false,
+      onToggleCheck,
+      ...rest
+    },
+    ref
+  ) => {
+    const showErrorBorder = !isChecked && isSubmitted;
+
     return (
       <div className={styles.container}>
         {label && (
@@ -34,7 +47,7 @@ const CheckBox = forwardRef<HTMLInputElement, Props>(
           type="checkbox"
           checked={isChecked}
           onChange={(e) => onToggleCheck(e)}
-          className={styles.checkbox}
+          className={cx('checkbox', { errorBorder: showErrorBorder })}
           {...rest}
         />
       </div>
