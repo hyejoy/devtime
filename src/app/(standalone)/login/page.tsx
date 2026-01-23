@@ -6,7 +6,6 @@ import TextLabel from '@/app/components/ui/TextLabel';
 import TextLinkRow from '@/app/components/ui/TextLinkRow';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import { login } from '@/services/login';
 import {
   LoginField,
   LoginHelperMessage,
@@ -18,6 +17,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { ChangeEvent, useState } from 'react';
 import styles from './page.module.css';
+import { login } from '@/services/login';
 
 const cx = classNames.bind(styles);
 // 상단바 없고 단독 UI
