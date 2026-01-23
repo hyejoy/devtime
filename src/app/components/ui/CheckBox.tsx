@@ -1,23 +1,42 @@
 'use client';
 
-import { ChangeEvent, forwardRef, useId, useState } from 'react';
+import { ChangeEvent, forwardRef, InputHTMLAttributes } from 'react';
 import styles from './CheckBox.module.css';
+import classNames from 'classnames/bind';
 
-type Props = {
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   id: string;
-  checked: boolean;
+  isChecked: boolean;
+  isSubmitted: boolean;
   onToggleCheck: (e: ChangeEvent<HTMLInputElement>) => void;
-};
+}
+
+const cx = classNames.bind(styles);
 
 const CheckBox = forwardRef<HTMLInputElement, Props>(
-  ({ label, id, checked = false, onToggleCheck }, ref) => {
+  (
+    {
+      label,
+      id,
+      isChecked = false,
+      isSubmitted = false,
+      onToggleCheck,
+      ...rest
+    },
+    ref
+  ) => {
+    const showErrorBorder = !isChecked && isSubmitted;
+
     return (
       <div className={styles.container}>
         {label && (
           <label
             htmlFor={id}
-            className={checked ? styles.checked : styles.unchecked}
+            className={cx({
+              checked: isChecked,
+              unchecked: !isChecked,
+            })}
           >
             {label}
           </label>
@@ -26,9 +45,10 @@ const CheckBox = forwardRef<HTMLInputElement, Props>(
           ref={ref}
           id={id}
           type="checkbox"
-          checked={checked}
+          checked={isChecked}
           onChange={(e) => onToggleCheck(e)}
-          className={styles.checkbox}
+          className={cx('checkbox', { errorBorder: showErrorBorder })}
+          {...rest}
         />
       </div>
     );

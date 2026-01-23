@@ -1,0 +1,25 @@
+.formInner {
+  background-color: var(--color-white);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 50vh;
+  max-height: 80vh;
+  padding: 0px 2rem;
+}
+.formTitle {
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 1.3rem;
+  line-height: 2rem;
+  text-align: center;
+  width: 100%;
+  color: var(--color-brand-primary);
+}
+
+.footerAction {
+  display: flex;
+  flex-direction: column;
+}

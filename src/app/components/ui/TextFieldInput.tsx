@@ -1,55 +1,38 @@
 'use client';
 
-import { ChangeEvent, HTMLInputTypeAttribute, forwardRef } from 'react';
+import React, { forwardRef, InputHTMLAttributes } from 'react';
 import styles from './TextFieldInput.module.css';
-export type FeedbackMessageType = boolean | null;
+import classNames from 'classnames/bind';
 
-type Props = {
-  name: string;
-  value: string;
-  onChangeValue: (e: ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
-  type?: HTMLInputTypeAttribute;
+// classnames 적용
+const cx = classNames.bind(styles);
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
+  isValid?: boolean;
   feedbackMessage?: string;
-  valiConfirm?: boolean;
-};
+  placeholder?: string;
+  className?: string;
+}
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
-  (
-    {
-      name,
-      value,
-      onChangeValue,
-      placeholder,
-      type = 'text',
-      feedbackMessage,
-      valiConfirm,
-    },
-    ref
-  ) => {
-    const messageInputType = valiConfirm || !feedbackMessage ? '' : 'negative';
-    const messageTextType = valiConfirm ? '' : 'negative_text';
+  ({ isValid, feedbackMessage, placeholder, className, ...rest }, ref) => {
+    const InputBorer =
+      !isValid && Boolean(feedbackMessage) ? 'negativeBorder' : '';
+    const messageTextType = isValid ? 'positive' : 'negative';
 
     return (
-      <>
-        <div className={styles.inputBox}>
-          <input
-            ref={ref}
-            name={name}
-            value={value}
-            onChange={(e) => onChangeValue(e)}
-            placeholder={placeholder}
-            type={type}
-            className={`${styles.input} ${styles[messageInputType]}`}
-          />
-          <div className={`${styles.feedback} ${styles[messageTextType]}`}>
-            {feedbackMessage}
-          </div>
-        </div>
-      </>
+      <div className={cx('inputBox')}>
+        <input
+          ref={ref}
+          className={cx('input', InputBorer, className)}
+          placeholder={placeholder}
+          {...rest}
+        />
+        <div className={cx('feedback', messageTextType)}>{feedbackMessage}</div>
+      </div>
     );
   }
 );
 
 TextFieldInput.displayName = 'TextFieldInput';
+
 export default TextFieldInput;

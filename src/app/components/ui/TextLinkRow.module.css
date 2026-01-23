@@ -1,15 +1,21 @@
 .linkContainer {
   display: flex;
-  margin-top: 8px;
   color: var(--color-brand-primary);
   font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
+  font-size: 1rem;
+  line-height: 1.25rem;
   gap: 12px;
+  justify-content: center;
 }
 
-.linkContainer > a {
+.linkContainer > .bold {
   font-weight: 700;
+  text-decoration: none;
+  color: var(--color-brand-primary);
+}
+.linkContainer > .notBold {
+  font-weight: 500;
+  font-size: 14px;
   text-decoration: none;
   color: var(--color-brand-primary);
 }

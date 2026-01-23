@@ -1,0 +1,30 @@
+.container {
+  position: relative;
+  min-height: 50vh;
+  margin-top: 3vw;
+  margin-left: 50vw;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.signupLink {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  border-radius: 10px;
+  transform: translate(-50%, -50%);
+  background-color: var(--color-login-bg);
+  backdrop-filter: blur(50px);
+  min-width: 23vw;
+  padding: 2.2rem 3rem;
+}
