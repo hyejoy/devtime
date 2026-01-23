@@ -31,3 +31,15 @@ export interface SignupRequest {
   password: string;
   confirmPassword: string;
 }
+
+/** 로그인 */
+export interface LoginResponse extends SignupResponse {
+  accessToken?: string;
+  refreshToken?: string;
+  isFirstLogin?: true;
+  isDuplicateLogin?: true;
+}
+export type LoginRequest = {
+  email: string;
+  password: string;
+};

@@ -20,14 +20,8 @@ export async function fetcher<T>(
   });
 
   if (!res.ok) {
-    let message = 'An unknown API error occurred';
-
-    try {
-      const errorData = await res.json();
-      message = errorData.message ?? message;
-    } catch {}
-
-    throw new Error(message);
+    const errorBody = await res.json();
+    throw errorBody;
   }
 
   return res.json() as Promise<T>;
