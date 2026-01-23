@@ -105,11 +105,8 @@ export default function Page() {
   async function onClickLoginButton() {
     try {
       const res = await login(values);
-      console.log('success', res);
       router.replace('/timer');
-    } catch (err) {
-      console.log('error', err);
-    }
+    } catch (err) {}
   }
 
   return (
