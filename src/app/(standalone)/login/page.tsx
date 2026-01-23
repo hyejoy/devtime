@@ -6,7 +6,6 @@ import TextLabel from '@/app/components/ui/TextLabel';
 import TextLinkRow from '@/app/components/ui/TextLinkRow';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import { login } from '@/services/login';
 import {
   LoginField,
   LoginHelperMessage,
@@ -18,6 +17,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { ChangeEvent, useState } from 'react';
 import styles from './page.module.css';
+import { login } from '@/services/login';
 
 const cx = classNames.bind(styles);
 // 상단바 없고 단독 UI
@@ -105,8 +105,30 @@ export default function Page() {
   async function onClickLoginButton() {
     try {
       const res = await login(values);
-      router.replace('/timer');
-    } catch (err) {}
+      // 1. accessToken 메모리에 저장
+      // setAccessToken(res.accessToken);
+      // 2. 서버가 refreshToken을 cookie에 심어줬다고 가정
+      // 3. 분기
+
+      // 중복 로그인 안내 (UI 전용)
+      if (res.isDuplicateLogin && res.accessToken) {
+        // 먼저 토큰 저장
+        document.cookie = `accessToken=${res.accessToken}; path=/`;
+        alert('이미 로그인된 계정입니다.');
+        router.replace('/timer');
+        return;
+      }
+
+      // 첫로그인
+      if (res.isFirstLogin && res.accessToken) {
+        router.replace('/profile');
+      } else {
+        // 첫로그인 아닌 경우
+        router.replace('/timer');
+      }
+    } catch (err) {
+
+    }
   }
 
   return (
@@ -147,20 +169,3 @@ export default function Page() {
     </div>
   );
 }
-
-// {
-//     "success": true,
-//     "message": "로그인이 완료되었습니다.",
-//     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBjNTc3YTkyLWYzZmMtNGQwYi1iM2UyLTUxNDk5YTliOWZkNyIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsIm5pY2tuYW1lIjoidGVzdDEiLCJpYXQiOjE3NjkxNDc2MTEsImV4cCI6MTc2OTE1MTIxMX0.F_CV23boEdVSXa2PXj_g50Ntty_Tj9TSBnOCfBXGVfc",
-//     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBjNTc3YTkyLWYzZmMtNGQwYi1iM2UyLTUxNDk5YTliOWZkNyIsImRldmljZUlkIjoiMTc2OTE0NzYxMTU1OSIsImlhdCI6MTc2OTE0NzYxMSwiZXhwIjoxNzcwMDExNjExfQ.5_ialW709aTYBXM3r7s_kp89eEdcH1SBAWxLC5lp0Aw",
-//     "isFirstLogin": true,
-//     "isDuplicateLogin": false
-// }
-
-// {
-//     "success": false,
-//     "error": {
-//         "message": "이메일 또는 비밀번호가 일치하지 않습니다.",
-//         "statusCode": 400
-//     }
-// }
