@@ -148,47 +148,52 @@ export default function Page() {
       setDialogType('login-failed');
       dialog?.openModal();
     }
-  }
 
-  return (
-    <div className={cx('page')}>
-      <div className={cx('container')}>
-        <Image src="/images/bg/signup-bg.png" alt="background" fill priority />
-        <div className={cx('loginForm')}>
-          <div className={cx('logoContainer')}>
-            <Logo direction="vertical" width="6rem" height="5.5rem" />
-          </div>
-          {(Object.keys(values) as Array<LoginField>).map((key) => {
-            return (
-              <React.Fragment key={key}>
-                <TextLabel label={LABEL_MAP[key]} name={key} />
-                <TextFieldInput
-                  id={key}
-                  name={key}
-                  value={values[key]}
-                  placeholder={MESSAGE.LOGIN[key]}
-                  onChange={onChangeInput}
-                  feedbackMessage={feedbackMessage[key]}
-                  type={key === 'password' ? 'password' : 'text'}
-                />
-              </React.Fragment>
-            );
-          })}
+    return (
+      <div className={cx('page')}>
+        <div className={cx('container')}>
+          <Image
+            src="/images/bg/signup-bg.png"
+            alt="background"
+            fill
+            priority
+          />
+          <div className={cx('loginForm')}>
+            <div className={cx('logoContainer')}>
+              <Logo direction="vertical" width="6rem" height="5.5rem" />
+            </div>
+            {(Object.keys(values) as Array<LoginField>).map((key) => {
+              return (
+                <React.Fragment key={key}>
+                  <TextLabel label={LABEL_MAP[key]} name={key} />
+                  <TextFieldInput
+                    id={key}
+                    name={key}
+                    value={values[key]}
+                    placeholder={MESSAGE.LOGIN[key]}
+                    onChange={onChangeInput}
+                    feedbackMessage={feedbackMessage[key]}
+                    type={key === 'password' ? 'password' : 'text'}
+                  />
+                </React.Fragment>
+              );
+            })}
 
-          <Button
-            disabled={isLoginButtonDisabled()}
-            onClick={onClickLoginButton}
-          >
-            로그인
-          </Button>
-          <div className={cx('signupLink')}>
-            <TextLinkRow label="회원가입" href="/signup" />
+            <Button
+              disabled={isLoginButtonDisabled()}
+              onClick={onClickLoginButton}
+            >
+              로그인
+            </Button>
+            <div className={cx('signupLink')}>
+              <TextLinkRow label="회원가입" href="/signup" />
+            </div>
           </div>
         </div>
+        {dialog?.modalState && (
+          <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
+        )}
       </div>
-      {dialog?.modalState && (
-        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
-      )}
-    </div>
-  );
+    );
+  }
 }
