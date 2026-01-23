@@ -1,6 +1,6 @@
-import { ComponentProps, ReactNode } from 'react';
-import styles from './Button.module.css';
 import classNames from 'classnames/bind';
+import { ComponentProps } from 'react';
+import styles from './Button.module.css';
 
 interface ButtonProps extends ComponentProps<'button'> {
   variant?: 'primary' | 'secondary' | 'tertiary';
