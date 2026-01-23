@@ -109,7 +109,6 @@ export default function Page() {
       // setAccessToken(res.accessToken);
       // 2. 서버가 refreshToken을 cookie에 심어줬다고 가정
       // 3. 분기
-      console.log(JSON.stringify(res));
 
       // 중복 로그인 안내 (UI 전용)
       if (res.isDuplicateLogin && res.accessToken) {
@@ -128,7 +127,7 @@ export default function Page() {
         router.replace('/timer');
       }
     } catch (err) {
-      console.log('error', err);
+
     }
   }
 
