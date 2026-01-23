@@ -7,6 +7,10 @@ export const MESSAGE = {
     checkPassword: '비밀번호를 다시 입력해 주세요.',
   },
 
+  LOGIN: {
+    email: '이메일 주소를 입력해 주세요.',
+    password: '비밀번호를 입력해 주세요.',
+  },
   /* 이메일 */
   EMAIL_INVALID: '이메일 형식으로 작성해 주세요.',
   EMAIL_DUPLICATE_REQUIRED: '중복을 확인해 주세요.',
