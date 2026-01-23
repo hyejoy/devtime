@@ -4,6 +4,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'tertiary';
 };
 
+const cx = classNames.bind(styles);
 export default function Button({
   variant = 'primary',
   className = '',

@@ -39,6 +39,7 @@ export default function AuthFormContainer({
           question={helperLink.text}
           href={helperLink.href}
           label={helperLink.label}
+          isBold={true}
         />
       )}
     </div>

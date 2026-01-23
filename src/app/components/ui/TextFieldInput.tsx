@@ -9,18 +9,22 @@ const cx = classNames.bind(styles);
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   isValid?: boolean;
   feedbackMessage?: string;
+  placeholder?: string;
+  className?: string;
 }
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
-  ({ isValid, feedbackMessage, className, ...rest }, ref) => {
-    const messageInputType = isValid || !feedbackMessage ? '' : 'negative';
-    const messageTextType = isValid ? '' : 'negative_text';
+  ({ isValid, feedbackMessage, placeholder, className, ...rest }, ref) => {
+    const InputBorer =
+      !isValid && Boolean(feedbackMessage) ? 'negativeBorder' : '';
+    const messageTextType = isValid ? 'positive' : 'negative';
 
     return (
       <div className={cx('inputBox')}>
         <input
           ref={ref}
-          className={cx('input', messageInputType, className)}
+          className={cx('input', InputBorer, className)}
+          placeholder={placeholder}
           {...rest}
         />
         {feedbackMessage && (
