@@ -1,8 +1,8 @@
 import styles from './TextLabel.module.css';
 
 export default function TextLabel({
-  name,
   label,
+  name,
 }: {
   label: string;
   name: string;
