@@ -36,6 +36,7 @@ export default function UserFormContainer({
           question={helperLink.text}
           href={helperLink.href}
           label={helperLink.label}
+          isBold={true}
         />
       )}
     </div>
