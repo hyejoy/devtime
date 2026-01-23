@@ -58,12 +58,12 @@ export default function Page() {
 
       // 유효성 검증
       updateRegexValidity(name, fieldValidMap[name]);
-      hanleFeedbackMessage(name, fieldValidMap[name]);
+      handleFeedbackMessage(name, fieldValidMap[name]);
       return next;
     });
   };
 
-  const hanleFeedbackMessage = (name: LoginField, isValid: boolean) => {
+  const handleFeedbackMessage = (name: LoginField, isValid: boolean) => {
     if (name === 'email') {
       const message = !isValid ? MESSAGE.EMAIL_INVALID : '';
       updateFeedbackMessage(name, message);
