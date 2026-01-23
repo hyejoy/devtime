@@ -1,9 +1,10 @@
+import { ComponentProps, ReactNode } from 'react';
 import styles from './Button.module.css';
 import classNames from 'classnames/bind';
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+interface ButtonProps extends ComponentProps<'button'> {
   variant?: 'primary' | 'secondary' | 'tertiary';
-};
+}
 
 const cx = classNames.bind(styles);
 export default function Button({
