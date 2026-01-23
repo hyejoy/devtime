@@ -1,6 +1,5 @@
 import { checkEmail, checkNickname } from '@/services/signup';
 import { DuplicateField } from './signup';
-import { LoginInput } from './login';
 
 /** 회원가입 이메일 닉네임 중복확인 */
 export interface SignUpCheckResponse {

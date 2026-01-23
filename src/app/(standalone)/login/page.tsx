@@ -1,23 +1,23 @@
 'use client';
-import Logo from '@/app/components/ui/Logo';
-import styles from './page.module.css';
-import classNames from 'classnames/bind';
-import Image from 'next/image';
-import TextLabel from '@/app/components/ui/TextLabel';
-import TextFieldInput from '@/app/components/ui/TextFieldInput';
-import { MESSAGE } from '@/constants/signupMessage';
 import Button from '@/app/components/ui/Button';
+import Logo from '@/app/components/ui/Logo';
+import TextFieldInput from '@/app/components/ui/TextFieldInput';
+import TextLabel from '@/app/components/ui/TextLabel';
 import TextLinkRow from '@/app/components/ui/TextLinkRow';
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import { emailRegex, passwordRegex } from '@/constants/regex';
+import { MESSAGE } from '@/constants/signupMessage';
+import { login } from '@/services/login';
 import {
   LoginField,
   LoginHelperMessage,
   LoginInput,
   LoginValid,
 } from '@/types/login';
-import { emailRegex, passwordRegex } from '@/constants/regex';
-import { login } from '@/services/login';
+import classNames from 'classnames/bind';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import React, { ChangeEvent, useState } from 'react';
+import styles from './page.module.css';
 
 const cx = classNames.bind(styles);
 // 상단바 없고 단독 UI
