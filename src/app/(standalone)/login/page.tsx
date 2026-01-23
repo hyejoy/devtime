@@ -1,8 +1,169 @@
+'use client';
+import Logo from '@/app/components/ui/Logo';
+import styles from './page.module.css';
+import classNames from 'classnames/bind';
+import Image from 'next/image';
+import TextLabel from '@/app/components/ui/TextLabel';
+import TextFieldInput from '@/app/components/ui/TextFieldInput';
+import { MESSAGE } from '@/constants/signupMessage';
+import Button from '@/app/components/ui/Button';
+import TextLinkRow from '@/app/components/ui/TextLinkRow';
+import React, { useState, ChangeEvent, useEffect } from 'react';
+import {
+  LoginField,
+  LoginHelperMessage,
+  LoginInput,
+  LoginValid,
+} from '@/types/login';
+import { emailRegex, passwordRegex } from '@/constants/regex';
+import { login } from '@/services/login';
+import { useRouter } from 'next/navigation';
+
+const cx = classNames.bind(styles);
 // 상단바 없고 단독 UI
 export default function Page() {
+  const router = useRouter();
+  const [values, setValues] = useState<LoginInput>({
+    email: '',
+    password: '',
+  });
+
+  /* validation (regex level) */
+  const [regexValidity, setRegexValidity] = useState<LoginValid>({
+    email: false,
+    password: false,
+  });
+
+  const [feedbackMessage, setFeedbackMessage] = useState<LoginHelperMessage>({
+    email: '',
+    password: '',
+  });
+
+  const LABEL_MAP: Record<LoginField, string> = {
+    email: '아이디',
+    password: '비밀번호',
+  };
+
+  const handleFieldChange = (name: LoginField, value: string) => {
+    setValues((prev) => {
+      const next = {
+        ...prev,
+        [name]: value,
+      };
+
+      const fieldValidMap: LoginValid = {
+        email: emailRegex.test(next.email),
+        password: passwordRegex.test(next.password),
+      };
+
+      // 유효성 검증
+      updateRegexValidity(name, fieldValidMap[name]);
+      hanleFeedbackMessage(name, fieldValidMap[name]);
+      return next;
+    });
+  };
+
+  const hanleFeedbackMessage = (name: LoginField, isValid: boolean) => {
+    if (name === 'email') {
+      const message = !isValid ? MESSAGE.EMAIL_INVALID : '';
+      updateFeedbackMessage(name, message);
+      return;
+    }
+    if (name == 'password') {
+      const message = !isValid ? MESSAGE.PASSWORD_INVALID : '';
+      updateFeedbackMessage(name, message);
+      return;
+    }
+  };
+
+  const updateRegexValidity = (name: LoginField, value: boolean) => {
+    setRegexValidity((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
+
+  const updateFeedbackMessage = (name: LoginField, message: string) => {
+    setFeedbackMessage((prev) => {
+      return { ...prev, [name]: message };
+    });
+    return;
+  };
+
+  const onChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.name as LoginField;
+    const value = e.target.value;
+    handleFieldChange(name, value);
+  };
+
+  const isLoginButtonDisabled = () => {
+    return Object.values(regexValidity).some((v) => !v);
+  };
+
+  async function onClickLoginButton() {
+    try {
+      const res = await login(values);
+      console.log('success', res);
+      router.replace('/timer');
+    } catch (err) {
+      console.log('error', err);
+    }
+  }
+
   return (
-    <>
-      <h1>Login page Component</h1>
-    </>
+    <div>
+      <div className={cx('container')}>
+        <Image src="/images/bg/signup-bg.png" alt="background" fill priority />
+      </div>
+
+      {/* 콘텐츠 */}
+      <div className={cx('loginForm')}>
+        <div className={cx('logoContainer')}>
+          <Logo direction="vertical" width="6rem" height="5.5rem" />
+        </div>
+        {(Object.keys(values) as Array<LoginField>).map((key) => {
+          return (
+            <React.Fragment key={key}>
+              <TextLabel label={LABEL_MAP[key]} name={key} />
+              <TextFieldInput
+                id={key}
+                name={key}
+                value={values[key]}
+                placeholder={MESSAGE.LOGIN[key]}
+                onChange={onChangeInput}
+                feedbackMessage={feedbackMessage[key]}
+                type={key === 'password' ? 'password' : 'text'}
+              />
+            </React.Fragment>
+          );
+        })}
+
+        <Button disabled={isLoginButtonDisabled()} onClick={onClickLoginButton}>
+          로그인
+        </Button>
+        <div className={cx('signupLink')}>
+          <TextLinkRow label="회원가입" href="/signup" />
+        </div>
+      </div>
+    </div>
   );
 }
+
+// {
+//     "success": true,
+//     "message": "로그인이 완료되었습니다.",
+//     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBjNTc3YTkyLWYzZmMtNGQwYi1iM2UyLTUxNDk5YTliOWZkNyIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsIm5pY2tuYW1lIjoidGVzdDEiLCJpYXQiOjE3NjkxNDc2MTEsImV4cCI6MTc2OTE1MTIxMX0.F_CV23boEdVSXa2PXj_g50Ntty_Tj9TSBnOCfBXGVfc",
+//     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBjNTc3YTkyLWYzZmMtNGQwYi1iM2UyLTUxNDk5YTliOWZkNyIsImRldmljZUlkIjoiMTc2OTE0NzYxMTU1OSIsImlhdCI6MTc2OTE0NzYxMSwiZXhwIjoxNzcwMDExNjExfQ.5_ialW709aTYBXM3r7s_kp89eEdcH1SBAWxLC5lp0Aw",
+//     "isFirstLogin": true,
+//     "isDuplicateLogin": false
+// }
+
+// {
+//     "success": false,
+//     "error": {
+//         "message": "이메일 또는 비밀번호가 일치하지 않습니다.",
+//         "statusCode": 400
+//     }
+// }
