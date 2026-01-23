@@ -190,7 +190,6 @@ export default function Page() {
       values.checkPassword,
     ]
   );
-
   const handleFieldChange = (name: keyof SignInput, value: string) => {
     setValues((prev) => {
       const next = { ...prev, [name]: value };

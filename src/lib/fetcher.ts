@@ -21,6 +21,7 @@ export async function fetcher<T>(
 
   if (!res.ok) {
     const errorBody = await res.json();
+    // TODO: CustomError 클래스로 래핑하거나 표준화된 오류 객체 반환
     throw errorBody;
   }
 
