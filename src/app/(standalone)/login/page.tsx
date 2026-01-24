@@ -1,4 +1,8 @@
 'use client';
+import { useDialog } from '@/app/components/dialog/dialogContext';
+import LoginDialog, {
+  LoginDialogType,
+} from '@/app/components/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
 import Logo from '@/app/components/ui/Logo';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
@@ -20,30 +24,38 @@ import React, { ChangeEvent, useState } from 'react';
 import styles from './page.module.css';
 
 const cx = classNames.bind(styles);
+
 // 상단바 없고 단독 UI
 export default function Page() {
+  /** hooks */
+  const dialog = useDialog();
   const router = useRouter();
+
+  /** state */
   const [values, setValues] = useState<LoginInput>({
     email: '',
     password: '',
   });
-
-  /* validation (regex level) */
   const [regexValidity, setRegexValidity] = useState<LoginValid>({
     email: false,
     password: false,
   });
-
   const [feedbackMessage, setFeedbackMessage] = useState<LoginHelperMessage>({
     email: '',
     password: '',
   });
 
+  const [dialogType, setDialogType] = useState<LoginDialogType>(null);
+
+  const [nextRoute, setNextRoute] = useState<string | null>(null);
+
+  /**constants · maps */
   const LABEL_MAP: Record<LoginField, string> = {
     email: '아이디',
     password: '비밀번호',
   };
 
+  /** handler */
   const handleFieldChange = (name: LoginField, value: string) => {
     setValues((prev) => {
       const next = {
@@ -58,12 +70,12 @@ export default function Page() {
 
       // 유효성 검증
       updateRegexValidity(name, fieldValidMap[name]);
-      hanleFeedbackMessage(name, fieldValidMap[name]);
+      handleFeedbackMessage(name, fieldValidMap[name]);
       return next;
     });
   };
 
-  const hanleFeedbackMessage = (name: LoginField, isValid: boolean) => {
+  const handleFeedbackMessage = (name: LoginField, isValid: boolean) => {
     if (name === 'email') {
       const message = !isValid ? MESSAGE.EMAIL_INVALID : '';
       updateFeedbackMessage(name, message);
@@ -105,65 +117,71 @@ export default function Page() {
   async function onClickLoginButton() {
     try {
       const res = await login(values);
-      console.log('success', res);
-      router.replace('/timer');
+      /** accessToekn 메모리 저장 → setAccessToken(res.accessToken) */
+      /** 서버가 refreshToken을 cookie에 심어줬다고 가정 →  분기*/
+
+      // 이미 로그인 된 계정
+      if (res.isDuplicateLogin && res.accessToken) {
+        // 먼저 토큰 저장
+        document.cookie = `accessToken=${res.accessToken}; path=/`;
+        setNextRoute('/timer');
+        setDialogType('duplicate-login');
+        dialog?.openModal();
+        return;
+      }
+
+      // 첫로그인
+      if (res.isFirstLogin && res.accessToken) {
+        router.replace('/profile/setup');
+      } else {
+        // 첫로그인 아닌 경우
+        router.replace('/timer');
+      }
     } catch (err) {
-      console.log('error', err);
+      setDialogType('login-failed');
+      dialog?.openModal();
     }
   }
 
   return (
-    <div>
+    <div className={cx('page')}>
       <div className={cx('container')}>
         <Image src="/images/bg/signup-bg.png" alt="background" fill priority />
-      </div>
+        <div className={cx('loginForm')}>
+          <div className={cx('logoContainer')}>
+            <Logo direction="vertical" width="6rem" height="5.5rem" />
+          </div>
+          {(Object.keys(values) as Array<LoginField>).map((key) => {
+            return (
+              <React.Fragment key={key}>
+                <TextLabel label={LABEL_MAP[key]} name={key} />
+                <TextFieldInput
+                  id={key}
+                  name={key}
+                  value={values[key]}
+                  placeholder={MESSAGE.LOGIN[key]}
+                  onChange={onChangeInput}
+                  feedbackMessage={feedbackMessage[key]}
+                  type={key === 'password' ? 'password' : 'text'}
+                />
+              </React.Fragment>
+            );
+          })}
 
-      {/* 콘텐츠 */}
-      <div className={cx('loginForm')}>
-        <div className={cx('logoContainer')}>
-          <Logo direction="vertical" width="6rem" height="5.5rem" />
-        </div>
-        {(Object.keys(values) as Array<LoginField>).map((key) => {
-          return (
-            <React.Fragment key={key}>
-              <TextLabel label={LABEL_MAP[key]} name={key} />
-              <TextFieldInput
-                id={key}
-                name={key}
-                value={values[key]}
-                placeholder={MESSAGE.LOGIN[key]}
-                onChange={onChangeInput}
-                feedbackMessage={feedbackMessage[key]}
-                type={key === 'password' ? 'password' : 'text'}
-              />
-            </React.Fragment>
-          );
-        })}
-
-        <Button disabled={isLoginButtonDisabled()} onClick={onClickLoginButton}>
-          로그인
-        </Button>
-        <div className={cx('signupLink')}>
-          <TextLinkRow label="회원가입" href="/signup" />
+          <Button
+            disabled={isLoginButtonDisabled()}
+            onClick={onClickLoginButton}
+          >
+            로그인
+          </Button>
+          <div className={cx('signupLink')}>
+            <TextLinkRow label="회원가입" href="/signup" />
+          </div>
         </div>
       </div>
+      {dialog?.modalState && (
+        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
+      )}
     </div>
   );
 }
-
-// {
-//     "success": true,
-//     "message": "로그인이 완료되었습니다.",
-//     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBjNTc3YTkyLWYzZmMtNGQwYi1iM2UyLTUxNDk5YTliOWZkNyIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsIm5pY2tuYW1lIjoidGVzdDEiLCJpYXQiOjE3NjkxNDc2MTEsImV4cCI6MTc2OTE1MTIxMX0.F_CV23boEdVSXa2PXj_g50Ntty_Tj9TSBnOCfBXGVfc",
-//     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBjNTc3YTkyLWYzZmMtNGQwYi1iM2UyLTUxNDk5YTliOWZkNyIsImRldmljZUlkIjoiMTc2OTE0NzYxMTU1OSIsImlhdCI6MTc2OTE0NzYxMSwiZXhwIjoxNzcwMDExNjExfQ.5_ialW709aTYBXM3r7s_kp89eEdcH1SBAWxLC5lp0Aw",
-//     "isFirstLogin": true,
-//     "isDuplicateLogin": false
-// }
-
-// {
-//     "success": false,
-//     "error": {
-//         "message": "이메일 또는 비밀번호가 일치하지 않습니다.",
-//         "statusCode": 400
-//     }
-// }

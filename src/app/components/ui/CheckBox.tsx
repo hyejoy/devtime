@@ -1,17 +1,16 @@
 'use client';
 
-import { ChangeEvent, forwardRef, InputHTMLAttributes } from 'react';
-import styles from './CheckBox.module.css';
 import classNames from 'classnames/bind';
+import { ChangeEvent, ComponentProps, forwardRef } from 'react';
+import styles from './CheckBox.module.css';
 
-interface Props extends InputHTMLAttributes<HTMLInputElement> {
+interface Props extends ComponentProps<'input'> {
   label?: string;
   id: string;
   isChecked: boolean;
   isSubmitted: boolean;
   onToggleCheck: (e: ChangeEvent<HTMLInputElement>) => void;
 }
-
 const cx = classNames.bind(styles);
 
 const CheckBox = forwardRef<HTMLInputElement, Props>(
