@@ -14,6 +14,7 @@ export const DialogContext = createContext<DialogContextValue | null>(null);
 
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [modalState, setModalState] = useState<ModalState>(null);
+
   const openModal = (type: ModalType) => {
     setModalState(type);
   };
