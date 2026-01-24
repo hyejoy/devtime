@@ -110,6 +110,9 @@ export default function Page() {
       // 2. 서버가 refreshToken을 cookie에 심어줬다고 가정
       // 3. 분기
 
+      console.log('❤️res : ', res);
+
+      /** 
       // 중복 로그인 안내 (UI 전용)
       if (res.isDuplicateLogin && res.accessToken) {
         // 먼저 토큰 저장
@@ -121,49 +124,54 @@ export default function Page() {
 
       // 첫로그인
       if (res.isFirstLogin && res.accessToken) {
-        router.replace('/profile');
+        router.replace('/profile/setup');
       } else {
         // 첫로그인 아닌 경우
         router.replace('/timer');
       }
+      */
     } catch (err) {
+      console.log('😭err : ', err);
+
       console.log('error', err);
     }
   }
 
   return (
-    <div>
+    <div className={cx('page')}>
       <div className={cx('container')}>
         <Image src="/images/bg/signup-bg.png" alt="background" fill priority />
-      </div>
+        {/* 콘텐츠 */}
+        <div className={cx('loginForm')}>
+          <div className={cx('logoContainer')}>
+            <Logo direction="vertical" width="6rem" height="5.5rem" />
+          </div>
+          {(Object.keys(values) as Array<LoginField>).map((key) => {
+            return (
+              <React.Fragment key={key}>
+                <TextLabel label={LABEL_MAP[key]} name={key} />
+                <TextFieldInput
+                  id={key}
+                  name={key}
+                  value={values[key]}
+                  placeholder={MESSAGE.LOGIN[key]}
+                  onChange={onChangeInput}
+                  feedbackMessage={feedbackMessage[key]}
+                  type={key === 'password' ? 'password' : 'text'}
+                />
+              </React.Fragment>
+            );
+          })}
 
-      {/* 콘텐츠 */}
-      <div className={cx('loginForm')}>
-        <div className={cx('logoContainer')}>
-          <Logo direction="vertical" width="6rem" height="5.5rem" />
-        </div>
-        {(Object.keys(values) as Array<LoginField>).map((key) => {
-          return (
-            <React.Fragment key={key}>
-              <TextLabel label={LABEL_MAP[key]} name={key} />
-              <TextFieldInput
-                id={key}
-                name={key}
-                value={values[key]}
-                placeholder={MESSAGE.LOGIN[key]}
-                onChange={onChangeInput}
-                feedbackMessage={feedbackMessage[key]}
-                type={key === 'password' ? 'password' : 'text'}
-              />
-            </React.Fragment>
-          );
-        })}
-
-        <Button disabled={isLoginButtonDisabled()} onClick={onClickLoginButton}>
-          로그인
-        </Button>
-        <div className={cx('signupLink')}>
-          <TextLinkRow label="회원가입" href="/signup" />
+          <Button
+            disabled={isLoginButtonDisabled()}
+            onClick={onClickLoginButton}
+          >
+            로그인
+          </Button>
+          <div className={cx('signupLink')}>
+            <TextLinkRow label="회원가입" href="/signup" />
+          </div>
         </div>
       </div>
     </div>
