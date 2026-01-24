@@ -17,7 +17,7 @@ import {
 import classNames from 'classnames/bind';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import SignupFields from './../../components/signup/SignupFields';
+import SignupFields from '../../components/signup/SignupFields';
 import styles from './page.module.css';
 const cx = classNames.bind(styles);
 

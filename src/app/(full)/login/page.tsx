@@ -25,7 +25,7 @@ import styles from './page.module.css';
 
 const cx = classNames.bind(styles);
 
-// 상단바 없고 단독 UI
+//  # 헤더 없고 전체 화면 사용하는 페이지
 export default function Page() {
   /** hooks */
   const dialog = useDialog();
