@@ -1,0 +1,18 @@
+.align-right {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.full > Button {
+  width: 100%;
+}
+.full {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.8rem;
+}
+
+.container {
+  margin-top: 0.8rem;
+}
