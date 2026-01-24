@@ -2,7 +2,7 @@ import classNames from 'classnames/bind';
 import { ComponentProps, ReactNode } from 'react';
 import styles from './Button.module.css';
 const cx = classNames.bind(styles);
-interface Props extends ComponentProps<'button'> {
+interface Props extends ComponentProps<'div'> {
   align: 'full' | 'align-right';
   children: ReactNode;
 }

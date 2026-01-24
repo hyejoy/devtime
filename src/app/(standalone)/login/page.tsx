@@ -126,7 +126,7 @@ export default function Page() {
         document.cookie = `accessToken=${res.accessToken}; path=/`;
         setNextRoute('/timer');
         setDialogType('duplicate-login');
-        dialog?.openModal('alert');
+        dialog?.openModal();
         return;
       }
 
@@ -139,7 +139,7 @@ export default function Page() {
       }
     } catch (err) {
       setDialogType('login-failed');
-      dialog?.openModal('alert');
+      dialog?.openModal();
     }
   }
 
