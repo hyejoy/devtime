@@ -21,9 +21,10 @@ const DialogField = (({ children }: { children: ReactNode }) => {
 
   // 모달 열릴때 body 스크롤 잠그기
   useEffect(() => {
+    const originalOverflow = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = originalOverflow;
     };
   }, []);
 

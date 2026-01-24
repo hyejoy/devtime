@@ -181,9 +181,15 @@ export default function Page() {
         }
       }
     },
-    []
+    [
+      MESSAGE,
+      passwordRegex,
+      updateFieldMessage,
+      values.id,
+      values.password,
+      values.checkPassword,
+    ]
   );
-
   const handleFieldChange = (name: keyof SignInput, value: string) => {
     setValues((prev) => {
       const next = { ...prev, [name]: value };

@@ -22,5 +22,12 @@ export function middleware(req: NextRequest) {
 
 // 미들웨어 어디에 적용할지 정하는 필터
 export const config = {
-  matcher: ['/login', '/timer/:path*'],
+  matcher: [
+    '/login',
+    '/timer/:path*',
+    '/dashboard/:path*',
+    '/mypage/:path*',
+    '/profile/:path*',
+    '/ranking/:path*',
+  ],
 };
