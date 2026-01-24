@@ -6,9 +6,5 @@ interface ContentProps {
   children: ReactNode;
 }
 export default function Content({ children }: ContentProps) {
-  return (
-    <>
-      <div className={cx('contentText')}>{children}</div>
-    </>
-  );
+  return <div className={cx('contentText')}>{children}</div>;
 }

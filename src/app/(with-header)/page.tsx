@@ -1,15 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import DialogField from '@/app/components/dialog/DialogField';
 import { useDialog } from '../components/dialog/dialogContext';
-import Button from '../components/ui/Button';
 
 export default function Page() {
   const dialog = useDialog();
 
   const onClick = () => {
-    dialog?.openModal('confirm');
+    dialog?.openModal();
   };
 
   return (

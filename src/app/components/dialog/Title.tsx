@@ -10,19 +10,11 @@ interface Props extends ComponentProps<'div'> {
   className?: string;
   children?: ReactNode;
 }
-export default function Title({
-  title,
-  type = 'text',
-  className,
-  children,
-  ...props
-}: Props) {
+export default function Title({ title, className, children, ...props }: Props) {
   return (
-    <>
-      <div className={cx('title', className)} {...props}>
-        {title}
-      </div>
+    <div className={cx('title', className)} {...props}>
+      {title}
       {children}
-    </>
+    </div>
   );
 }
