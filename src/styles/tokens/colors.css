@@ -41,9 +41,6 @@
   --color-gray-700: #394252;
   --color-gray-800: #1f2937;
 
-  /** Color Mix */
-  --color-login-bg: color-mix(in srgb, var(--color-white) 50%, transparent);
-
   /* Common */
   --color-disabled-bg: var(--color-gray-200);
   --color-primary-light: var(--color-brand-primary-10);
