@@ -4,14 +4,15 @@ import React, { ComponentProps, forwardRef, InputHTMLAttributes } from 'react';
 import styles from './TextFieldInput.module.css';
 import classNames from 'classnames/bind';
 
+export type FeedbackMessageType = boolean | null;
+
 // classnames 적용
 const cx = classNames.bind(styles);
 
 interface Props extends ComponentProps<'input'> {
   isValid?: boolean;
   feedbackMessage?: string;
-  placeholder?: string;
-  className?: string;
+  valiConfirm?: boolean;
 }
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
@@ -35,5 +36,4 @@ const TextFieldInput = forwardRef<HTMLInputElement, Props>(
 );
 
 TextFieldInput.displayName = 'TextFieldInput';
-
 export default TextFieldInput;

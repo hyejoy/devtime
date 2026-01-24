@@ -6,7 +6,6 @@ interface ButtonProps extends ComponentProps<'button'> {
   variant?: 'primary' | 'secondary' | 'tertiary';
 }
 
-const cx = classNames.bind(styles);
 export default function Button({
   variant = 'primary',
   className = '',
@@ -14,7 +13,9 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={cx('button', `variant_${variant}`, className)}
+      className={[styles.button, styles[`variant_${variant}`], className].join(
+        ' '
+      )}
       {...props}
     />
   );
