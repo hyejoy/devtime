@@ -1,8 +1,6 @@
 'use client';
 import { useDialog } from '@/app/components/dialog/dialogContext';
-import LoginDialog, {
-  LoginDialogType,
-} from '@/app/components/login/LoginDialog';
+import LoginDialog from '@/app/components/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
 import Logo from '@/app/components/ui/Logo';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
