@@ -11,6 +11,7 @@ export default function Page() {
   const onClick = () => {
     dialog?.openModal('confirm');
   };
+
   return (
     <>
       <h1>Main Page</h1>
@@ -18,7 +19,7 @@ export default function Page() {
         <Link href="/signup">회원가입</Link>
         <Link href="/login">로그인</Link>
       </div>
-      <DialogField>
+      {/* <DialogField>
         <DialogField.Title
           type="text"
           title="프로필 설정을 건너뛸까요?"
@@ -34,7 +35,7 @@ export default function Page() {
           <Button variant="secondary">건너뛰기</Button>
           <Button>계속 설정하기</Button>
         </DialogField.Button>
-      </DialogField>
+      </DialogField> */}
     </>
   );
 }
