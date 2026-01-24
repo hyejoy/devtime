@@ -1,14 +1,16 @@
 'use client';
 
-import { ChangeEvent, forwardRef, useId, useState } from 'react';
+import classNames from 'classnames/bind';
+import { ChangeEvent, ComponentProps, forwardRef } from 'react';
 import styles from './CheckBox.module.css';
 
-type Props = {
+interface Props extends ComponentProps<'input'> {
   label?: string;
   id: string;
   checked: boolean;
   onToggleCheck: (e: ChangeEvent<HTMLInputElement>) => void;
-};
+}
+const cx = classNames.bind(styles);
 
 const CheckBox = forwardRef<HTMLInputElement, Props>(
   ({ label, id, checked = false, onToggleCheck }, ref) => {

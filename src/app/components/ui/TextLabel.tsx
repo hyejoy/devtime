@@ -1,14 +1,14 @@
 import styles from './TextLabel.module.css';
+import { ComponentProps } from 'react';
 
-export default function TextLabel({
-  label,
-  name,
-}: {
+interface Props extends ComponentProps<'label'> {
   label: string;
   name: string;
-}) {
+}
+
+export default function TextLabel({ label, name, ...props }: Props) {
   return (
-    <label htmlFor={name} className={styles.label}>
+    <label htmlFor={name} className={styles.label} {...props}>
       {label}
     </label>
   );

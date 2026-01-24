@@ -1,8 +1,10 @@
+import classNames from 'classnames/bind';
+import { ComponentProps } from 'react';
 import styles from './Button.module.css';
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+interface ButtonProps extends ComponentProps<'button'> {
   variant?: 'primary' | 'secondary' | 'tertiary';
-};
+}
 
 export default function Button({
   variant = 'primary',

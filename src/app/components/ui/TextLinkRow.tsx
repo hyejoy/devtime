@@ -1,18 +1,28 @@
 import Link from 'next/link';
 import styles from './TextLinkRow.module.css';
+import classNames from 'classnames/bind';
 
 type RoutePath = `/${string}`;
-type TextLink = {
+
+interface Props {
   question?: string;
   label: string;
   href: RoutePath;
-};
+  isBold?: boolean;
+}
 
-export default function TextLinkRow({ question, label, href }: TextLink) {
+const cx = classNames.bind(styles);
+
+export default function TextLinkRow({
+  question,
+  label,
+  href,
+  isBold = false,
+}: Props) {
   return (
-    <div className={styles.linkContainer}>
-      <div>{question}</div>
-      <Link className="link" href={href}>
+    <div className={cx('linkContainer')}>
+      {question && <div>{question}</div>}
+      <Link href={href} className={cx({ bold: isBold, notBold: !isBold })}>
         {label}
       </Link>
     </div>
