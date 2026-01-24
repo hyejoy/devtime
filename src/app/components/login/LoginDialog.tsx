@@ -49,5 +49,5 @@ export default function LoginDialog({ dialogType, nextRoute }: Props) {
         </DialogField.Button>
       </DialogField>
     );
-  } else return null;
+  }
 }
