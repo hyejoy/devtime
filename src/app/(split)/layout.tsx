@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import styles from './layout.module.css';
 import Logo from '../components/ui/Logo';
-// ✅ 좌측 블루 + 우측 컨텐츠 영역 layout
+// # 헤더 없고 회원가입처럼 반반 나뉜 페이지
 export default function layout({ children }: { children: ReactNode }) {
   return (
     <div className={styles.container}>

@@ -25,7 +25,7 @@ import styles from './page.module.css';
 
 const cx = classNames.bind(styles);
 
-// 상단바 없고 단독 UI
+//  # 헤더 없고 전체 화면 사용하는 페이지
 export default function Page() {
   /** hooks */
   const dialog = useDialog();
@@ -120,6 +120,13 @@ export default function Page() {
       /** accessToekn 메모리 저장 → setAccessToken(res.accessToken) */
       /** 서버가 refreshToken을 cookie에 심어줬다고 가정 →  분기*/
 
+      /**
+       * TODO :저희 프로젝트에서는 서버가 토큰을 쿠키에 심어주지 않습니다
+       * 그리고 쿠키를 지금처럼 document.cookie 방식으로 저장하면
+       * httpOnly 쿠키가 아니기 때문에 로컬스토리지와 다른 점이 없어집니다
+       * 쿠키 사용하고 싶으시다면 next.js 에서 api route 활용하여
+       * 토큰을 직접 쿠키에 저장하는 방법에 대해 찾아보세요!
+       */
       // 이미 로그인 된 계정
       if (res.isDuplicateLogin && res.accessToken) {
         // 먼저 토큰 저장
@@ -141,47 +148,52 @@ export default function Page() {
       setDialogType('login-failed');
       dialog?.openModal();
     }
-  }
 
-  return (
-    <div className={cx('page')}>
-      <div className={cx('container')}>
-        <Image src="/images/bg/signup-bg.png" alt="background" fill priority />
-        <div className={cx('loginForm')}>
-          <div className={cx('logoContainer')}>
-            <Logo direction="vertical" width="6rem" height="5.5rem" />
-          </div>
-          {(Object.keys(values) as Array<LoginField>).map((key) => {
-            return (
-              <React.Fragment key={key}>
-                <TextLabel label={LABEL_MAP[key]} name={key} />
-                <TextFieldInput
-                  id={key}
-                  name={key}
-                  value={values[key]}
-                  placeholder={MESSAGE.LOGIN[key]}
-                  onChange={onChangeInput}
-                  feedbackMessage={feedbackMessage[key]}
-                  type={key === 'password' ? 'password' : 'text'}
-                />
-              </React.Fragment>
-            );
-          })}
+    return (
+      <div className={cx('page')}>
+        <div className={cx('container')}>
+          <Image
+            src="/images/bg/signup-bg.png"
+            alt="background"
+            fill
+            priority
+          />
+          <div className={cx('loginForm')}>
+            <div className={cx('logoContainer')}>
+              <Logo direction="vertical" width="6rem" height="5.5rem" />
+            </div>
+            {(Object.keys(values) as Array<LoginField>).map((key) => {
+              return (
+                <React.Fragment key={key}>
+                  <TextLabel label={LABEL_MAP[key]} name={key} />
+                  <TextFieldInput
+                    id={key}
+                    name={key}
+                    value={values[key]}
+                    placeholder={MESSAGE.LOGIN[key]}
+                    onChange={onChangeInput}
+                    feedbackMessage={feedbackMessage[key]}
+                    type={key === 'password' ? 'password' : 'text'}
+                  />
+                </React.Fragment>
+              );
+            })}
 
-          <Button
-            disabled={isLoginButtonDisabled()}
-            onClick={onClickLoginButton}
-          >
-            로그인
-          </Button>
-          <div className={cx('signupLink')}>
-            <TextLinkRow label="회원가입" href="/signup" />
+            <Button
+              disabled={isLoginButtonDisabled()}
+              onClick={onClickLoginButton}
+            >
+              로그인
+            </Button>
+            <div className={cx('signupLink')}>
+              <TextLinkRow label="회원가입" href="/signup" />
+            </div>
           </div>
         </div>
+        {dialog?.modalState && (
+          <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
+        )}
       </div>
-      {dialog?.modalState && (
-        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
-      )}
-    </div>
-  );
+    );
+  }
 }
