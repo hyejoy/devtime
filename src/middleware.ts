@@ -23,10 +23,7 @@ export function middleware(req: NextRequest) {
 // TODO:케이스(블랙리스트)로 적용
 // → https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher
 export const config = {
-<<<<<<< HEAD
   // 미들웨어 어디에 적용할지 정하는 필터
-=======
->>>>>>> fa99a0c (chore: apply Gemini code review feedback)
   matcher: [
     '/login',
     '/timer/:path*',
