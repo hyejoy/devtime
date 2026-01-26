@@ -1,0 +1,71 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  width: 80vw;
+  background-color: pink;
+}
+
+.headerField {
+  display: flex;
+  background-color: aqua;
+}
+
+.logoField {
+  margin-right: 3rem;
+  cursor: pointer;
+}
+
+.linkField {
+  display: flex;
+  flex: 1;
+  background-color: antiquewhite;
+  gap: 2.3rem;
+  align-items: center;
+  font-weight: 600;
+  size: 1rem;
+  line-height: 1.5;
+}
+
+.linkField a {
+  text-decoration: none;
+  color: var(--color-primary-900);
+}
+
+.linkField a:hover {
+  text-decoration: none;
+}
+.profileField {
+  display: flex;
+  white-space: nowrap;
+  width: auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profileImage {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profileNickName {
+  font-weight: 700;
+  size: 1rem;
+  line-height: 1.5;
+  color: var(--color-primary-900);
+}
+
+.childrenContainer {
+  background-color: blueviolet;
+}
+
+.childrenField {
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding-top: clamp(5rem, 10vh, 7rem);
+  padding-bottom: clamp(5rem, 10vh, 7rem);
+  background-color: darkolivegreen;
+}

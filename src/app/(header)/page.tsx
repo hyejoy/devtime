@@ -16,6 +16,7 @@ export default function Page() {
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <Link href="/signup">회원가입</Link>
         <Link href="/login">로그인</Link>
+        <Link href="/timer">타이머</Link>
       </div>
       {/* <DialogField>
         <DialogField.Title

@@ -9,4 +9,7 @@ export const API = {
     CHECK_NICKNAME_DUPLICATE: '/api/signup/check-nickname?nickname=',
     SIGNUP: '/api/signup',
   },
+  TIMER: {
+    GET_ACTIVE_TIMER: '/api/timers',
+  },
 } as const;

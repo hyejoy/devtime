@@ -1,14 +1,8 @@
 import '@/styles/tokens/colors.css';
-import localFont from 'next/font/local';
 import { ReactNode } from 'react';
+import { pretendard } from '../../public/fonts/font';
 import { DialogProvider } from './components/dialog/dialogContext';
 import './globals.css';
-
-const pretendard = localFont({
-  src: '../../public/fonts/PretendardVariable.woff2',
-  variable: '--font-pretendard',
-  display: 'swap',
-});
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

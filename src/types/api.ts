@@ -1,6 +1,19 @@
 import { checkEmail, checkNickname } from '@/services/signup';
 import { DuplicateField } from './signup';
 
+export interface BasicStructure {
+  success: boolean;
+  error?: {
+    message: string;
+    statusCode: number;
+  };
+}
+
+export interface RefreshToken {
+  success: boolean;
+  accessToken: string;
+}
+
 /** 회원가입 이메일 닉네임 중복확인 */
 export interface SignUpCheckResponse {
   success: boolean;
@@ -43,3 +56,6 @@ export type LoginRequest = {
   email: string;
   password: string;
 };
+
+/** 타이머 */
+// export interface ActiveTimmerResponse extends BasicStructure {}

@@ -1,11 +1,25 @@
-import { API } from '@/constants/endpoints';
-import { fetcher } from '@/lib/fetcher';
-import { LoginRequest, LoginResponse } from '@/types/api';
+import { LoginRequest } from '@/types/api';
 
-/** 로그인 */
-export const login = (data: LoginRequest): Promise<LoginResponse> => {
-  return fetcher(`${API.AUTH.LOGIN}`, {
+/** 로그인 – Next.js route 호출 */
+export const login = (data: LoginRequest) => {
+  return fetch('/api/auth/login', {
     method: 'POST',
-    body: data,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+    credentials: 'include', // 브라우저가 인증 쿠키(HttpOnly)를 함께 전송하도록 설정⭐
+  });
+};
+
+/** 엑세스 토큰 갱신 */
+export const requestRefreshToken = (refreshToken: string) => {
+  return fetch('/api/auth/refresh', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(refreshToken),
+    credentials: 'include', // 브라우저가 인증 쿠키(HttpOnly)를 함께 전송하도록 설정⭐
   });
 };

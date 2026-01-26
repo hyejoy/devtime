@@ -1,35 +1,39 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// middleware.ts
+import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  console.log('pathname: ', pathname);
+
   const accessToken = req.cookies.get('accessToken')?.value;
-  const pathname = req.nextUrl.pathname;
-  const isLoginPage = pathname === '/login';
+  console.log('accessToken: ', accessToken);
 
-  /**  인증 / 인가 처리 (Middleware) */
-  // 로그인 안 했는데 보호 페이지 접근
-  if (!accessToken && pathname.startsWith('/timer')) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
+  const isLoginPage = pathname.startsWith('/login');
+  const isProtectedPage =
+    pathname.startsWith('/timer') || pathname.startsWith('/profile');
 
-  // 로그인 했는데 로그인 페이지 접근
-  if (accessToken && isLoginPage) {
+  console.log('isProtectedPage: ', isProtectedPage);
+  // ✅ 로그인 상태인데 로그인 페이지 접근
+  if (isLoginPage && accessToken) {
+    console.log('✅ 로그인 상태인데 로그인 페이지 접근');
+
     return NextResponse.redirect(new URL('/timer', req.url));
   }
 
+  // ✅ 보호 페이지인데 로그인 안 됨
+  if (isProtectedPage && !accessToken) {
+    console.log(' ✅ 보호 페이지인데 로그인 안 됨');
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  // 그 외 전부 통과
+
+  console.log('그 외 전부 통과');
   return NextResponse.next();
 }
-
 // TODO:케이스(블랙리스트)로 적용
 // → https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher
 export const config = {
-  // 미들웨어 어디에 적용할지 정하는 필터
-  matcher: [
-    '/login',
-    '/timer/:path*',
-    '/dashboard/:path*',
-    '/mypage/:path*',
-    '/profile/:path*',
-    '/ranking/:path*',
-  ],
+  matcher: ['/timer/:path*', '/profile/:path*'],
 };

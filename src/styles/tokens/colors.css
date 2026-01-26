@@ -7,11 +7,18 @@
     var(--color-brand-primary) 10%,
     transparent
   );
+  --color-brand-primary-20: color-mix(
+    in srgb,
+    var(--color-brand-primary) 20%,
+    transparent
+  );
   --color-brand-primary-30: color-mix(
     in srgb,
     var(--color-brand-primary) 30%,
     transparent
   );
+
+  --color-background: linear-gradient(180deg, #f6f7f9 0%, #e9ecf5 100%);
 
   /* Color scale */
   --color-primary-500: var(--color-brand-primary);

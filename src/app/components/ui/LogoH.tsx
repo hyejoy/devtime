@@ -63,8 +63,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint1_linear_74_3699"
@@ -74,8 +74,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint2_linear_74_3699"
@@ -85,8 +85,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint3_linear_74_3699"
@@ -96,8 +96,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint4_linear_74_3699"
@@ -107,8 +107,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint5_linear_74_3699"
@@ -118,8 +118,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint6_linear_74_3699"
@@ -129,8 +129,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint7_linear_74_3699"
@@ -140,8 +140,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
         <linearGradient
           id="paint8_linear_74_3699"
@@ -151,8 +151,8 @@ export default function LogoH({
           y2="41.2181"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#4C79FF" />
-          <stop offset="1" stop-color="#023E99" />
+          <stop stopColor="#4C79FF" />
+          <stop offset="1" stopColor="#023E99" />
         </linearGradient>
       </defs>
     </svg>
