@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import styles from './TimerClient.module.css';
 import { useTimer } from './context/TimerContext';
+import { API } from '@/constants/endpoints';
 
 const cx = classNames.bind(styles);
 export default function TimerClient() {
@@ -65,18 +66,7 @@ export default function TimerClient() {
   useEffect(() => {
     const init = async () => {
       try {
-        // 1.세션 확인 (refresh 포함)
-        const sessionRes = await fetch('/api/auth/session', {
-          credentials: 'include',
-        });
-
-        if (!sessionRes.ok) {
-          router.replace('/login');
-          return;
-        }
-
-        // 2. 타이머 데이터 요청
-        const res = await fetch('/api/timers', {
+        const res = await fetch(`${API.TIMER.TIMERS}`, {
           credentials: 'include',
         });
         const data: ActiveTimerResponse = await res.json();
@@ -119,7 +109,7 @@ export default function TimerClient() {
         (task) => task.content
       );
 
-      const res = await fetch('/api/timers', {
+      const res = await fetch(`${API.TIMER.TIMERS}`, {
         method: 'POST',
         credentials: 'include',
         body: JSON.stringify({
@@ -140,6 +130,7 @@ export default function TimerClient() {
       // console.log('활성화 타이머 하나도 없을때 새로운 타이머 시작>', next);
       const now = new Date().toISOString();
       timer.setTimerId(next.timerId);
+      timer.setFirstStartTime(now);
       timer.setLastStartTimestamp(now);
       timer.setIsRunning(true);
       return next;
@@ -184,7 +175,7 @@ export default function TimerClient() {
     ];
 
     // API 요청 (현재 세션의 split 정보 전송)
-    const res = await fetch(`/api/timers/${timer.timerId}`, {
+    const res = await fetch(`${API.TIMER.ITEM(timer.timerId)}`, {
       method: 'PUT',
       credentials: 'include',
       body: JSON.stringify({
@@ -204,6 +195,8 @@ export default function TimerClient() {
       return;
     }
     const lastSplit = createSplitTime(timer.lastStartTimestamp!);
+    const test = [...(initTimer?.splitTimes ?? [])];
+
     const finalSplitTimes = [
       ...(initTimer?.splitTimes ?? []), // 기존 데이터 (없으면 빈 배열)
       {
@@ -214,7 +207,7 @@ export default function TimerClient() {
 
     console.log(finalSplitTimes);
 
-    const res = await fetch(`/api/timers/${timer.timerId}/stop`, {
+    const res = await fetch(`${API.TIMER.STOP(timer.timerId)}`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -246,11 +239,7 @@ export default function TimerClient() {
     setInitTimer(undefined);
 
     // 2. Context(Provider)의 상태를 안전하게 초기화
-    timer.setTimerId('');
-    timer.setTotalActiveMs(0);
-    timer.setDisplayTime(0);
-    timer.setIsRunning(false);
-    timer.setLastStartTimestamp('');
+    timer.timerReset();
 
     // 3. 마지막으로 로딩 상태를 해제
     setLoading(false);

@@ -5,7 +5,6 @@ import { API } from '@/constants/endpoints';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  console.log('body: ', body);
 
   const isProd = process.env.NODE_ENV === 'production';
 
@@ -19,35 +18,48 @@ export async function POST(req: NextRequest) {
 
   const data = await backendRes.json();
 
-  console.log('data: ', data);
-
   if (!backendRes.ok) {
     return NextResponse.json(data, { status: backendRes.status });
   }
 
   const {
+    success,
+    message,
     accessToken,
     refreshToken,
-    accessTokenExpiresIn,
-    refreshTokenExpiresIn,
+    isFirstLogin,
+    isDuplicateLogin,
   } = data;
 
-  const res = NextResponse.json({ ok: true });
+  // 1. 응답 생성 (클라이언트에 전달할 정보만 담기)
+  const res = NextResponse.json({
+    success,
+    message,
+    isFirstLogin,
+    isDuplicateLogin,
+  });
 
-  res.cookies.set('accessToken', accessToken, {
+  // 2. 만료 시간 설정
+  // 예: AccessToken 1시간(3600초), RefreshToken 10일
+  const ACCESS_TOKEN_MAX_AGE = 60 * 60;
+  const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 10;
+
+  const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'lax',
+    sameSite: 'lax' as const,
     path: '/',
-    maxAge: accessTokenExpiresIn,
+  };
+
+  // 3. 쿠키 굽기
+  res.cookies.set('accessToken', accessToken, {
+    ...cookieOptions,
+    maxAge: ACCESS_TOKEN_MAX_AGE,
   });
 
   res.cookies.set('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: refreshTokenExpiresIn,
+    ...cookieOptions,
+    maxAge: REFRESH_TOKEN_MAX_AGE,
   });
 
   return res;

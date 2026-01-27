@@ -1,3 +1,5 @@
+const PROXY = '/api/proxy';
+
 export const API = {
   AUTH: {
     LOGIN: '/api/auth/login',
@@ -10,7 +12,8 @@ export const API = {
     SIGNUP: '/api/signup',
   },
   TIMER: {
-    TIMERS: '/api/timers',
-    PUT_TIMERS: '/api/timers/',
+    TIMERS: `${PROXY}/api/timers`, // GET, POST용
+    ITEM: (id: string) => `${PROXY}/api/timers/${id}`, // PUT, DELETE용
+    STOP: (id: string) => `${PROXY}/api/timers/${id}/stop`, // STOP용
   },
 } as const;

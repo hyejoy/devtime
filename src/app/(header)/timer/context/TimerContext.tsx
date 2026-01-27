@@ -12,18 +12,19 @@ import {
 interface TimerContextType {
   timerId: string;
   totalActiveMs: number; // 실제로 타이머가 '재생' 상태였던 시간의 합.
-  // totalPausedMs: number; // 타이머를 '일시정지' 해두었던 시간의 합
   isRunning: boolean; // 실행 중 여부
   lastStartTimestamp: string | undefined; // 마지막으로 '시작'
   lastPauseTimestamp: string | undefined; // 마지막으로 '정지'
   displayTime: number;
   setTimerId: Dispatch<SetStateAction<string>>;
   setTotalActiveMs: Dispatch<SetStateAction<number>>;
-  // setTotalPausedMs: Dispatch<SetStateAction<number>>;
   setIsRunning: Dispatch<SetStateAction<boolean>>;
   setLastStartTimestamp: Dispatch<SetStateAction<string>>;
   setLastPauseTimestamp: Dispatch<SetStateAction<string>>;
   setDisplayTime: Dispatch<SetStateAction<number>>;
+  timerReset: () => void;
+  // totalPausedMs: number; // 타이머를 '일시정지' 해두었던 시간의 합
+  // setTotalPausedMs: Dispatch<SetStateAction<number>>;
 }
 // 초기값에 타입을 부여 (null을 허용하되 명시적으로)
 export const TimerContext = createContext<TimerContextType | undefined>(
@@ -31,7 +32,6 @@ export const TimerContext = createContext<TimerContextType | undefined>(
 );
 
 export function TimerProvider({ children }: { children: ReactNode }) {
-  // const [startTime, setStartTime] = useState('');
   const [timerId, setTimerId] = useState('');
   const [totalActiveMs, setTotalActiveMs] = useState(0);
   // const [totalPausedMs, setTotalPausedMs] = useState(0);
@@ -40,23 +40,30 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [isRunning, setIsRunning] = useState(false);
   const [displayTime, setDisplayTime] = useState(0);
 
+  const timerReset = () => {
+    setTimerId('');
+    setTotalActiveMs(0);
+    setDisplayTime(0);
+    setIsRunning(false);
+    setLastStartTimestamp('');
+  };
+
   const value = {
     timerId,
-    // startTime,
     totalActiveMs,
-    // totalPausedMs,
     isRunning,
     lastStartTimestamp,
     lastPauseTimestamp,
     setTimerId,
     displayTime,
-    // setStartTime,
     setTotalActiveMs,
-    // setTotalPausedMs,
     setIsRunning,
     setLastStartTimestamp,
     setLastPauseTimestamp,
     setDisplayTime,
+    timerReset,
+    // totalPausedMs,
+    // setTotalPausedMs,
   };
 
   useEffect(() => {
