@@ -1,7 +1,4 @@
-import { requestRefreshToken } from '@/services/login';
-import { NextRequest, NextResponse } from 'next/server';
-
-// app/api/auth/refresh/route.ts
+// app/api/auth/refresh/route.ts 수정안
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const redirectPath = searchParams.get('redirect') || '/timer'; // 갱신 후 돌아갈 경로

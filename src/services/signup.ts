@@ -1,4 +1,5 @@
 // services/signup.ts
+import { API_BASE_URL } from '@/config/env';
 import { API } from '@/constants/endpoints';
 import { fetcher } from '@/lib/fetcher';
 import {
@@ -9,8 +10,10 @@ import {
 
 /** 이메일 중복확인 */
 export const checkEmail = (email: string): Promise<SignUpCheckResponse> => {
+  console.log(email);
+
   return fetcher(
-    `${API.SIGNUP.CHECK_EMAIL_DUPLICATE}${encodeURIComponent(email)}`
+    `${API_BASE_URL}${API.SIGNUP.CHECK_EMAIL_DUPLICATE}${encodeURIComponent(email)}`
   );
 };
 
@@ -19,14 +22,14 @@ export const checkNickname = (
   nickname: string
 ): Promise<SignUpCheckResponse> => {
   return fetcher(
-    `${API.SIGNUP.CHECK_NICKNAME_DUPLICATE}${encodeURIComponent(nickname)}`
+    `${API_BASE_URL}${API.SIGNUP.CHECK_NICKNAME_DUPLICATE}${encodeURIComponent(nickname)}`
   );
 };
 
 /** 회원가입 */
 export const signup = (data: SignupRequest): Promise<SignupResponse> => {
-  return fetcher(`${API.SIGNUP.SIGNUP}`, {
+  return fetcher(`${API_BASE_URL}${API.SIGNUP.SIGNUP}`, {
     method: 'POST',
-    body: data,
+    body: JSON.stringify(data),
   });
 };

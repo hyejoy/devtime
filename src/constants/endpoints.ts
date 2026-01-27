@@ -10,6 +10,7 @@ export const API = {
     SIGNUP: '/api/signup',
   },
   TIMER: {
-    GET_ACTIVE_TIMER: '/api/timers',
+    TIMERS: '/api/timers',
+    PUT_TIMERS: '/api/timers/',
   },
 } as const;
