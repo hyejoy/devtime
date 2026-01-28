@@ -2,7 +2,6 @@
   font-family: "digitalNumber", sans-serif;
 }
 .title {
-  background-color: palegreen;
   display: flex;
   justify-content: center;
   font-weight: 700;
@@ -13,18 +12,21 @@
 }
 
 .test {
-  background-color: #0a24ff;
   white-space: nowrap;
 }
 
 .timerContainer {
-  background-color: brown;
   display: flex;
   justify-content: center;
   height: auto;
 }
 
 .timeField {
+  background: linear-gradient(
+    135deg,
+    rgba(76, 121, 255, 0) 0%,
+    rgba(76, 121, 255, 0.2) 100%
+  );
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,7 +42,6 @@
   display: flex;
   justify-content: center;
   min-width: 10rem;
-  background-color: yellow;
   gap: 1rem;
   height: auto;
 }
@@ -48,7 +49,6 @@
 .digit {
   width: 4rem; /* 고정 */
   height: 10rem;
-  background-color: darkorchid;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -56,15 +56,14 @@
   font-size: 10rem; /* 160px */
   line-height: 1; /* 200px */
   letter-spacing: -0.25rem; /* -4px */
-  color: #000;
-
+  color: var(--color-brand-primary);
   border-radius: 0.5rem; /* 8px */
 }
 
 .unit {
   margin: 1.5rem 0rem;
   font-family: "pretendard", sans-serif;
-  background-color: beige;
+  color: var(--color-brand-primary);
   font-weight: 600;
   font-size: 14px;
   letter-spacing: 0.2em;
@@ -74,15 +73,14 @@
 .dot {
   box-sizing: border-box;
   padding: 1rem 2rem;
-  background-color: green;
   font-family: "pretendard", sans-serif;
   font-size: 10rem; /* 160px */
   line-height: 1; /* 200px */
+  color: var(--color-brand-primary);
 }
 
 .buttonContainer {
   display: flex;
-  background-color: aquamarine;
   padding-top: clamp(4rem, 10vh, 7rem);
 }
 
@@ -91,7 +89,6 @@
   display: flex;
   flex: 3;
   justify-content: flex-end;
-  background-color: chocolate;
   width: 24rem;
 }
 .playButtonField {
@@ -117,7 +114,6 @@
 }
 
 .iconContainer {
-  background-color: deeppink;
   flex: 1;
   display: flex;
   justify-content: center;

@@ -5,12 +5,10 @@
   min-height: 100dvh;
   margin: 0 auto;
   width: 80vw;
-  background-color: pink;
 }
 
 .headerField {
   display: flex;
-  background-color: aqua;
 }
 
 .logoField {
@@ -21,7 +19,6 @@
 .linkField {
   display: flex;
   flex: 1;
-  background-color: antiquewhite;
   gap: 2.3rem;
   align-items: center;
   font-weight: 600;
@@ -57,15 +54,11 @@
   color: var(--color-primary-900);
 }
 
-.childrenContainer {
-  background-color: blueviolet;
-}
-
 .childrenField {
   display: flex;
   justify-content: center;
   box-sizing: border-box;
   padding-top: clamp(5rem, 10vh, 7rem);
   padding-bottom: clamp(5rem, 10vh, 7rem);
-  background-color: darkolivegreen;
+  /* background-color: darkolivegreen; */
 }
