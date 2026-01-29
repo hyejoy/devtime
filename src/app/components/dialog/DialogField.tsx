@@ -3,9 +3,9 @@ import classNames from 'classnames/bind';
 import { JSX, ReactNode, useEffect } from 'react';
 import Button from './Button';
 import Content from './Content';
-import { useDialog } from './dialogContext';
 import styles from './DialogField.module.css';
 import Title from './Title';
+import { useIsModalOpen } from '@/store/modal';
 const cx = classNames.bind(styles);
 
 interface DialogFieldComponent {
@@ -16,8 +16,8 @@ interface DialogFieldComponent {
 }
 // Root 컴포넌트
 const DialogField = (({ children }: { children: ReactNode }) => {
-  const dialog = useDialog();
-  if (!dialog || !dialog.modalState) return null;
+  const isModalOpen = useIsModalOpen();
+  if (!isModalOpen) return null;
 
   // 모달 열릴때 body 스크롤 잠그기
   useEffect(() => {

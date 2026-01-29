@@ -2,7 +2,6 @@ import AuthSesseionProvider from '@/context/AuthContext';
 import '@/styles/tokens/colors.css';
 import { ReactNode } from 'react';
 import { pretendard } from '../../public/fonts/font';
-import { DialogProvider } from './components/dialog/dialogContext';
 import './globals.css';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -11,9 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         style={{ fontFamily: 'var(--font-pretendard)', position: 'relative' }}
       >
-        <AuthSesseionProvider>
-          <DialogProvider>{children}</DialogProvider>
-        </AuthSesseionProvider>
+        <AuthSesseionProvider>{children}</AuthSesseionProvider>
       </body>
     </html>
   );

@@ -1,15 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useDialog } from '../components/dialog/dialogContext';
 
 export default function Page() {
-  const dialog = useDialog();
-
-  const onClick = () => {
-    dialog?.openModal();
-  };
-
   return (
     <>
       <h1>Main Page</h1>

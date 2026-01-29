@@ -1,5 +1,4 @@
 'use client';
-import { useDialog } from '@/app/components/dialog/dialogContext';
 import LoginDialog, {
   LoginDialogType,
 } from '@/app/components/login/LoginDialog';
@@ -8,9 +7,10 @@ import Logo from '@/app/components/ui/Logo';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
 import TextLabel from '@/app/components/ui/TextLabel';
 import TextLinkRow from '@/app/components/ui/TextLinkRow';
+import { API } from '@/constants/endpoints';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import { login } from '@/services/login';
+import { useIsModalOpen, useModalActions } from '@/store/modal';
 import {
   LoginField,
   LoginHelperMessage,
@@ -19,18 +19,16 @@ import {
 } from '@/types/login';
 import classNames from 'classnames/bind';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
-import { API } from '@/constants/endpoints';
 
 const cx = classNames.bind(styles);
 
 //  # 헤더 없고 전체 화면 사용하는 페이지
 export default function Page() {
-  /** hooks */
-  const dialog = useDialog();
-  const router = useRouter();
+  /** zustand */
+  const isModalOpen = useIsModalOpen();
+  const { openModal, closeModal } = useModalActions();
 
   /** state */
   const [values, setValues] = useState<LoginInput>({
@@ -135,7 +133,7 @@ export default function Page() {
       if (data.isDuplicateLogin) {
         setNextRoute('/timer');
         setDialogType('duplicate-login');
-        dialog?.openModal();
+        openModal();
         return;
       }
       if (data.isFirstLogin) {
@@ -149,7 +147,7 @@ export default function Page() {
     } catch (err) {
       console.error(err);
       setDialogType('login-failed');
-      dialog?.openModal();
+      openModal();
     }
   }
 
@@ -193,7 +191,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      {dialog?.modalState && (
+      {isModalOpen && (
         <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
       )}
     </div>
