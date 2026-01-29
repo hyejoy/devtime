@@ -12,8 +12,8 @@ export const API = {
     SIGNUP: '/api/signup',
   },
   TIMER: {
-    TIMERS: `${PROXY}/api/timers`, // GET, POST용
-    ITEM: (id: string) => `${PROXY}/api/timers/${id}`, // PUT, DELETE용
-    STOP: (id: string) => `${PROXY}/api/timers/${id}/stop`, // STOP용
+    TIMERS: `${PROXY}/timers`, // GET, POST용
+    ITEM: (id: string) => `${PROXY}/timers/${id}`, // PUT, DELETE용
+    STOP: (id: string) => `${PROXY}/timers/${id}/stop`, // STOP용
   },
 } as const;

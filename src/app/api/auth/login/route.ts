@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
 
   const isProd = process.env.NODE_ENV === 'production';
 
+  // const backendRes = await fetch(`${API_BASE_URL}${API.AUTH.LOGIN}`, {
   const backendRes = await fetch(`${API_BASE_URL}${API.AUTH.LOGIN}`, {
     method: 'POST',
     headers: {
@@ -17,6 +18,8 @@ export async function POST(req: NextRequest) {
   });
 
   const data = await backendRes.json();
+
+  console.log('🧡 res', data);
 
   if (!backendRes.ok) {
     return NextResponse.json(data, { status: backendRes.status });

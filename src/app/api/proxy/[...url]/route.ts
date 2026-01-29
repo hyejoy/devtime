@@ -13,10 +13,8 @@ async function handleRequest(
   const targetPath = url.join('/');
   const query = req.nextUrl.search;
 
-  const externalApiUrl = `${API_BASE_URL}/${targetPath}${query}`;
-  console.log('accessToken>>>>>>>>', accessToken);
-
-  console.log('externalApiUrl>>>>>>>>', externalApiUrl);
+  const externalApiUrl = `${API_BASE_URL}/api/${targetPath}${query}`;
+  console.log('Next.js → Server 요청 경로 : ', externalApiUrl);
 
   // 요청 본문(body)_ GET/DELETE 제외
   let body = null;
@@ -37,8 +35,6 @@ async function handleRequest(
       body,
       cache: 'no-store',
     });
-
-    console.log('🧡res :', res);
 
     // 401 발생시 리프레시 로직으로 유도
     if (res.status === 401) {

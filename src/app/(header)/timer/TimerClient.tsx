@@ -1,7 +1,7 @@
 'use client';
 
 import { ActiveTimerResponse, StartTimerResponse } from '@/types/api';
-import { SplitTime, timerSummary } from '@/types/timer';
+import { timerSummary } from '@/types/timer';
 import classNames from 'classnames/bind';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -18,6 +18,7 @@ import {
 } from '@/store/timer';
 
 const cx = classNames.bind(styles);
+
 export default function TimerClient() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,6 @@ export default function TimerClient() {
 
   const timerId = useTimerId();
   const lastStartTimestamp = useLastStartTimestamp();
-  const totalActiveSeconds = useTotalSeconds();
   const isRunning = useIsRunning();
 
   const {
@@ -54,22 +54,122 @@ export default function TimerClient() {
 
   const { hours, mins, secs } = useDisplayTime();
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (isRunning) {
-      //  1초마다 스토어의 tick 함수를 실행
-      intervalId = setInterval(() => {
-        tick();
-      }, 1000);
+  // --- 헬퍼 함수 및 공통 로직 ---
+
+  // 시간을 갱신하고 서버에 동기화하는 핵심 함수
+  const handleSyncWithServer = async () => {
+    if (!timerId || !lastStartTimestamp) return null;
+
+    const split = createSplitTime(lastStartTimestamp);
+    const now = new Date().toISOString();
+
+    const newSplitTimes = [
+      ...(initTimer?.splitTimes ?? []),
+      {
+        date: now,
+        timeSpent: split.timeSpent,
+      },
+    ];
+
+    try {
+      const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ splitTimes: newSplitTimes }),
+      });
+
+      if (!res.ok) throw new Error('동기화 실패');
+
+      const data: ActiveTimerResponse = await res.json();
+      setInitTimer(data);
+      setLastStartTimestamp(now); // 기준점 갱신
+      return data;
+    } catch (err) {
+      console.error('서버 동기화 중 오류:', err);
+      return null;
+    }
+  };
+
+  const reSetDatas = () => {
+    setDailyGoal(undefined);
+    setInitTimer(undefined);
+    timerReset();
+    setLoading(false);
+  };
+
+  // --- 핸들러 함수 ---
+
+  const onStartTimer = async () => {
+    // 1. 처음 생성하는 경우
+    if (!lastStartTimestamp) {
+      const taskList = timerSummary?.tasks.map((t) => t.content) ?? [];
+      try {
+        const res = await fetch(`${API.TIMER.TIMERS}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ todayGoal: dailyGoal, tasks: taskList }),
+        });
+        if (!res.ok) throw new Error('타이머 시작 실패');
+
+        const next: StartTimerResponse = await res.json();
+        setTimerId(next.timerId);
+        setLastStartTimestamp(new Date().toISOString());
+        setIsRunning(true);
+      } catch (err) {
+        console.error(err);
+      }
+      return;
     }
 
-    // 클린업 함수: 컴포넌트가 사라지거나(Unmount), isRunning이 바뀌면 인터벌 제거
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [isRunning, tick]); // isRunning이 바뀔 때마다 실행 여부 결정
+    // 2. 일시정지 후 다시 시작하는 경우
+    if (timerId) {
+      setLastStartTimestamp(new Date().toISOString());
+      setIsRunning(true);
+    }
+  };
 
-  // 활성화된 타이머 가져오기
+  const onPauseTimer = async () => {
+    if (!timerId) return;
+    setIsRunning(false);
+    await handleSyncWithServer();
+  };
+
+  const onFinishTimer = async () => {
+    if (!timerSummary || timerSummary.review.length < 15) {
+      alert('회고를 15자 이상 작성해주세요!');
+      return;
+    }
+
+    // 종료 전 마지막 세션 시간을 서버에 한 번 더 보내서 완벽하게 맞춤
+    const updatedData = await handleSyncWithServer();
+    const finalSplitTimes = updatedData?.splitTimes ?? initTimer?.splitTimes;
+
+    try {
+      const res = await fetch(`${API.TIMER.STOP(timerId!)}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          splitTimes: finalSplitTimes,
+          review: timerSummary.review,
+          tasks: timerSummary.tasks,
+        }),
+      });
+
+      if (res.ok) {
+        setLoading(true);
+        reSetDatas();
+      }
+    } catch (err) {
+      console.error('타이머 종료 중 오류:', err);
+    }
+  };
+
+  // --- Effects ---
+
+  // 초기 활성 타이머 로드
   useEffect(() => {
     const init = async () => {
       try {
@@ -77,36 +177,19 @@ export default function TimerClient() {
           credentials: 'include',
         });
         const data: ActiveTimerResponse = await res.json();
-        console.log('활성화된 타이머 가져오기>', data);
-        setInitTimer(data);
-        if (!data.error) {
-          console.log('활성화된 타이머가 있어요');
 
-          // 1. 기존 splitTimes의 모든 timeSpent 합산 (초 단위)
+        if (res.ok && !data.error) {
+          setInitTimer(data);
           const accumulatedTime = data.splitTimes.reduce(
-            (acc, split) => acc + split.timeSpent,
+            (acc, s) => acc + s.timeSpent,
             0
           );
-
-          console.log(
-            '기존 splitTimes의 모든 timeSpent 합산 (초 단위) : ',
-            accumulatedTime
-          );
-
-          // 2. 마지막 업데이트 이후 현재까지 흐른 시간 계산
           const currentDiff = createSplitTime(data.lastUpdateTime).timeSpent;
 
-          console.log(
-            '마지막 업데이트 이후 현재까지 흐른 시간 계산 (초):',
-            currentDiff % 60
-          );
-          console.log('📝총 공부 시간 : ', accumulatedTime + currentDiff);
-
-          // 3. 타이머 상태 설정 (기존 누적 + 현재 차이)
           setTimerId(data.timerId);
           setIsRunning(true);
           setLastStartTimestamp(data.lastUpdateTime);
-          setTotalActiveSeconds(accumulatedTime + currentDiff); // 합침
+          setTotalActiveSeconds(accumulatedTime + currentDiff);
         }
       } catch (err) {
         router.replace('/login');
@@ -114,150 +197,28 @@ export default function TimerClient() {
         setLoading(false);
       }
     };
-
     init();
   }, []);
 
-  // ▶️ 111 활성화 타이머 하나도 없을때 새로운 타이머 시작
-  const onStartTimer = async () => {
-    console.log('재생 버튼 클릭!');
+  // 10분마다 자동 저장 (Polling)
+  useEffect(() => {
+    if (!timerId || !isRunning) return;
 
-    if (!lastStartTimestamp) {
-      // summary의 content로 구성된 배열
-      const taskList = Object.values(timerSummary!.tasks).map(
-        (task) => task.content
-      );
+    const intervalId = setInterval(async () => {
+      console.log('10분 자동 저장 실행 ✅');
+      await handleSyncWithServer();
+    }, 600000);
 
-      const res = await fetch(`${API.TIMER.TIMERS}`, {
-        method: 'POST',
-        credentials: 'include',
-        body: JSON.stringify({
-          todayGoal: dailyGoal,
-          tasks: taskList,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error('타이머 시작 실패');
-      }
+    return () => clearInterval(intervalId);
+    // lastStartTimestamp를 의존성에서 빼야 인터벌이 10분을 온전히 채우고 실행됩니다.
+  }, [timerId, isRunning, initTimer]);
 
-      const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        // 서버가 body 없이 성공 응답 준 경우
-        console.log('서버가 body없이 성공 응답 줌');
-
-        return;
-      }
-      const next: StartTimerResponse = await res.json();
-      console.log('활성화 타이머 하나도 없을때 새로운 타이머 시작>', next);
-      const now = new Date().toISOString();
-      setTimerId(next.timerId);
-      setLastStartTimestamp(now);
-      setIsRunning(true);
-      return next;
-    }
-
-    // 활성화 타이머 있을때 타이머 시작
-    if (timerId) {
-      onReStartTimer();
-    }
-  };
-
-  // ▶️ 일시정지 후 다시 재생
-  const onReStartTimer = async () => {
-    console.log('일시 정지 후 다시 재생');
-
-    if (!timerId) return;
-    const now = new Date().toISOString();
-    setLastStartTimestamp(now); // 기준점을 지금으로 초기화
-    setIsRunning(true);
-  };
-
-  // ⏸️ 타이머 일시정지
-  const onPauseTimer = async () => {
-    if (!timerId) return;
-    const split = createSplitTime(lastStartTimestamp!);
-    const now = new Date().toISOString();
-
-    const totalSeconds = split.timeSpent; // 예: 125초
-    const mins = Math.floor(totalSeconds / 60); // 2분
-    const secs = totalSeconds % 60;
-    console.log(' 이번 세션 재생 시간:', `${mins}분${secs}초`);
-
-    const totalSeconds3 = totalActiveSeconds; // 예: 125초
-    const mins3 = Math.floor(totalSeconds3 / 60); // 2분
-    const secs3 = totalSeconds3 % 60;
-    console.log('TIMER STORE에 저장된 총 재생 시간', `${mins3}분${secs3}초`);
-
-    //test
-    setLastStartTimestamp(now);
-    setIsRunning(false);
-
-    const splitTimes = [
-      ...(initTimer?.splitTimes ?? []), // initTimer나 splitTimes가 없으면 빈배열
-      {
-        date: new Date().toISOString(),
-        timeSpent: split.timeSpent,
-      },
-    ];
-
-    // API 요청 (현재 세션의 split 정보 전송)
-    const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: JSON.stringify({
-        splitTimes,
-      }),
-    });
-
-    if (!res.ok) return;
-    const data = await res.json(); // 서버에서 업데이트된 전체 타이머 객체 반환
-    setInitTimer(data);
-    console.log('⏸️ 서버에서 업데이트된 전체 타이머 객체 : ', data);
-  };
-
-  // 타이머 종료
-  const onFinishTimer = async () => {
-    if (timerSummary!.review.length < 15) {
-      alert('회고를 15장 이상 작성해주세요!');
-      return;
-    }
-
-    console.log('서버로 보낼 총 splitTimes :: ', initTimer?.splitTimes);
-
-    const res = await fetch(`${API.TIMER.STOP(timerId)}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        splitTimes: initTimer?.splitTimes, //  undefined 대신 배열 전달
-        review: timerSummary?.review, // 15자 이상 확인됨
-        tasks: timerSummary?.tasks ?? [], // [{content, isCompleted}] 형태
-      }),
-    });
-
-    const responseData = await res.json();
-    console.log('종료된 타이머 정보_RES : ', responseData);
-
-    if (res.ok) {
-      setLoading(true);
-      reSetDatas();
-    } else {
-      // 여기서 백엔드가 보낸 진짜 에러 메시지 확인
-      console.error('백엔드 에러 상세:', responseData);
-    }
-    if (!res.ok) return;
-  };
-
-  // TODO 주석 풀기
-  const reSetDatas = () => {
-    // setTimerSummary(undefined);
-    setDailyGoal(undefined);
-    setInitTimer(undefined);
-
-    timerReset(); // timer store 값 초기화
-
-    setLoading(false);
-  };
+  // 1초마다 UI 갱신 (Tick)
+  useEffect(() => {
+    if (!isRunning) return;
+    const intervalId = setInterval(() => tick(), 1000);
+    return () => clearInterval(intervalId);
+  }, [isRunning, tick]);
 
   if (loading) return <div>로딩중...</div>;
 
@@ -268,61 +229,31 @@ export default function TimerClient() {
       </div>
 
       <div className={cx('timerContainer')}>
-        <div className={cx('timeField')}>
-          <div className={cx('digitField')}>
-            <div className={cx('digit')}>{hours[0]}</div>
-            <div className={cx('digit')}>{hours[1]}</div>
-          </div>
-          <div className={cx('unit')}>HOURS</div>
-        </div>
-
+        <TimeDisplay unit="HOURS" value={hours} />
         <div className={cx('dot')}>:</div>
-
-        <div className={cx('timeField')}>
-          <div className={cx('digitField')}>
-            <div className={cx('digit')}>{mins[0]}</div>
-            <div className={cx('digit')}>{mins[1]}</div>
-          </div>
-          <div className={cx('unit')}>MINUTES</div>
-        </div>
-
+        <TimeDisplay unit="MINUTES" value={mins} />
         <div className={cx('dot')}>:</div>
-
-        <div className={cx('timeField')}>
-          <div className={cx('digitField')}>
-            <div className={cx('digit')}>{secs[0]}</div>
-            <div className={cx('digit')}>{secs[1]}</div>
-          </div>
-          <div className={cx('unit')}>SECONDS</div>
-        </div>
+        <TimeDisplay unit="SECONDS" value={secs} />
       </div>
 
       <div className={cx('buttonContainer')}>
+        {/* 1. 메인 컨트롤 버튼 영역 (재생, 일시정지, 종료) */}
         <div className={cx('buttonWrap')}>
           <div className={cx('playButtonField')}>
-            <Image
+            <TimerButton
+              type="start"
+              active={!isRunning}
               onClick={onStartTimer}
-              className={cx('iconField')}
-              src={`/images/timer/icon-start-${isRunning ? 'disabled' : 'active'}.png`}
-              alt="재생"
-              width={80}
-              height={80}
             />
-            <Image
+            <TimerButton
+              type="pause"
+              active={isRunning}
               onClick={onPauseTimer}
-              className={cx('iconField')}
-              src={`/images/timer/icon-pause-${isRunning ? 'active' : 'disabled'}.png`}
-              alt="일시정지"
-              width={80}
-              height={80}
             />
-            <Image
+            <TimerButton
+              type="finish"
+              active={!!lastStartTimestamp}
               onClick={onFinishTimer}
-              className={cx('iconField')}
-              src={`/images/timer/icon-finish-${lastStartTimestamp ? 'active' : 'disabled'}.png`}
-              alt="정지"
-              width={80}
-              height={80}
             />
           </div>
         </div>
@@ -342,10 +273,46 @@ export default function TimerClient() {
               alt="새로고침"
               width={55}
               height={55}
+              onClick={() => window.location.reload()} // 새로고침 기능 추가
             />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// 가독성을 위한 간단한 서브 컴포넌트들
+function TimeDisplay({ unit, value }: { unit: string; value: string }) {
+  return (
+    <div className={cx('timeField')}>
+      <div className={cx('digitField')}>
+        <div className={cx('digit')}>{value[0]}</div>
+        <div className={cx('digit')}>{value[1]}</div>
+      </div>
+      <div className={cx('unit')}>{unit}</div>
+    </div>
+  );
+}
+
+function TimerButton({
+  type,
+  active,
+  onClick,
+}: {
+  type: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const state = active ? 'active' : 'disabled';
+  return (
+    <Image
+      onClick={active ? onClick : undefined}
+      className={cx('iconField', { disabled: !active })}
+      src={`/images/timer/icon-${type}-${state}.png`}
+      alt={type}
+      width={80}
+      height={80}
+    />
   );
 }
