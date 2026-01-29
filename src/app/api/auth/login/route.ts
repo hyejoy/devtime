@@ -6,7 +6,7 @@ import { API } from '@/constants/endpoints';
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = process.env.NODE_ENV === 'development';
 
   // const backendRes = await fetch(`${API_BASE_URL}${API.AUTH.LOGIN}`, {
   const backendRes = await fetch(`${API_BASE_URL}${API.AUTH.LOGIN}`, {
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
 
   const data = await backendRes.json();
 
+  console.log('🩵 req', body);
   console.log('🧡 res', data);
 
   if (!backendRes.ok) {
@@ -48,10 +49,10 @@ export async function POST(req: NextRequest) {
   const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 10;
 
   const cookieOptions = {
+    path: '/',
     httpOnly: true,
     secure: isProd,
     sameSite: 'lax' as const,
-    path: '/',
   };
 
   // 3. 쿠키 굽기

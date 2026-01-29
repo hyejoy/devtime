@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
   const refreshToken = cookieStore.get('refreshToken')?.value;
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = process.env.NODE_ENV === 'development';
 
   // 쿠키 옵션 공통 설정
   const cookieOptions = {

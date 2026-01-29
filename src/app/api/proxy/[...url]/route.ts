@@ -14,13 +14,14 @@ async function handleRequest(
   const query = req.nextUrl.search;
 
   const externalApiUrl = `${API_BASE_URL}/api/${targetPath}${query}`;
-  console.log('Next.js → Server 요청 경로 : ', externalApiUrl);
+  console.log('🧭 Next.js → Server 요청 경로 : ', externalApiUrl);
 
   // 요청 본문(body)_ GET/DELETE 제외
   let body = null;
   if (!['GET', 'HEAD'].includes(req.method)) {
     try {
       body = await req.text();
+      console.log('💚 req : ', body);
     } catch (e) {
       body = null;
     }
@@ -58,6 +59,7 @@ async function handleRequest(
 
     // 2. 성공 시
     const data = await res.json();
+    console.log('🧡res : ', data);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Proxy Error:', error); // 디버깅용

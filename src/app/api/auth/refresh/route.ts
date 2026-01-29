@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const redirectPath = searchParams.get('redirect') || '/timer';
   const refreshToken = req.cookies.get('refreshToken')?.value;
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = process.env.NODE_ENV === 'development';
 
   // 쿠키를 삭제하고 로그인 페이지로 보내는 공통 함수
   const handleAuthFailure = () => {

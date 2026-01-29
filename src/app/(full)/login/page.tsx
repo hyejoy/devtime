@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
+import { API } from '@/constants/endpoints';
 
 const cx = classNames.bind(styles);
 
@@ -116,7 +117,7 @@ export default function Page() {
 
   async function onClickLoginButton() {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API.AUTH.LOGIN}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,24 +128,26 @@ export default function Page() {
         }),
         credentials: 'include',
       });
-
-      if (!res.ok) throw new Error('login failed');
-
+      // 1. 에러 응답 처리 (백엔드 에러 메시지를 보여주기 위해 data 추출을 먼저 합니다)
       const data = await res.json();
-
+      if (!res.ok) throw new Error(data.message || 'login failed');
+      // 2. 로그인 성공 처리
       if (data.isDuplicateLogin) {
         setNextRoute('/timer');
         setDialogType('duplicate-login');
         dialog?.openModal();
         return;
       }
-
       if (data.isFirstLogin) {
-        router.replace('/profile/setup');
+        // 첫 로그인 시 프로필 설정 페이지로 이동
+        window.location.href = '/profile/setup';
       } else {
-        router.replace('/timer');
+        // 🧡 핵심: router.replace 대신 window.location.href 사용
+        // 브라우저가 쿠키를 확실히 저장하고 미들웨어가 이를 인식하도록 새로고침 방식으로 이동합니다.
+        window.location.href = '/timer';
       }
     } catch (err) {
+      console.error(err);
       setDialogType('login-failed');
       dialog?.openModal();
     }

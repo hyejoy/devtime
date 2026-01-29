@@ -4,6 +4,7 @@ import classNames from 'classnames/bind';
 import Logo from '../components/ui/Logo';
 import Image from 'next/image';
 import Link from 'next/link';
+import Logout from '../components/logout/Logout';
 const cx = classNames.bind(styles);
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -29,6 +30,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             height={40}
           />
           <div className={cx('profileNickName')}>닉네임입니다</div>
+          <Logout />
         </div>
       </div>
       <div className={cx('childrenContainer')}>
