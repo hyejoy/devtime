@@ -1,21 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useDialog } from '../components/dialog/dialogContext';
 
 export default function Page() {
-  const dialog = useDialog();
-
-  const onClick = () => {
-    dialog?.openModal();
-  };
-
   return (
     <>
       <h1>Main Page</h1>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <Link href="/signup">회원가입</Link>
         <Link href="/login">로그인</Link>
+        <Link href="/timer">타이머</Link>
       </div>
       {/* <DialogField>
         <DialogField.Title

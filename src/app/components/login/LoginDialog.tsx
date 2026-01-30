@@ -1,7 +1,7 @@
 'use client';
 
+import { useModalActions } from '@/store/modal';
 import { useRouter } from 'next/navigation';
-import { useDialog } from '../dialog/dialogContext';
 import DialogField from '../dialog/DialogField';
 import Button from '../ui/Button';
 
@@ -27,10 +27,10 @@ interface Props {
 }
 
 export default function LoginDialog({ dialogType, nextRoute }: Props) {
-  const dialog = useDialog();
+  const { closeModal } = useModalActions();
   const router = useRouter();
   const handleConfirm = () => {
-    dialog?.closeModal();
+    closeModal();
     if (nextRoute) {
       router.replace(nextRoute);
     }

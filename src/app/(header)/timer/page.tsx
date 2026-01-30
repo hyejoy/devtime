@@ -1,7 +1,10 @@
+// /app/timer/page.tsx
+import TimerClient from './TimerClient';
+
 export default function Page() {
   return (
-    <>
-      <h1>TimerPage Component</h1>
-    </>
+    <main>
+      <TimerClient />
+    </main>
   );
 }

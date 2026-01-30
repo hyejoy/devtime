@@ -1,14 +1,8 @@
+import AuthSesseionProvider from '@/context/AuthContext';
 import '@/styles/tokens/colors.css';
-import localFont from 'next/font/local';
 import { ReactNode } from 'react';
-import { DialogProvider } from './components/dialog/dialogContext';
+import { pretendard } from '../../public/fonts/font';
 import './globals.css';
-
-const pretendard = localFont({
-  src: '../../public/fonts/PretendardVariable.woff2',
-  variable: '--font-pretendard',
-  display: 'swap',
-});
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -16,7 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         style={{ fontFamily: 'var(--font-pretendard)', position: 'relative' }}
       >
-        <DialogProvider>{children}</DialogProvider>
+        <AuthSesseionProvider>{children}</AuthSesseionProvider>
       </body>
     </html>
   );

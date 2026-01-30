@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Page() {
   return (
     <>
@@ -9,6 +11,7 @@ export default function Page() {
         설정을 건너뛰기 하더라도) 두 번째 로그인부터는 바로 타이머 페이지로
         이동한다.
       </h1>
+      <Link href={'/timer'}>타이머</Link>
     </>
   );
 }
