@@ -5,7 +5,7 @@ import Button from './Button';
 import Content from './Content';
 import styles from './DialogField.module.css';
 import Title from './Title';
-import { useIsModalOpen } from '@/store/modal';
+import { useDialogType } from '@/store/dialog';
 const cx = classNames.bind(styles);
 
 interface DialogFieldComponent {
@@ -16,9 +16,9 @@ interface DialogFieldComponent {
 }
 // Root 컴포넌트
 const DialogField = (({ children }: { children: ReactNode }) => {
-  const isModalOpen = useIsModalOpen();
-  if (!isModalOpen) return null;
+  // if (!isModalOpen) return null;
 
+  const dialogType = useDialogType();
   // 모달 열릴때 body 스크롤 잠그기
   useEffect(() => {
     const originalOverflow = window.getComputedStyle(document.body).overflow;
@@ -30,7 +30,12 @@ const DialogField = (({ children }: { children: ReactNode }) => {
 
   return (
     <div className={cx('overlay')}>
-      <div className={cx('dialogContainer')}>
+      <div
+        className={cx(
+          'dialogContainer',
+          `${dialogType === 'alert' ? 'alertDialog' : 'customDialog'}`
+        )}
+      >
         <div className={cx('childrenContainer')}>{children}</div>
       </div>
     </div>

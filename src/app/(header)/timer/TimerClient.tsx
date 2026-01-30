@@ -1,12 +1,6 @@
 'use client';
 
-import { ActiveTimerResponse, StartTimerResponse } from '@/types/api';
-import { timerSummary } from '@/types/timer';
-import classNames from 'classnames/bind';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import styles from './TimerClient.module.css';
+import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import { API } from '@/constants/endpoints';
 import {
   useDisplayTime,
@@ -14,26 +8,25 @@ import {
   useLastStartTimestamp,
   useTimerActions,
   useTimerId,
-  useTotalSeconds,
 } from '@/store/timer';
+import { ActiveTimerResponse, StartTimerResponse } from '@/types/api';
+import { timerSummary } from '@/types/timer';
+import classNames from 'classnames/bind';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import TimerButton from './../../components/timer/TimerButton';
+import styles from './TimerClient.module.css';
+import TimerDialog from '@/app/components/dialog/timer/TimerDialog';
+import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
+import { useTaskReview, useTasks, useTaskTitle } from '@/store/task';
 
 const cx = classNames.bind(styles);
 
 export default function TimerClient() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [dailyGoal, setDailyGoal] = useState<string | undefined>(
-    '10시간 채워봅시다!✌️'
-  );
-  const [timerSummary, setTimerSummary] = useState<timerSummary | undefined>({
-    review:
-      '오늘 10시간 채우기 목표 달성 완료! 정말 보람찬 하루였어요.🐤🐤🐤!!',
-    tasks: [
-      { content: 'Next.js 공부하기', isCompleted: true },
-      { content: '리엑트 공부하기', isCompleted: true },
-      { content: 'devTime 구현하기', isCompleted: false },
-    ],
-  });
+
   const [initTimer, setInitTimer] = useState<ActiveTimerResponse | undefined>(
     undefined
   );
@@ -41,6 +34,8 @@ export default function TimerClient() {
   const timerId = useTimerId();
   const lastStartTimestamp = useLastStartTimestamp();
   const isRunning = useIsRunning();
+  const review = useTaskReview();
+  const tasks = useTasks();
 
   const {
     setTimerId,
@@ -50,9 +45,15 @@ export default function TimerClient() {
     tick,
     timerReset,
     createSplitTime,
+    setIsDone,
+    getSplitTimesForServer,
   } = useTimerActions();
 
+  const isDialogOpen = useIsDialogOpen();
+  const { openDialog, closeDialog, changeType } = useDialogActions();
+
   const { hours, mins, secs } = useDisplayTime();
+  const title = useTaskTitle();
 
   // --- 헬퍼 함수 및 공통 로직 ---
 
@@ -91,25 +92,23 @@ export default function TimerClient() {
     }
   };
 
-  const reSetDatas = () => {
-    setDailyGoal(undefined);
-    setInitTimer(undefined);
-    timerReset();
-    setLoading(false);
-  };
-
   // --- 핸들러 함수 ---
 
+  const onStart = () => {
+    console.log(isDialogOpen);
+
+    openDialog();
+  };
   const onStartTimer = async () => {
     // 1. 처음 생성하는 경우
     if (!lastStartTimestamp) {
-      const taskList = timerSummary?.tasks.map((t) => t.content) ?? [];
+      const taskList = tasks.map((t) => t.content) ?? [];
       try {
         const res = await fetch(`${API.TIMER.TIMERS}`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ todayGoal: dailyGoal, tasks: taskList }),
+          body: JSON.stringify({ todayGoal: title, tasks: taskList }),
         });
         if (!res.ok) throw new Error('타이머 시작 실패');
 
@@ -117,6 +116,7 @@ export default function TimerClient() {
         setTimerId(next.timerId);
         setLastStartTimestamp(new Date().toISOString());
         setIsRunning(true);
+        closeDialog();
       } catch (err) {
         console.error(err);
       }
@@ -136,8 +136,12 @@ export default function TimerClient() {
     await handleSyncWithServer();
   };
 
+  const onFinish = () => {
+    setIsDone(true);
+  };
+
   const onFinishTimer = async () => {
-    if (!timerSummary || timerSummary.review.length < 15) {
+    if (!review || review.length < 15) {
       alert('회고를 15자 이상 작성해주세요!');
       return;
     }
@@ -145,22 +149,23 @@ export default function TimerClient() {
     // 종료 전 마지막 세션 시간을 서버에 한 번 더 보내서 완벽하게 맞춤
     const updatedData = await handleSyncWithServer();
     const finalSplitTimes = updatedData?.splitTimes ?? initTimer?.splitTimes;
-
+    const body = getSplitTimesForServer();
     try {
       const res = await fetch(`${API.TIMER.STOP(timerId!)}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          splitTimes: finalSplitTimes,
-          review: timerSummary.review,
-          tasks: timerSummary.tasks,
+          body,
+          // splitTimes: finalSplitTimes,
+          // review: review,
+          // tasks: tasks,
         }),
       });
 
       if (res.ok) {
         setLoading(true);
-        reSetDatas();
+        timerReset();
       }
     } catch (err) {
       console.error('타이머 종료 중 오류:', err);
@@ -210,7 +215,6 @@ export default function TimerClient() {
     }, 600000);
 
     return () => clearInterval(intervalId);
-    // lastStartTimestamp를 의존성에서 빼야 인터벌이 10분을 온전히 채우고 실행됩니다.
   }, [timerId, isRunning, initTimer]);
 
   // 1초마다 UI 갱신 (Tick)
@@ -225,7 +229,7 @@ export default function TimerClient() {
   return (
     <div className={cx('page')}>
       <div className={cx('title')}>
-        <div className={cx('test')}>오늘도 열심히 달려봐요!</div>
+        <div className={cx('test')}>{title}</div>
       </div>
 
       <div className={cx('timerContainer')}>
@@ -241,17 +245,17 @@ export default function TimerClient() {
         <div className={cx('buttonWrap')}>
           <div className={cx('playButtonField')}>
             <TimerButton
-              type="start"
+              timerType="start"
               active={!isRunning}
-              onClick={onStartTimer}
+              onClick={onStart}
             />
             <TimerButton
-              type="pause"
+              timerType="pause"
               active={isRunning}
               onClick={onPauseTimer}
             />
             <TimerButton
-              type="finish"
+              timerType="finish"
               active={!!lastStartTimestamp}
               onClick={onFinishTimer}
             />
@@ -278,41 +282,12 @@ export default function TimerClient() {
           </div>
         </div>
       </div>
+      {isDialogOpen && (
+        <TimerDialog
+          onStartTimer={onStartTimer}
+          onFinishTimer={onFinishTimer}
+        />
+      )}
     </div>
-  );
-}
-
-// 가독성을 위한 간단한 서브 컴포넌트들
-function TimeDisplay({ unit, value }: { unit: string; value: string }) {
-  return (
-    <div className={cx('timeField')}>
-      <div className={cx('digitField')}>
-        <div className={cx('digit')}>{value[0]}</div>
-        <div className={cx('digit')}>{value[1]}</div>
-      </div>
-      <div className={cx('unit')}>{unit}</div>
-    </div>
-  );
-}
-
-function TimerButton({
-  type,
-  active,
-  onClick,
-}: {
-  type: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  const state = active ? 'active' : 'disabled';
-  return (
-    <Image
-      onClick={active ? onClick : undefined}
-      className={cx('iconField', { disabled: !active })}
-      src={`/images/timer/icon-${type}-${state}.png`}
-      alt={type}
-      width={80}
-      height={80}
-    />
   );
 }

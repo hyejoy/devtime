@@ -21,55 +21,6 @@
   height: auto;
 }
 
-.timeField {
-  background: linear-gradient(
-    135deg,
-    rgba(76, 121, 255, 0) 0%,
-    rgba(76, 121, 255, 0.2) 100%
-  );
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  width: auto;
-  height: auto;
-  border: 1px solid var(--color-brand-primary); /* 1px */
-  border-radius: 1rem; /* 16px */
-  padding: 8px 7px 0px 7px; /* 8px 7px 90px 7px */
-  /* gap: 0.75rem; */
-}
-.digitField {
-  display: flex;
-  justify-content: center;
-  min-width: 10rem;
-  gap: 1rem;
-  height: auto;
-}
-
-.digit {
-  width: 4rem; /* 고정 */
-  height: 10rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  font-size: 10rem; /* 160px */
-  line-height: 1; /* 200px */
-  letter-spacing: -0.25rem; /* -4px */
-  color: var(--color-brand-primary);
-  border-radius: 0.5rem; /* 8px */
-}
-
-.unit {
-  margin: 1.5rem 0rem;
-  font-family: "pretendard", sans-serif;
-  color: var(--color-brand-primary);
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.2em;
-  opacity: 0.7;
-}
-
 .dot {
   box-sizing: border-box;
   padding: 1rem 2rem;

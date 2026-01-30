@@ -62,5 +62,4 @@
   box-sizing: border-box;
   padding-top: clamp(5rem, 10vh, 7rem);
   padding-bottom: clamp(5rem, 10vh, 7rem);
-  /* background-color: darkolivegreen; */
 }
