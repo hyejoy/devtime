@@ -7,7 +7,7 @@ import {
   useTaskTitle,
 } from '@/store/task';
 import classNames from 'classnames/bind';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import Input from '../../input/Input';
 import TaskItem from '../../timer/TaskItem';
 import Button from '../../ui/Button';
@@ -38,9 +38,10 @@ export default function TimerDialog({
   const tasks = useTasks();
   const isRunning = useIsRunning();
   const isDone = useTimerDone();
-  const { addTask, updateTitle } = useTaskActions();
+  const { addTask, updateTitle, resetGoal, resetReview } = useTaskActions();
   const { setIsDone } = useTimerActions();
 
+  const prevTasks = useRef([...tasks]);
   /** handler */
   const changeEditingMode = () => {
     // editingMode && !isEditing;
@@ -63,11 +64,24 @@ export default function TimerDialog({
     updateTitle(e.target.value);
   };
 
-  const onClickCancle = () => {
+  const cancelTimer = () => {
     closeDialog();
-    setIsDone(false);
+    // 초기화
+    setIsDone(false); // Finish 버튼 클릭시 done 설정 초기화
+    resetGoal(); // 작성중 닫기 눌렀을 때 제목, TODO TASK 초기화
   };
-
+  const discardTaskChanges = () => {};
+  const abortReviewChange = () => {};
+  const handleCancelByStatus = () => {
+    if (!isRunning) {
+      cancelTimer(); // 타이머 생성하다가 취소
+      return;
+    } else if (isDone) {
+      abortReviewChange(); // 할일 관리 수정하다가 취소
+    } else {
+      discardTaskChanges(); // 회고 작성하다가 취소
+    }
+  };
   // render button
   const renderButtons = () => {
     if (!isRunning) {
@@ -174,7 +188,7 @@ export default function TimerDialog({
         ) : null}
       </DialogField.Content>
       <DialogField.Button align="align-right">
-        <Button variant="secondary" onClick={closeDialog}>
+        <Button variant="secondary" onClick={handleCancelByStatus}>
           취소
         </Button>
         {renderButtons()}

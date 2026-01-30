@@ -228,8 +228,13 @@ export default function TimerClient() {
 
   return (
     <div className={cx('page')}>
-      <div className={cx('title')}>
-        <div className={cx('test')}>{title}</div>
+      <div
+        className={cx(
+          'title',
+          `${lastStartTimestamp ? 'titleRunning' : 'titleDefault'}`
+        )}
+      >
+        <div>{lastStartTimestamp ? title : '오늘도 열심히 달려봐요!'}</div>
       </div>
 
       <div className={cx('timerContainer')}>

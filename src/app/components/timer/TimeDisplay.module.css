@@ -1,4 +1,5 @@
 .digitField {
+  font-family: "digitalNumber", sans-serif;
   display: flex;
   justify-content: center;
   min-width: 10rem;

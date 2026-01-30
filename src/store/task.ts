@@ -18,6 +18,8 @@ interface TaskState {
     addTask: (content: string) => void;
     updateTaskContent: (updateId: string, content: string) => void;
     deletedTask: (deletedId: string) => void;
+    resetGoal: () => void; // 타이틀 + Tasks 초기화
+    resetReview: () => void;
   };
 }
 
@@ -65,6 +67,17 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     deletedTask: (id) => {
       set((state) => ({
         tasks: state.tasks.filter((task) => task.id !== id),
+      }));
+    },
+    resetGoal: () => {
+      set(() => ({
+        title: '',
+        tasks: [],
+      }));
+    },
+    resetReview: () => {
+      set(() => ({
+        review: '',
       }));
     },
   },
