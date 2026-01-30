@@ -4,6 +4,9 @@ import { API } from '@/constants/endpoints';
 import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation'; // 경로 확인을 위해 추가
 
+// 세션체크 제외 페이지
+const EXCLUDING_PATH = ['/login', '/signup'];
+
 export default function AuthSesseionProvider({
   children,
 }: {
@@ -12,12 +15,12 @@ export default function AuthSesseionProvider({
   const pathname = usePathname();
 
   useEffect(() => {
-    // 로그인 페이지에서는 세션 체크를 하지 않음
-    if (pathname === '/login') return;
+    const isExclude = EXCLUDING_PATH.find((path) => path === pathname);
+    if (isExclude) return; // 세션 체크 제외
 
     const initSession = async () => {
       try {
-        const res = await fetch('/api/auth/session');
+        const res = await fetch(`${API.AUTH.SESSION}`);
 
         if (res.ok) {
           console.log('세션 연결 성공');

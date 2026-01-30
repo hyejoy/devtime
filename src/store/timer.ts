@@ -19,6 +19,7 @@ interface DisplayTime {
 
 interface TimerStore {
   timerId: string;
+  isDone: boolean;
   isRunning: boolean; // 실행 중 여부
   dailyRecords: Record<string, number>; // key는 날짜(string), value는 초(number)
   totalActiveSeconds: number; // 실제로 타이머가 '재생' 상태였던 시간의 합.
@@ -27,6 +28,7 @@ interface TimerStore {
 
   actions: {
     setTimerId: (id: string) => void;
+    setIsDone: (done: boolean) => void;
     setTotalActiveSeconds: (s: number) => void;
     setIsRunning: (running: boolean) => void;
     setLastStartTimestamp: (time: string | undefined) => void;
@@ -40,6 +42,7 @@ interface TimerStore {
 export const useTimerStore = create<TimerStore>((set, get) => ({
   timerId: '',
   isRunning: false,
+  isDone: false,
   dailyRecords: {},
   totalActiveSeconds: 0,
   lastStartTimestamp: undefined,
@@ -50,6 +53,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   },
   actions: {
     setTimerId: (id) => set({ timerId: id }),
+    setIsDone: (done) => set({ isDone: done }),
     setTotalActiveSeconds: (s) => set({ totalActiveSeconds: s }),
     setIsRunning: (running) => set({ isRunning: running }),
     setLastStartTimestamp: (time) => set({ lastStartTimestamp: time }),
@@ -65,13 +69,12 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
       const now = new Date();
       const todayKey = now.toISOString().split('T')[0]; // 2026-01-28
 
-      // 1. 전체 초 증가 (이게 바뀌어야 화면이 그려짐)
+      // 전체 초 증가 (1초마다 화면 변경)
       const nextTotalSeconds = totalActiveSeconds + 1;
       // 1초씩(1000ms) 현재 날자 키에 누적
       const updateRecords = { ...dailyRecords };
 
       updateRecords[todayKey] = (updateRecords[todayKey] || 0) + 1; // 초(s) 단위로 저장함
-      // 3. 포맷팅 계산 (이걸 여기서 미리 해서 state에 넣어버리면 컴포넌트가 편함)
       const h = Math.floor(nextTotalSeconds / 3600)
         .toString()
         .padStart(2, '0');
@@ -97,6 +100,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
       set({
         timerId: '',
         isRunning: false,
+        isDone: false,
         totalActiveSeconds: 0,
         displayTime: {
           hours: '00',
@@ -124,6 +128,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
 }));
 
 export const useTimerId = () => useTimerStore((state) => state.timerId);
+export const useTimerDone = () => useTimerStore((state) => state.isDone);
 export const useIsRunning = () => useTimerStore((state) => state.isRunning);
 export const useDailyRecords = () =>
   useTimerStore((state) => state.dailyRecords);

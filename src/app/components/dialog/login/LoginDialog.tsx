@@ -1,9 +1,9 @@
 'use client';
 
-import { useModalActions } from '@/store/modal';
 import { useRouter } from 'next/navigation';
-import DialogField from '../dialog/DialogField';
-import Button from '../ui/Button';
+import DialogField from '../DialogField';
+import Button from '../../ui/Button';
+import { useDialogActions } from '@/store/dialog';
 
 const LOGIN_DIALOG_COPY = {
   'duplicate-login': {
@@ -27,10 +27,10 @@ interface Props {
 }
 
 export default function LoginDialog({ dialogType, nextRoute }: Props) {
-  const { closeModal } = useModalActions();
+  const { closeDialog } = useDialogActions();
   const router = useRouter();
   const handleConfirm = () => {
-    closeModal();
+    closeDialog();
     if (nextRoute) {
       router.replace(nextRoute);
     }

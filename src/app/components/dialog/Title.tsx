@@ -5,7 +5,7 @@ const cx = classNames.bind(styles);
 
 type TitleType = 'text' | 'custom';
 interface Props extends ComponentProps<'div'> {
-  title: string;
+  title?: string;
   type: TitleType;
   className?: string;
   children?: ReactNode;

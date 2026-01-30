@@ -5,6 +5,7 @@ export const API = {
     LOGIN: '/api/auth/login',
     LOGOUT: '/api/auth/logout',
     REFRESH: '/api/auth/refresh',
+    SESSION: '/api/auth/session',
   },
   SIGNUP: {
     CHECK_EMAIL_DUPLICATE: '/api/signup/check-email?email=',

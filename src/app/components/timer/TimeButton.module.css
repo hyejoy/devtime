@@ -1,0 +1,9 @@
+.iconField {
+  display: flex;
+  gap: 5rem;
+  flex: 1;
+  cursor: pointer;
+  display: inline-flex; /* 핵심 */
+  justify-content: center;
+  align-items: center;
+}

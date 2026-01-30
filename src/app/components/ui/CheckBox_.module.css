@@ -1,0 +1,62 @@
+.checkbox {
+  box-sizing: border-box;
+  width: 24px; /* 크기를 조금 키웠습니다 */
+  height: 24px;
+  /* 핵심: 두께(2px)와 스타일(solid)을 명시해야 보입니다 */
+  border: 2px solid var(--color-brand-primary);
+  border-radius: 5px;
+  appearance: none;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.whiteCheckbox {
+  border: 2px solid var(--color-white);
+}
+
+.negativeCheckbox {
+  border: 2px solid var(--color-feedback-negative);
+}
+
+/* ✔️ 표시 **/
+
+.checkbox::after {
+  content: "";
+  width: 5px;
+  height: 10px;
+  border-right: 2px solid var(--color-brand-primary);
+  border-bottom: 2px solid var(--color-brand-primary);
+  transform: rotate(45deg) translateY(-1px); /* 위치 미세 조정 */
+  opacity: 0; /* 기본은 숨김 */
+}
+
+.whiteCheckbox::after {
+  content: "";
+  width: 5px;
+  height: 10px;
+  border-right: 2px solid var(--color-white);
+  border-bottom: 2px solid var(--color-white);
+  transform: rotate(45deg) translateY(-1px); /* 위치 미세 조정 */
+  opacity: 0; /* 기본은 숨김 */
+}
+
+/* 체크되었을 때 스타일 */
+.checkbox:checked {
+  background: var(--color-brand-primary-10);
+}
+
+.whiteCheckbox:checked {
+  background: var(--color-gray-300);
+}
+
+/* 핵심: 체크되었을 때 내부 표시가 보이게 함 */
+
+.checkbox:checked::after {
+  opacity: 1;
+}
+.whiteCheckbox:checked::after {
+  opacity: 1;
+}

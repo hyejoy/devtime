@@ -1,7 +1,4 @@
 'use client';
-import LoginDialog, {
-  LoginDialogType,
-} from '@/app/components/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
 import Logo from '@/app/components/ui/Logo';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
@@ -10,7 +7,6 @@ import TextLinkRow from '@/app/components/ui/TextLinkRow';
 import { API } from '@/constants/endpoints';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import { useIsModalOpen, useModalActions } from '@/store/modal';
 import {
   LoginField,
   LoginHelperMessage,
@@ -21,14 +17,18 @@ import classNames from 'classnames/bind';
 import Image from 'next/image';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
+import LoginDialog, {
+  LoginDialogType,
+} from '@/app/components/dialog/login/LoginDialog';
+import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 
 const cx = classNames.bind(styles);
 
 //  # 헤더 없고 전체 화면 사용하는 페이지
 export default function Page() {
   /** zustand */
-  const isModalOpen = useIsModalOpen();
-  const { openModal, closeModal } = useModalActions();
+  const IsDialogOpen = useIsDialogOpen();
+  const { openDialog, closeDialog } = useDialogActions();
 
   /** state */
   const [values, setValues] = useState<LoginInput>({
@@ -126,28 +126,31 @@ export default function Page() {
         }),
         credentials: 'include',
       });
-      // 1. 에러 응답 처리 (백엔드 에러 메시지를 보여주기 위해 data 추출을 먼저 합니다)
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'login failed');
-      // 2. 로그인 성공 처리
+      // 로그인 실패 처리
+      if (!res.ok) {
+        console.warn('로그인 실패:', data.message);
+        setDialogType('login-failed');
+        openDialog();
+        return;
+      }
+      //  로그인 성공 처리
       if (data.isDuplicateLogin) {
         setNextRoute('/timer');
         setDialogType('duplicate-login');
-        openModal();
+        openDialog();
         return;
       }
       if (data.isFirstLogin) {
-        // 첫 로그인 시 프로필 설정 페이지로 이동
         window.location.href = '/profile/setup';
       } else {
-        // 🧡 핵심: router.replace 대신 window.location.href 사용
-        // 브라우저가 쿠키를 확실히 저장하고 미들웨어가 이를 인식하도록 새로고침 방식으로 이동합니다.
         window.location.href = '/timer';
       }
     } catch (err) {
-      console.error(err);
+      // 네트워크 장애 등 예상치 못한 에러 발생 시
+      console.error('네트워크 에러:', err);
       setDialogType('login-failed');
-      openModal();
+      openDialog();
     }
   }
 
@@ -191,7 +194,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      {isModalOpen && (
+      {IsDialogOpen && (
         <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
       )}
     </div>
