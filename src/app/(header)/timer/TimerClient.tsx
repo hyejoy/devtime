@@ -1,237 +1,142 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import classNames from 'classnames/bind';
+import styles from './TimerClient.module.css';
+
 import TimeDisplay from '@/app/components/timer/TimeDisplay';
-import { API } from '@/constants/endpoints';
+import TimerButton from './../../components/timer/TimerButton';
+import TimerDialog from '@/app/components/dialog/timer/TimerDialog';
+
 import {
-  useDisplayTime,
+  useTimerActions,
   useIsRunning,
   useLastStartTimestamp,
-  useTimerActions,
   useTimerId,
+  useTaskTitle,
+  useDisplayTime,
+  useTotalSeconds,
+  useTaskReview,
 } from '@/store/timer';
-import { ActiveTimerResponse, StartTimerResponse } from '@/types/api';
-import { timerSummary } from '@/types/timer';
-import classNames from 'classnames/bind';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import TimerButton from './../../components/timer/TimerButton';
-import styles from './TimerClient.module.css';
-import TimerDialog from '@/app/components/dialog/timer/TimerDialog';
 import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
-import { useTaskReview, useTasks, useTaskTitle } from '@/store/task';
+import { API } from '@/constants/endpoints';
 
 const cx = classNames.bind(styles);
 
 export default function TimerClient() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false); // ✅ 하이드레이션 체크
 
-  const [initTimer, setInitTimer] = useState<ActiveTimerResponse | undefined>(
-    undefined
-  );
-
+  // Zustand States
   const timerId = useTimerId();
-  const lastStartTimestamp = useLastStartTimestamp();
   const isRunning = useIsRunning();
-  const review = useTaskReview();
-  const tasks = useTasks();
+  const lastStartTimestamp = useLastStartTimestamp();
+  const title = useTaskTitle();
+  const totalActiveSeconds = useTotalSeconds();
+  const { hours, mins, secs } = useDisplayTime();
 
+  // Zustand Actions
   const {
-    setTimerId,
-    setIsRunning,
-    setTotalActiveSeconds,
-    setLastStartTimestamp,
+    startTimerOnServer,
+    pauseTimerOnServer,
+    setTimerStatus,
     tick,
     timerReset,
-    createSplitTime,
-    setIsDone,
-    getSplitTimesForServer,
+    fetchTaskList,
+    setTotalActiveSeconds,
+    setIsRunning,
   } = useTimerActions();
 
+  // Dialog Actions
   const isDialogOpen = useIsDialogOpen();
-  const { openDialog, closeDialog, changeType } = useDialogActions();
+  const { openDialog } = useDialogActions();
 
-  const { hours, mins, secs } = useDisplayTime();
-  const title = useTaskTitle();
+  // 1. [Hydration] 클라이언트 사이드 데이터 복구 확인
+  useEffect(() => {
+    setIsHydrated(true);
 
-  // --- 헬퍼 함수 및 공통 로직 ---
+    // 새로고침 시, 실행 중이었다면 서버와 동기화하거나 시간을 보정합니다.
+    if (isRunning && lastStartTimestamp) {
+      const now = new Date().getTime();
+      const last = new Date(lastStartTimestamp).getTime();
+      const gap = Math.floor((now - last) / 1000);
 
-  // 시간을 갱신하고 서버에 동기화하는 핵심 함수
-  const handleSyncWithServer = async () => {
-    if (!timerId || !lastStartTimestamp) return null;
-
-    const split = createSplitTime(lastStartTimestamp);
-    const now = new Date().toISOString();
-
-    const newSplitTimes = [
-      ...(initTimer?.splitTimes ?? []),
-      {
-        date: now,
-        timeSpent: split.timeSpent,
-      },
-    ];
-
-    try {
-      const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ splitTimes: newSplitTimes }),
-      });
-
-      if (!res.ok) throw new Error('동기화 실패');
-
-      const data: ActiveTimerResponse = await res.json();
-      setInitTimer(data);
-      setLastStartTimestamp(now); // 기준점 갱신
-      return data;
-    } catch (err) {
-      console.error('서버 동기화 중 오류:', err);
-      return null;
+      // 흐른 시간만큼 추가 (보정)
+      setTotalActiveSeconds(totalActiveSeconds + gap);
     }
-  };
+  }, []);
 
-  // --- 핸들러 함수 ---
+  // 2. [Tick] 1초마다 UI 갱신
+  // 1초마다 숫자를 올리는 엔진 (Tick)
+  useEffect(() => {
+    // 로컬스토리지에서 복구된 isRunning이 true일 때만 인터벌 실행
+    if (!isRunning) return;
 
+    console.log('⏱️ 타이머 엔진 재가동 (Tick)');
+
+    const intervalId = setInterval(() => {
+      tick();
+    }, 1000);
+
+    // 컴포넌트 언마운트 시 인터벌 청소 (메모리 누수 방지)
+    return () => {
+      console.log('🛑 타이머 엔진 정지');
+      clearInterval(intervalId);
+    };
+  }, [isRunning, tick]);
+
+  // 3. [Sync] 10분마다 서버 자동 저장 (Polling)
+  useEffect(() => {
+    if (!timerId || !isRunning) return;
+    const intervalId = setInterval(async () => {
+      // persist가 이미 데이터를 들고 있으므로 pause 시와 동일한 로직 사용 가능
+      pauseTimerOnServer();
+      console.log('10분 자동 동기화 완료');
+    }, 600000);
+    return () => clearInterval(intervalId);
+  }, [timerId, isRunning]);
+
+  // --- 핸들러 ---
   const onStart = () => {
-    console.log(isDialogOpen);
-
-    openDialog();
-  };
-  const onStartTimer = async () => {
-    // 1. 처음 생성하는 경우
-    if (!lastStartTimestamp) {
-      const taskList = tasks.map((t) => t.content) ?? [];
-      try {
-        const res = await fetch(`${API.TIMER.TIMERS}`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ todayGoal: title, tasks: taskList }),
-        });
-        if (!res.ok) throw new Error('타이머 시작 실패');
-
-        const next: StartTimerResponse = await res.json();
-        setTimerId(next.timerId);
-        setLastStartTimestamp(new Date().toISOString());
-        setIsRunning(true);
-        closeDialog();
-      } catch (err) {
-        console.error(err);
-      }
-      return;
+    if (!timerId) {
+      setTimerStatus('READY');
+      openDialog();
+    } else {
+      startTimerOnServer();
     }
-
-    // 2. 일시정지 후 다시 시작하는 경우
-    if (timerId) {
-      setLastStartTimestamp(new Date().toISOString());
-      setIsRunning(true);
-    }
-  };
-
-  const onPauseTimer = async () => {
-    if (!timerId) return;
-    setIsRunning(false);
-    await handleSyncWithServer();
   };
 
   const onFinish = () => {
-    setIsDone(true);
+    setTimerStatus('DONE');
+    setIsRunning(false);
+    openDialog();
   };
 
-  const onFinishTimer = async () => {
-    if (!review || review.length < 15) {
-      alert('회고를 15자 이상 작성해주세요!');
-      return;
-    }
+  const handleEditTasks = () => {
+    setTimerStatus('RUNNING');
+    fetchTaskList(); // 최신 목록 가져오기
+    openDialog();
+  };
 
-    // 종료 전 마지막 세션 시간을 서버에 한 번 더 보내서 완벽하게 맞춤
-    const updatedData = await handleSyncWithServer();
-    const finalSplitTimes = updatedData?.splitTimes ?? initTimer?.splitTimes;
-    const body = getSplitTimesForServer();
+  const resetTimer = async () => {
+    if (!confirm('정말 타이머를 초기화하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API.TIMER.STOP(timerId!)}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          body,
-          // splitTimes: finalSplitTimes,
-          // review: review,
-          // tasks: tasks,
-        }),
-      });
-
-      if (res.ok) {
-        setLoading(true);
-        timerReset();
-      }
+      await fetch(`${API.TIMER.ITEM(timerId)}`, { method: 'DELETE' });
+      timerReset();
     } catch (err) {
-      console.error('타이머 종료 중 오류:', err);
+      console.error('리셋 실패:', err);
     }
   };
 
-  // --- Effects ---
-
-  // 초기 활성 타이머 로드
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const res = await fetch(`${API.TIMER.TIMERS}`, {
-          credentials: 'include',
-        });
-        const data: ActiveTimerResponse = await res.json();
-
-        if (res.ok && !data.error) {
-          setInitTimer(data);
-          const accumulatedTime = data.splitTimes.reduce(
-            (acc, s) => acc + s.timeSpent,
-            0
-          );
-          const currentDiff = createSplitTime(data.lastUpdateTime).timeSpent;
-
-          setTimerId(data.timerId);
-          setIsRunning(true);
-          setLastStartTimestamp(data.lastUpdateTime);
-          setTotalActiveSeconds(accumulatedTime + currentDiff);
-        }
-      } catch (err) {
-        router.replace('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-
-  // 10분마다 자동 저장 (Polling)
-  useEffect(() => {
-    if (!timerId || !isRunning) return;
-
-    const intervalId = setInterval(async () => {
-      console.log('10분 자동 저장 실행 ✅');
-      await handleSyncWithServer();
-    }, 600000);
-
-    return () => clearInterval(intervalId);
-  }, [timerId, isRunning, initTimer]);
-
-  // 1초마다 UI 갱신 (Tick)
-  useEffect(() => {
-    if (!isRunning) return;
-    const intervalId = setInterval(() => tick(), 1000);
-    return () => clearInterval(intervalId);
-  }, [isRunning, tick]);
-
-  if (loading) return <div>로딩중...</div>;
+  // 하이드레이션 전에 빈 화면  방지
+  if (!isHydrated) return null;
 
   return (
     <div className={cx('page')}>
       <div
         className={cx(
           'title',
-          `${lastStartTimestamp ? 'titleRunning' : 'titleDefault'}`
+          lastStartTimestamp ? 'titleRunning' : 'titleDefault'
         )}
       >
         <div>{lastStartTimestamp ? title : '오늘도 열심히 달려봐요!'}</div>
@@ -246,7 +151,6 @@ export default function TimerClient() {
       </div>
 
       <div className={cx('buttonContainer')}>
-        {/* 1. 메인 컨트롤 버튼 영역 (재생, 일시정지, 종료) */}
         <div className={cx('buttonWrap')}>
           <div className={cx('playButtonField')}>
             <TimerButton
@@ -257,42 +161,40 @@ export default function TimerClient() {
             <TimerButton
               timerType="pause"
               active={isRunning}
-              onClick={onPauseTimer}
+              onClick={pauseTimerOnServer}
             />
             <TimerButton
               timerType="finish"
               active={!!lastStartTimestamp}
-              onClick={onFinishTimer}
+              onClick={onFinish}
             />
           </div>
         </div>
 
         <div className={cx('iconContainer')}>
-          <div className={cx('iconWrap')}>
-            <Image
-              className={cx('iconField')}
-              src="/images/timer/see-todo-active.png"
-              alt="할 일 목록"
-              width={55}
-              height={55}
-            />
-            <Image
-              className={cx('iconField')}
-              src="/images/timer/reset-active.png"
-              alt="새로고침"
-              width={55}
-              height={55}
-              onClick={() => window.location.reload()} // 새로고침 기능 추가
-            />
-          </div>
+          {lastStartTimestamp && (
+            <div className={cx('iconWrap')}>
+              <Image
+                className={cx('iconField')}
+                src="/images/timer/see-todo-active.png"
+                alt="목록"
+                width={55}
+                height={55}
+                onClick={handleEditTasks}
+              />
+              <Image
+                className={cx('iconField')}
+                src="/images/timer/reset-active.png"
+                alt="리셋"
+                width={55}
+                height={55}
+                onClick={resetTimer}
+              />
+            </div>
+          )}
         </div>
       </div>
-      {isDialogOpen && (
-        <TimerDialog
-          onStartTimer={onStartTimer}
-          onFinishTimer={onFinishTimer}
-        />
-      )}
+      {isDialogOpen && <TimerDialog />}
     </div>
   );
 }

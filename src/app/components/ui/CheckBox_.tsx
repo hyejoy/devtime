@@ -9,21 +9,23 @@ interface CheckboxProps extends ComponentProps<'input'> {
   height: number;
   isChecked: boolean;
   className?: 'whiteCheckbox' | 'negativeCheckbox' | 'checkbox';
-  onClick: React.MouseEventHandler<HTMLInputElement>;
+  onChange: () => void; // ✅ prop 정의
 }
 const cx = classNames.bind(styles);
 
 export default function CheckBox_({
   id,
+  onChange,
   isChecked,
   className = 'checkbox',
   ...props
 }: CheckboxProps) {
   return (
     <input
+      type="checkbox"
       className={cx('checkbox', className)}
       id={id}
-      type="checkbox"
+      onChange={onChange}
       checked={isChecked}
       {...props}
     />

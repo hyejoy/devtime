@@ -1,56 +1,53 @@
 'use client';
 import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 import {
-  useTaskActions,
+  useIsRunning,
   useTaskReview,
   useTasks,
   useTaskTitle,
-} from '@/store/task';
+  useTimerActions,
+  useTimerStauts,
+} from '@/store/timer';
 import classNames from 'classnames/bind';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { ChangeEvent, useEffect, useState } from 'react';
 import Input from '../../input/Input';
 import TaskItem from '../../timer/TaskItem';
 import Button from '../../ui/Button';
 import DialogField from '../DialogField';
 import styles from './TimerDialog.module.css';
-import { useIsRunning, useTimerActions, useTimerDone } from '@/store/timer';
-import Image from 'next/image';
+
 const cx = classNames.bind(styles);
 
-interface TimerDialogProps {
-  onStartTimer: () => Promise<void>;
-  onFinishTimer: () => Promise<void>;
-  onSaveTasks: () => Promise<void>;
-}
-
-export default function TimerDialog({
-  onStartTimer,
-  onFinishTimer,
-  onSaveTasks,
-}: TimerDialogProps) {
-  /** state */
+export default function TimerDialog() {
+  /** local state */
   const [editingMode, setEditingMode] = useState(false);
   const [newTask, setNewTask] = useState('');
-  /** zustand */
+
+  /** zustand state */
+  const {
+    addTask,
+    updateTitle,
+    resetGoal,
+    resetReview,
+    startTimerOnServer,
+    updateReview,
+    syncTasksWithSaved,
+    updateTaskList,
+    finishTimerOnServer, // ✅ 최종 종료 액션 추가
+  } = useTimerActions();
+
   const { closeDialog, changeType } = useDialogActions();
+  const timerStatus = useTimerStauts();
   const dialogOpen = useIsDialogOpen();
   const title = useTaskTitle();
   const tasks = useTasks();
-  const isRunning = useIsRunning();
-  const isDone = useTimerDone();
-  const { addTask, updateTitle, resetGoal, resetReview } = useTaskActions();
-  const { setIsDone } = useTimerActions();
+  const review = useTaskReview();
 
-  const prevTasks = useRef([...tasks]);
+  const isReadyToStart = title.trim() !== '' && tasks.length !== 0;
+
   /** handler */
-  const changeEditingMode = () => {
-    // editingMode && !isEditing;
-    setEditingMode((prev) => !prev);
-  };
-
-  const onChangeNewTask = (e: ChangeEvent<HTMLInputElement>) => {
-    setNewTask(e.target.value);
-  };
+  const changeEditingMode = () => setEditingMode((prev) => !prev);
 
   const onAddTask = () => {
     if (newTask.trim() === '') return;
@@ -58,74 +55,101 @@ export default function TimerDialog({
     setNewTask('');
   };
 
-  const isReadyToStart = title.trim() !== '' && tasks.length !== 0;
-
-  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    updateTitle(e.target.value);
+  const saveChanges = () => {
+    if (editingMode) {
+      setEditingMode(false);
+    }
+    updateTaskList();
   };
 
-  const cancelTimer = () => {
-    closeDialog();
-    // 초기화
-    setIsDone(false); // Finish 버튼 클릭시 done 설정 초기화
-    resetGoal(); // 작성중 닫기 눌렀을 때 제목, TODO TASK 초기화
-  };
-  const discardTaskChanges = () => {};
-  const abortReviewChange = () => {};
   const handleCancelByStatus = () => {
-    if (!isRunning) {
-      cancelTimer(); // 타이머 생성하다가 취소
-      return;
-    } else if (isDone) {
-      abortReviewChange(); // 할일 관리 수정하다가 취소
-    } else {
-      discardTaskChanges(); // 회고 작성하다가 취소
+    switch (timerStatus) {
+      case 'READY':
+        resetGoal();
+        closeDialog();
+        break;
+      case 'DONE':
+        syncTasksWithSaved(); // 편집 중이던 내용 버리고 저장된 스냅샷으로 복구
+        resetReview();
+        closeDialog();
+        break;
+      case 'RUNNING':
+        syncTasksWithSaved();
+        closeDialog();
+        break;
     }
   };
-  // render button
+
+  /** 렌더링용 버튼 컴포넌트 */
   const renderButtons = () => {
-    if (!isRunning) {
-      return (
-        <Button
-          onClick={onStartTimer}
-          variant="secondary"
-          disabled={!isReadyToStart}
-        >
-          타이머 시작하기
-        </Button>
-      );
-    }
-
-    if (isRunning && editingMode) {
-      return <Button variant="secondary">변경 사항 저장하기</Button>;
-    }
-
-    if (isRunning && !editingMode) {
-      return <Button variant="secondary">저장하기</Button>;
+    switch (timerStatus) {
+      case 'READY':
+        return (
+          <Button
+            onClick={onStartTimer}
+            variant="secondary"
+            disabled={!isReadyToStart}
+          >
+            타이머 시작하기
+          </Button>
+        );
+      case 'RUNNING':
+        return (
+          <Button onClick={saveChanges} variant="secondary">
+            {editingMode ? '변경 사항 저장하기' : '저장하기'}
+          </Button>
+        );
+      case 'DONE':
+        return (
+          <Button
+            variant="secondary"
+            disabled={review.length < 15}
+            onClick={onClickDone}
+          >
+            공부 완료하기
+          </Button>
+        );
+      default:
+        return null;
     }
   };
+
+  const onChangeNewTask = (e: ChangeEvent<HTMLInputElement>) =>
+    setNewTask(e.target.value);
+
+  const onStartTimer = async () => {
+    await startTimerOnServer();
+    closeDialog();
+  };
+  const onClickDone = async () => {
+    finishTimerOnServer();
+  };
+
+  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) =>
+    updateTitle(e.target.value);
+  const onReviewChange = (e: ChangeEvent<HTMLTextAreaElement>) =>
+    updateReview(e.target.value);
+
   /** dialog값 고정 */
   useEffect(() => {
     changeType('custom');
-    return () => {
-      changeType('alert');
-    };
-  }, []);
+    return () => changeType('alert');
+  }, [changeType]);
 
   if (!dialogOpen) return null;
 
   return (
     <DialogField>
       <DialogField.Title type="text">
-        {isDone ? (
+        {timerStatus === 'DONE' && (
           <div className={cx('isDoneTitleField')}>
             <div className={cx('isDoneMainTitle')}>오늘도 수고하셨어요!</div>
             <div className={cx('isDoneSubTitle')}>
               완료한 일을 체크하고, 오늘의 학습 회고를 작성해 주세요.
             </div>
           </div>
-        ) : null}
-        {!isRunning ? (
+        )}
+        {timerStatus === 'READY' && (
           <>
             <Input.Input
               onChange={onChangeTitle}
@@ -138,10 +162,9 @@ export default function TimerDialog({
               할 일 목록
             </Input.Label>
           </>
-        ) : null}
+        )}
         <div className={cx('inputGroupField')}>
           <div className={cx('inputField')}>
-            {/* 1. 인풋창 */}
             <Input.Input
               size={'normal'}
               name="todo"
@@ -154,39 +177,44 @@ export default function TimerDialog({
           </div>
         </div>
       </DialogField.Title>
+
       <DialogField.Content>
         <div className={cx('goalWrapper')}>
-          {isRunning ? (
+          {(timerStatus === 'RUNNING' || timerStatus === 'DONE') && (
             <div className={cx('listHeader')}>
               <div className={cx('content')}>할 일 목록</div>
-              {!editingMode ? (
-                <div className={cx('button')}>
+              {!editingMode && (
+                <div className={cx('button')} onClick={changeEditingMode}>
                   <Image
                     src="/images/timerDialog/edit_black.png"
                     className={cx('iconButton')}
                     alt="edit"
                     width={16.6}
                     height={16.6}
-                    onClick={changeEditingMode}
                   />
-                  <div onClick={changeEditingMode}>할 일 수정</div>
+                  <div>할 일 수정</div>
                 </div>
-              ) : null}
+              )}
             </div>
-          ) : null}
+          )}
           <div className={cx('goalContainer')}>
-            {tasks.map((task) => (
+            {tasks!.map((task) => (
               <TaskItem task={task} key={task.id} editingMode={editingMode} />
             ))}
           </div>
         </div>
-        {isDone ? (
+        {timerStatus === 'DONE' && (
           <div className={cx('reviewField')}>
-            <div className={cx('reviewTitle')}>학습회고</div>
-            <textarea className={cx('reviewContent')} />
+            <div className={cx('reviewTitle')}>학습 회고</div>
+            <textarea
+              placeholder="오늘 학습한 내용을 회고해 보세요(15자 이상 작성 필수)"
+              className={cx('reviewContent')}
+              onChange={onReviewChange}
+            />
           </div>
-        ) : null}
+        )}
       </DialogField.Content>
+
       <DialogField.Button align="align-right">
         <Button variant="secondary" onClick={handleCancelByStatus}>
           취소

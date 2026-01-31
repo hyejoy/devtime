@@ -1,4 +1,4 @@
-import { Task, useTaskActions, useTasks } from '@/store/task';
+import { Task, useTimerActions, useTasks } from '@/store/timer';
 import { useIsRunning } from '@/store/timer';
 import classNames from 'classnames/bind';
 import Image from 'next/image';
@@ -16,7 +16,7 @@ export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
   /** state  */
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(task.content);
-  const { updateTaskContent, deletedTask, toggleDone } = useTaskActions();
+  const { updateTaskContent, deletedTask, toggleDone } = useTimerActions();
 
   const handleDone = () => {
     toggleDone(task.id);
@@ -103,12 +103,12 @@ export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
           )}
           {!isEditing && !editingMode ? (
             <CheckBox_
-              id="checkbox"
+              id={`checkbox${task.id}`}
               className="whiteCheckbox"
               width={36}
               height={36}
               isChecked={task.isCompleted}
-              onClick={handleDone}
+              onChange={handleDone}
             />
           ) : (
             <></>
