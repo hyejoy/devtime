@@ -78,7 +78,21 @@ interface TimerState {
 }
 
 // --- Store ---
-export const STUDY_LOG_KEY = 'study_log_id';
+export const STUDY_LOG_KEY = 'timer-storage';
+const initialState = {
+  //초기값
+  studyLogId: '',
+  timerId: '',
+  isRunning: false,
+  totalActiveSeconds: 0,
+  displayTime: { hours: '00', mins: '00', secs: '00' },
+  lastStartTimestamp: undefined,
+  dailyRecords: {},
+  title: '',
+  review: '',
+  tasks: [],
+  saveTasks: [],
+};
 export const useTimerStore = create<TimerState>()(
   persist(
     (set, get) => ({
@@ -156,20 +170,7 @@ export const useTimerStore = create<TimerState>()(
 
         timerReset: () => {
           // ✅ 초기화 시 로컬스토리지에서도 삭제
-          localStorage.removeItem(STUDY_LOG_KEY);
-          set({
-            studyLogId: '',
-            timerId: '',
-            isRunning: false,
-            totalActiveSeconds: 0,
-            displayTime: { hours: '00', mins: '00', secs: '00' },
-            lastStartTimestamp: undefined,
-            dailyRecords: {},
-            title: '',
-            review: '',
-            tasks: [],
-            saveTasks: [],
-          });
+          set(initialState);
         },
 
         // --- Task Actions ---
@@ -220,12 +221,13 @@ export const useTimerStore = create<TimerState>()(
           const { lastStartTimestamp, tasks, title, timerId } = get();
           const now = new Date().toISOString();
 
-          // 1. 처음 생성하는 경우 (스냅샷 저장 및 서버 전송)
           if (!lastStartTimestamp) {
-            console.log('처음 생성하는 경우');
+            console.log('🚀처음 생성 시도');
 
-            // 타이머 시작 시점의 tasks를 saveTasks에 복사 (스냅샷)
             set({ saveTasks: [...tasks] });
+
+            // ✅ 서버 에러 메시지에 따라 다시 문자열 배열로 변경
+            // 만약 tasks가 비어있다면 서버에서 400을 뱉을 수 있으므로 체크 필요
             const taskList = tasks.map((t) => t.content);
 
             try {
@@ -233,15 +235,19 @@ export const useTimerStore = create<TimerState>()(
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ todayGoal: title, tasks: taskList }),
+                body: JSON.stringify({
+                  todayGoal: title || '오늘의 목표', // 빈 값일 경우 기본값 부여 (400 방지)
+                  tasks: taskList,
+                }),
               });
 
-              if (!res.ok) throw new Error('타이머 시작 실패');
+              if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                console.error('❌ 서버 상세 에러:', errorData);
+                throw new Error(errorData.error?.message || '타이머 시작 실패');
+              }
 
               const data = await res.json();
-              console.log('🍀🧡res :', data);
-              // ✅ 로컬스토리지에 저장
-              localStorage.setItem(STUDY_LOG_KEY, data.studyLogId);
               set({
                 studyLogId: data.studyLogId,
                 timerId: data.timerId,
@@ -253,17 +259,11 @@ export const useTimerStore = create<TimerState>()(
             } catch (err) {
               console.error('타이머 생성 에러:', err);
             }
-          }
-          // 2. 일시정지 후 다시 시작하는 경우
-          else if (timerId) {
-            console.log('일시 정지 후 다시 시작');
-            set({
-              lastStartTimestamp: now,
-              isRunning: true,
-            });
+          } else if (timerId) {
+            set({ lastStartTimestamp: now, isRunning: true });
+            useDialogStore.getState().actions.closeDialog();
           }
         },
-
         // 2. 타이머 일시정지 (서버 동기화 포함)
         pauseTimerOnServer: async () => {
           const { timerId, isRunning, actions } = get();
@@ -295,18 +295,22 @@ export const useTimerStore = create<TimerState>()(
 
         // 3. 타이머 최종 종료 (회고 및 할 일 목록 제출)
         finishTimerOnServer: async () => {
-          const { timerId, review, saveTasks, actions } = get();
-          console.log('저장된 테스크 목록ㅡ', saveTasks);
+          const { timerId, review, tasks, actions } = get();
 
           if (!timerId) return;
 
-          if (review.length < 15) {
-            alert('회고를 15자 이상 작성해주세요!');
-            return;
-          }
+          const cleanReview = review.trim();
+          if (cleanReview.length < 15) return;
 
-          const splitTimes = actions.getSplitTimesForServer();
-          const taskList = saveTasks.map((t) => ({
+          const splitTimes = actions.getSplitTimesForServer().map((s) => ({
+            ...s,
+            // 만약 date가 T00:00:00 형식이면 현재 시간으로 보정
+            date: s.date.includes('T00:00:00')
+              ? new Date().toISOString()
+              : s.date,
+          }));
+
+          const taskList = tasks.map((t) => ({
             content: t.content,
             isCompleted: t.isCompleted,
           }));
@@ -327,6 +331,9 @@ export const useTimerStore = create<TimerState>()(
               actions.timerReset(); // 모든 상태 초기화
               useDialogStore.getState().actions.closeDialog();
             } else {
+              // 400 에러의 구체적 원인 파악을 위해 에러 바디 로그 출력
+              const errorDetail = await res.json();
+              console.error('서버가 거절한 이유:', errorDetail);
               throw new Error('종료 처리 실패');
             }
           } catch (err) {
@@ -374,7 +381,7 @@ export const useTimerStore = create<TimerState>()(
           }));
 
           set({ saveTasks: [...tasks] });
-          console.log('req 🩵:', requestBody);
+
           try {
             const res = await fetch(`${API.TASK.UPDATE(studyLogId)}`, {
               method: 'PUT',
@@ -396,7 +403,7 @@ export const useTimerStore = create<TimerState>()(
       },
     }),
     {
-      name: 'timer-storage',
+      name: STUDY_LOG_KEY,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         studyLogId: state.studyLogId,

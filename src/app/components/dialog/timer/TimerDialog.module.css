@@ -133,3 +133,7 @@
   background-color: #f3f4f6; /* 미세하게 어두워짐 */
   /* 만약 아주 얇은 선이라도 원한다면: border: 1px solid #E5E7EB; */
 }
+
+.reviewContent::placeholder {
+  color: var(--color-gray-300);
+}
