@@ -17,4 +17,13 @@ export const API = {
     ITEM: (id: string) => `${PROXY}/timers/${id}`, // PUT, DELETE용
     STOP: (id: string) => `${PROXY}/timers/${id}/stop`, // STOP용
   },
+  TASK: {
+    UPDATE: (studyLogId: string) => `${PROXY}/${studyLogId}/tasks`, //  PUT
+  },
+  STUDYLOGS: {
+    GET_STUDY_LOGS: `${PROXY}/study-logs`,
+    GET_STUDY_LOG: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
+    DELETE_STUDY_LOG: (studyLogId: string) =>
+      `${PROXY}/study-logs/${studyLogId}`,
+  },
 } as const;
