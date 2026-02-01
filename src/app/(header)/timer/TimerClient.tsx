@@ -104,7 +104,7 @@ export default function TimerClient() {
     } else {
       startTimerOnServer();
     }
-  };
+};
 
   const onFinish = () => {
     setTimerStatus('DONE');
