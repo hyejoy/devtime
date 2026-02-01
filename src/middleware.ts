@@ -1,19 +1,38 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const accessToken = req.cookies.get('accessToken')?.value;
-  const pathname = req.nextUrl.pathname;
-  const isLoginPage = pathname === '/login';
+  const { pathname } = req.nextUrl;
 
-  /**  인증 / 인가 처리 (Middleware) */
-  // 로그인 안 했는데 보호 페이지 접근
-  if (!accessToken && pathname.startsWith('/timer')) {
-    return NextResponse.redirect(new URL('/login', req.url));
+  const accessToken = req.cookies.get('accessToken')?.value;
+  const refreshToken = req.cookies.get('refreshToken')?.value;
+
+  const isLoginPage = pathname.startsWith('/login');
+  const isProtectedPage =
+    pathname.startsWith('/timer') || pathname.startsWith('/profile');
+
+  const hasAccess = Boolean(accessToken);
+  const hasRefresh = Boolean(refreshToken);
+
+  // 1. 보호된 페이지 접근 시
+  if (isProtectedPage) {
+    // Access 토큰은 없는데 Refresh 토큰만 있는 경우 -> 토큰 갱신하러 가기
+    if (!hasAccess && hasRefresh) {
+      console.log('🔄 Access 토큰 만료, Refresh 토큰으로 갱신 시도');
+      return NextResponse.redirect(
+        new URL(`/api/auth/refresh?redirect=${pathname}`, req.url)
+      );
+    }
+
+    // 둘 다 없는 경우 -> 로그인으로
+    if (!hasAccess && !hasRefresh) {
+      console.log('🚫 토큰 없음, 로그인 페이지로 이동');
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
   }
 
-  // 로그인 했는데 로그인 페이지 접근
-  if (accessToken && isLoginPage) {
+  // 2. 이미 로그인된 상태에서 로그인 페이지 접근 시 -> 홈(타이머)으로
+  if (isLoginPage && (hasAccess || hasRefresh)) {
+    console.log('이미 로그인됨, 타이머 페이지로 리다이렉트');
     return NextResponse.redirect(new URL('/timer', req.url));
   }
 
@@ -23,13 +42,5 @@ export function middleware(req: NextRequest) {
 // TODO:케이스(블랙리스트)로 적용
 // → https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher
 export const config = {
-  // 미들웨어 어디에 적용할지 정하는 필터
-  matcher: [
-    '/login',
-    '/timer/:path*',
-    '/dashboard/:path*',
-    '/mypage/:path*',
-    '/profile/:path*',
-    '/ranking/:path*',
-  ],
-
+  matcher: ['/timer/:path*', '/profile/:path*', '/login'],
+};

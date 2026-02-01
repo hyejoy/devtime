@@ -1,8 +1,8 @@
 'use client';
 import CheckBox from '@/app/components/ui/CheckBox';
-import { TERMS_OF_SERVICE } from '@/constants/termsOfService.ts';
 import { ChangeEvent } from 'react';
 import styles from './SignupTerms.module.css';
+import { TERMS_OF_SERVICE } from '@/constants/termsOfService';
 type Props = {
   isChecked: boolean;
   isSubmitted: boolean;

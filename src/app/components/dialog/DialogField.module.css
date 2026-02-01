@@ -1,20 +1,34 @@
+/* DialogField.module.css */
+
 .overlay {
   position: fixed;
-  inset: 0; /* top:0 right:0 bottom:0 left:0 */
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center; /* 가로 가운데 */
-  align-items: center; /* 세로 가운데 */
+  justify-content: center;
+  align-items: center;
   z-index: 1000;
+  padding: 20px;
 }
 
 .dialogContainer {
-  background: #fff;
-  /* background-color: blueviolet; */
+  background-color: var(--color-white);
   border-radius: 12px;
   padding: 24px;
-  max-width: 328px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.alertDialog {
+  width: 348px;
+}
+
+.customDialog {
+  width: auto;
+}
+
+.childrenContainer {
+  min-width: 20.5rem;
+  height: 100%; /* 부모 크기에 맞춤 */
 }

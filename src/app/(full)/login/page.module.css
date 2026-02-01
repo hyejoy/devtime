@@ -1,0 +1,37 @@
+.page {
+  height: 100vh;
+  width: 100%;
+  padding-top: 30px;
+  box-sizing: border-box;
+  background-color: var(--color-white);
+}
+
+.container {
+  position: relative;
+  min-height: 50vh;
+  margin-left: 50vw;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.signupLink {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  border-radius: 10px;
+  transform: translate(-50%, -50%);
+  background-color: var(--color-login-bg);
+  backdrop-filter: blur(50px);
+  min-width: 23vw;
+  padding: 2.2rem 3rem;
+}
