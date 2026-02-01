@@ -12,107 +12,104 @@ interface TaskItemProps {
   editingMode: boolean;
   changeEditingMode: () => void;
 }
-
-// editingMode => (ICON) 할 일 수정 클릭
 export default function TaskItem({
   task,
   editingMode = false,
-  changeEditingMode,
+  changeEditingMode, // 부모의 편집 모드를 토글하는 함수
 }: TaskItemProps) {
-  /** state  */
   const status = useTimerStauts();
-  const [isEditingTitle, setIsEditingTitle] = useState(false); // 할일 변경모드
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [content, setContent] = useState(task.content);
   const { updateTaskContent, deletedTask, toggleDone } = useTimerActions();
 
-  useEffect(() => {
-    console.log('할일 수정중입니까? : ', isEditingTitle);
-  }, [isEditingTitle]);
+  // 개별 아이템 연필 클릭
+  const changeEditing = () => {
+    setIsEditingTitle(true);
+  };
+
+  // 개별 아이템 저장 (체크 아이콘 클릭 / 엔터 / 블러)
+  const onSave = () => {
+    updateTaskContent(task.id, content);
+    setIsEditingTitle(false); // 로컬 수정 모드 종료
+    if (editingMode) {
+      changeEditingMode(); // 부모의 전체 편집 모드를 꺼서 상단 버튼을 복구하고 아이콘을 체크박스로 변경
+    }
+  };
+
   const handleDone = () => {
     toggleDone(task.id);
   };
 
-  const changeEditing = () => {
-    setIsEditingTitle((prev) => !prev);
-  };
-
-  // 휴지통 모양에 설정
   const deleteTask = () => {
     deletedTask(task.id);
+    if (editingMode) changeEditingMode(); // 삭제 후 모드 종료 (선택 사항)
   };
 
-  const onChangeContent = (e: ChangeEvent<HTMLInputElement>) => {
-    setContent(e.target.value);
-  };
-
-  const onSave = () => {
-    updateTaskContent(task.id, content);
-  };
   return (
-    <>
-      <div
-        className={cx(
-          'goalField',
-          `${task.isCompleted ? 'doneGoal' : 'doingGoal'}`
-        )}
-      >
-        <Image
-          className={cx('goalSymbol')}
-          alt="symbol"
-          src="/images/timerDialog/symbol.png"
-          width={42}
-          height={20}
+    <div
+      className={cx('goalField', task.isCompleted ? 'doneGoal' : 'doingGoal')}
+    >
+      <Image
+        className={cx('goalSymbol')}
+        alt="symbol"
+        src="/images/timerDialog/symbol.png"
+        width={42}
+        height={20}
+      />
+
+      {isEditingTitle ? (
+        <input
+          type="text"
+          className={cx('goalInput')}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onBlur={onSave}
+          onKeyDown={(e) => e.key === 'Enter' && onSave()}
+          autoFocus
         />
-        {isEditingTitle ? (
-          <input
-            type="text"
-            className={cx('goalInput')}
-            value={content}
-            onChange={onChangeContent}
-            onBlur={onSave} // 포커스가 나갈 때 자동 저장
-            onKeyDown={(e) => e.key === 'Enter' && onSave()} // 엔터 치면 저장
-            autoFocus // 수정 버튼 누르자마자 커서가 바로 가도록 함
-          />
-        ) : (
-          <div className={cx('goal')}>{task.content}</div>
-        )}
-        <div className={cx('goalButtonField')}>
-          {(editingMode && !isEditingTitle) ||
-          (!editingMode && !isEditingTitle && status === 'READY') ? (
-            <>
-              <Image
-                src="/images/timerDialog/edit.png"
-                className={cx('iconButton')}
-                alt="edit"
-                width={16.6}
-                height={16.6}
-                onClick={changeEditing}
-              />
-              <Image
-                src="/images/timerDialog/delete.png"
-                className={cx('iconButton')}
-                alt="delete"
-                width={16.6}
-                height={16.6}
-                onClick={deleteTask}
-              />
-            </>
-          ) : (
-            <></>
-          )}
-          {isEditingTitle ? (
+      ) : (
+        <div className={cx('goal')}>{task.content}</div>
+      )}
+
+      <div className={cx('goalButtonField')}>
+        {/* 1. 편집 모드(연필/쓰레기통) 아이콘 노출 조건 */}
+        {editingMode && !isEditingTitle && (
+          <>
             <Image
-              src="/images/timerDialog/check.png"
+              src="/images/timerDialog/edit.png"
               className={cx('iconButton')}
-              alt="check"
-              width={24}
-              height={24}
+              alt="edit"
+              width={16.6}
+              height={16.6}
               onClick={changeEditing}
             />
-          ) : (
-            <></>
-          )}
-          {!editingMode && (status === 'DONE' || status === 'RUNNING') ? (
+            <Image
+              src="/images/timerDialog/delete.png"
+              className={cx('iconButton')}
+              alt="delete"
+              width={16.6}
+              height={16.6}
+              onClick={deleteTask}
+            />
+          </>
+        )}
+
+        {/* 2. 수정 완료(체크) 아이콘 노출 조건 */}
+        {isEditingTitle && (
+          <Image
+            src="/images/timerDialog/check.png"
+            className={cx('iconButton')}
+            alt="check"
+            width={24}
+            height={24}
+            onClick={onSave} // 여기서 onSave를 호출해야 모드가 풀림
+          />
+        )}
+
+        {/* 3. 체크박스 노출 조건 (편집 모드가 아닐 때만) */}
+        {!editingMode &&
+          !isEditingTitle &&
+          (status === 'DONE' || status === 'RUNNING') && (
             <CheckBox_
               id={`checkbox${task.id}`}
               className="whiteCheckbox"
@@ -121,11 +118,8 @@ export default function TaskItem({
               isChecked={task.isCompleted}
               onChange={handleDone}
             />
-          ) : (
-            <></>
           )}
-        </div>
       </div>
-    </>
+    </div>
   );
 }
