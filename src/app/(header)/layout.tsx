@@ -10,7 +10,7 @@ const cx = classNames.bind(styles);
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className={cx('root')}>
-      <div className={cx('headerField')}>
+      <header className={cx('headerField')}>
         <div className={cx('logoField')}>
           <Link href={'/timer'}>
             <Logo direction="horizontal" height="40px" width="148px" />
@@ -32,7 +32,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className={cx('profileNickName')}>닉네임입니다</div>
           <Logout />
         </div>
-      </div>
+      </header>
       <div className={cx('childrenContainer')}>
         <div className={cx('childrenField')}>{children}</div>
       </div>
