@@ -47,8 +47,13 @@ export default function TimerDialog() {
   const isReadyToStart = title.trim() !== '' && tasks.length !== 0;
 
   /** handler */
-  const changeEditingMode = () => setEditingMode((prev) => !prev);
+  useEffect(() => {
+    console.log('타이틀 연필 모야 눌렀나요? ', editingMode);
+  }, [editingMode]);
 
+  const changeEditingMode = () => {
+    setEditingMode((prev) => !prev);
+  };
   const onAddTask = () => {
     if (newTask.trim() === '') return;
     addTask(newTask);
@@ -58,6 +63,8 @@ export default function TimerDialog() {
   const saveChanges = () => {
     if (editingMode) {
       setEditingMode(false);
+    } else {
+      closeDialog();
     }
     updateTaskList();
   };
@@ -199,7 +206,12 @@ export default function TimerDialog() {
           )}
           <div className={cx('goalContainer')}>
             {tasks!.map((task) => (
-              <TaskItem task={task} key={task.id} editingMode={editingMode} />
+              <TaskItem
+                task={task}
+                key={task.id}
+                editingMode={editingMode}
+                changeEditingMode={changeEditingMode}
+              />
             ))}
           </div>
         </div>

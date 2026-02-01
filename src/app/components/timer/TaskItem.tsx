@@ -1,8 +1,8 @@
-import { Task, useTimerActions, useTasks } from '@/store/timer';
+import { Task, useTimerActions, useTasks, useTimerStauts } from '@/store/timer';
 import { useIsRunning } from '@/store/timer';
 import classNames from 'classnames/bind';
 import Image from 'next/image';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import CheckBox_ from '../ui/CheckBox_';
 import styles from './TaskItem.module.css';
 const cx = classNames.bind(styles);
@@ -10,20 +10,30 @@ const cx = classNames.bind(styles);
 interface TaskItemProps {
   task: Task;
   editingMode: boolean;
+  changeEditingMode: () => void;
 }
 
-export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
+// editingMode => (ICON) 할 일 수정 클릭
+export default function TaskItem({
+  task,
+  editingMode = false,
+  changeEditingMode,
+}: TaskItemProps) {
   /** state  */
-  const [isEditing, setIsEditing] = useState(false);
+  const status = useTimerStauts();
+  const [isEditingTitle, setIsEditingTitle] = useState(false); // 할일 변경모드
   const [content, setContent] = useState(task.content);
   const { updateTaskContent, deletedTask, toggleDone } = useTimerActions();
 
+  useEffect(() => {
+    console.log('할일 수정중입니까? : ', isEditingTitle);
+  }, [isEditingTitle]);
   const handleDone = () => {
     toggleDone(task.id);
   };
-  // 연필하고 체크표시에 설정
+
   const changeEditing = () => {
-    setIsEditing((prev) => !prev);
+    setIsEditingTitle((prev) => !prev);
   };
 
   // 휴지통 모양에 설정
@@ -53,7 +63,7 @@ export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
           width={42}
           height={20}
         />
-        {isEditing ? (
+        {isEditingTitle ? (
           <input
             type="text"
             className={cx('goalInput')}
@@ -67,7 +77,8 @@ export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
           <div className={cx('goal')}>{task.content}</div>
         )}
         <div className={cx('goalButtonField')}>
-          {editingMode && !isEditing ? (
+          {(editingMode && !isEditingTitle) ||
+          (!editingMode && !isEditingTitle && status === 'READY') ? (
             <>
               <Image
                 src="/images/timerDialog/edit.png"
@@ -89,7 +100,7 @@ export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
           ) : (
             <></>
           )}
-          {isEditing ? (
+          {isEditingTitle ? (
             <Image
               src="/images/timerDialog/check.png"
               className={cx('iconButton')}
@@ -101,7 +112,7 @@ export default function TaskItem({ task, editingMode = false }: TaskItemProps) {
           ) : (
             <></>
           )}
-          {!isEditing && !editingMode ? (
+          {!editingMode && (status === 'DONE' || status === 'RUNNING') ? (
             <CheckBox_
               id={`checkbox${task.id}`}
               className="whiteCheckbox"

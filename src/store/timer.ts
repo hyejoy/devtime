@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 import { useDialogStore } from './dialog';
 import { API } from '@/constants/endpoints';
+import { formatSplitTimesForServer } from '@/utils/timer';
 
 // --- Types ---
 
@@ -79,6 +80,7 @@ interface TimerState {
 
 // --- Store ---
 export const STUDY_LOG_KEY = 'timer-storage';
+
 const initialState = {
   //초기값
   studyLogId: '',
@@ -218,7 +220,7 @@ export const useTimerStore = create<TimerState>()(
 
         /*** 🚩 API Actions ***/
         startTimerOnServer: async () => {
-          const { lastStartTimestamp, tasks, title, timerId } = get();
+          const { lastStartTimestamp, tasks, title, timerId, actions } = get();
           const now = new Date().toISOString();
 
           if (!lastStartTimestamp) {
@@ -273,7 +275,12 @@ export const useTimerStore = create<TimerState>()(
           set({ isRunning: false });
 
           // 서버에 현재까지의 기록 동기화
-          const body = actions.getSplitTimesForServer();
+          const body = formatSplitTimesForServer(
+            actions.getSplitTimesForServer()
+          );
+
+          console.log(body);
+
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
               method: 'PUT',
@@ -281,6 +288,16 @@ export const useTimerStore = create<TimerState>()(
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ splitTimes: body }),
             });
+
+            // 1. 응답이 성공적이지 않을 때 (400, 500 등)
+            if (!res.ok) {
+              // 💡 await를 붙여서 데이터를 기다리고, 변수에 담아 출력합니다.
+              const errorData = await res.json().catch(() => ({}));
+              console.log('🛑 백엔드 에러 메세지:', errorData);
+
+              // 만약 프록시 서버(route.ts)에서 에러를 { error: ... } 형태로 감쌌다면
+              // console.log('🔍 상세 내용:', errorData.error);
+            }
 
             if (res.status === 401 || res.url.includes('/auth/')) {
               console.warn('세션이 만료되어 로그인이 필요합니다.');
@@ -302,13 +319,9 @@ export const useTimerStore = create<TimerState>()(
           const cleanReview = review.trim();
           if (cleanReview.length < 15) return;
 
-          const splitTimes = actions.getSplitTimesForServer().map((s) => ({
-            ...s,
-            // 만약 date가 T00:00:00 형식이면 현재 시간으로 보정
-            date: s.date.includes('T00:00:00')
-              ? new Date().toISOString()
-              : s.date,
-          }));
+          const splitTimes = formatSplitTimesForServer(
+            actions.getSplitTimesForServer()
+          );
 
           const taskList = tasks.map((t) => ({
             content: t.content,
@@ -381,6 +394,7 @@ export const useTimerStore = create<TimerState>()(
           }));
 
           set({ saveTasks: [...tasks] });
+          console.log('보내는 요청 : ', JSON.stringify(requestBody));
 
           try {
             const res = await fetch(`${API.TASK.UPDATE(studyLogId)}`, {
@@ -390,6 +404,22 @@ export const useTimerStore = create<TimerState>()(
               body: JSON.stringify({ tasks: requestBody }),
             });
 
+            // 2. 스터디 로그 목록 가져오기 테스트
+            // 💡 괄호()를 붙여서 함수를 실행해야 URL이 나옵니다!
+            const testUrl = API.STUDYLOGS.GET_STUDY_LOGS();
+            console.log('🔍 호출할 URL:', testUrl);
+
+            const test = await fetch(testUrl, {
+              method: 'GET',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+            });
+
+            // 💡 fetch 응답 객체 자체를 찍으면 내용이 안 보일 수 있으니 JSON으로 파싱해서 찍어보세요.
+            const testData = await test.json().catch(() => ({}));
+            console.log('✅ test 결과 데이터:', testData);
+
+            /////
             if (res.status === 401 || res.url.includes('/auth/')) {
               console.warn('세션이 만료되어 로그인이 필요합니다.');
               // 필요한 경우 로그인 페이지로 이동시키거나 알림 처리
