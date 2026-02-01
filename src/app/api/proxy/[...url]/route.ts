@@ -59,7 +59,7 @@ async function handleRequest(
 
     // 2. 성공 시
     const data = await res.json();
-    console.log('🧡res : ', data);
+    console.log('🧡res : ', JSON.stringify(data));
     return NextResponse.json(data);
   } catch (error) {
     console.error('Proxy Error:', error); // 디버깅용

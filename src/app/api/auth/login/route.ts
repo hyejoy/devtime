@@ -2,11 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL } from '@/config/env';
 import { API } from '@/constants/endpoints';
+import { IS_PROD } from '@/config/env';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-
-  const isProd = process.env.NODE_ENV === 'development';
 
   // const backendRes = await fetch(`${API_BASE_URL}${API.AUTH.LOGIN}`, {
   const backendRes = await fetch(`${API_BASE_URL}${API.AUTH.LOGIN}`, {
@@ -51,7 +50,7 @@ export async function POST(req: NextRequest) {
   const cookieOptions = {
     path: '/',
     httpOnly: true,
-    secure: isProd,
+    secure: IS_PROD,
     sameSite: 'lax' as const,
   };
 
