@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL } from '@/config/env';
 import { API } from '@/constants/endpoints';
 import { cookies } from 'next/headers';
+import { IS_PROD } from '@/config/env';
 
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
   const refreshToken = cookieStore.get('refreshToken')?.value;
-  const isProd = process.env.NODE_ENV === 'development';
 
   // 쿠키 옵션 공통 설정
   const cookieOptions = {
     httpOnly: true,
-    secure: isProd,
+    secure: IS_PROD,
     sameSite: 'lax' as const,
     path: '/',
   };
