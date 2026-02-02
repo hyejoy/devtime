@@ -3,7 +3,7 @@ import TimerClient from './TimerClient';
 
 export default function Page() {
   return (
-    <main>
+    <main className="mt-[96px]">
       <TimerClient />
     </main>
   );

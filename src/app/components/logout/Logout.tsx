@@ -44,7 +44,12 @@ export default function Logout() {
   };
 
   return (
-    <button type="button" onClick={handleLogout} style={{ cursor: 'pointer' }}>
+    <button
+      className="w-30 rounded-3xl bg-gray-200"
+      type="button"
+      onClick={handleLogout}
+      style={{ cursor: 'pointer' }}
+    >
       로그아웃
     </button>
   );
