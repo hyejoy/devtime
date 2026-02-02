@@ -41,4 +41,7 @@ export const API = {
     DELETE_STUDY_LOG: (studyLogId: string) =>
       `${PROXY}/study-logs/${studyLogId}`,
   },
+  STATS: {
+    STATS: `${PROXY}/stats`,
+  },
 } as const;
