@@ -61,6 +61,7 @@ interface TimerState {
     // 시작, 일시정지, 정지
     startTimerOnServer: () => Promise<void>;
     pauseTimerOnServer: () => Promise<void>;
+    saveCurrentTime: () => Promise<void>;
     finishTimerOnServer: () => Promise<void>;
     // 할일 목록 fetch / update
     updateTaskList: () => Promise<void>;
@@ -280,6 +281,45 @@ export const useTimerStore = create<TimerState>()(
           );
 
           console.log(body);
+
+          try {
+            const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
+              method: 'PUT',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ splitTimes: body }),
+            });
+
+            // 1. 응답이 성공적이지 않을 때 (400, 500 등)
+            if (!res.ok) {
+              // 💡 await를 붙여서 데이터를 기다리고, 변수에 담아 출력합니다.
+              const errorData = await res.json().catch(() => ({}));
+              console.log('🛑 백엔드 에러 메세지:', errorData);
+
+              // 만약 프록시 서버(route.ts)에서 에러를 { error: ... } 형태로 감쌌다면
+              // console.log('🔍 상세 내용:', errorData.error);
+            }
+
+            if (res.status === 401 || res.url.includes('/auth/')) {
+              console.warn('세션이 만료되어 로그인이 필요합니다.');
+              // 필요한 경우 로그인 페이지로 이동시키거나 알림 처리
+              return;
+            }
+            if (!res.ok) throw new Error('일시정지 동기화 실패');
+          } catch (err) {
+            console.error('일시정지 중 오류:', err);
+          }
+        },
+        saveCurrentTime: async () => {
+          const { timerId, isRunning, actions } = get();
+          if (!timerId || !isRunning) return;
+
+          // 화면 먼저 멈춤 (UX 최적화)
+
+          // 서버에 현재까지의 기록 동기화
+          const body = formatSplitTimesForServer(
+            actions.getSplitTimesForServer()
+          );
 
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
