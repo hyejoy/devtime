@@ -29,6 +29,7 @@
 
   /** Color Mix */
   --color-login-bg: color-mix(in srgb, var(--color-white) 50%, transparent);
+  --color-white-mix-50: color-mix(in srgb, var(--color-white) 50%, transparent);
 
   /* Common */
   --color-disabled-bg: var(--color-gray-200);
@@ -133,6 +134,14 @@
   --btn-text-field-disabled-text: var(--color-gray-400);
 
   --color-active-link: var(--color-brand-primary);
+
+  /* 상단에서 하단으로 이어지는 깊이감 있는 그라데이션 */
+  --background-image-main-layout: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f0f2f9 40%,
+    #e2e5f0 100%
+  );
 }
 
 :root {
@@ -217,8 +226,6 @@
       var(--state-active-overlay),
       var(--state-active-overlay)
     );
-
-  --color-background: linear-gradient(180deg, #f6f7f9 0%, #e9ecf5 100%);
 
   /* Gradient */
   --gradient-primary: linear-gradient(
