@@ -45,6 +45,7 @@ export default function TimerClient() {
     fetchTaskList,
     setTotalActiveSeconds,
     setIsRunning,
+    saveCurrentTime,
   } = useTimerActions();
 
   // Dialog Actions
@@ -88,13 +89,20 @@ export default function TimerClient() {
   // 3. [Sync] 10분마다 서버 자동 저장 (Polling)
   useEffect(() => {
     if (!timerId || !isRunning) return;
+
+    // 10분 = 10 * 60 * 1000 ms
+    const TEN_MINUTES = 10 * 60 * 1000;
+
     const intervalId = setInterval(async () => {
-      // persist가 이미 데이터를 들고 있으므로 pause 시와 동일한 로직 사용 가능
-      pauseTimerOnServer();
-      console.log('10분 자동 동기화 완료');
-    }, 600000);
+      try {
+        await saveCurrentTime();
+      } catch (err) {
+        console.error('동기화 실패:', err);
+      }
+    }, TEN_MINUTES);
+
     return () => clearInterval(intervalId);
-  }, [timerId, isRunning]);
+  }, [timerId, isRunning, pauseTimerOnServer, setIsRunning]);
 
   // --- 핸들러 ---
   const onStart = () => {
@@ -104,7 +112,7 @@ export default function TimerClient() {
     } else {
       startTimerOnServer();
     }
-};
+  };
 
   const onFinish = () => {
     setTimerStatus('DONE');
