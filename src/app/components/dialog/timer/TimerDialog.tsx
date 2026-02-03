@@ -16,6 +16,7 @@ import TaskItem from '../../timer/TaskItem';
 import Button from '../../ui/Button';
 import DialogField from '../DialogField';
 import styles from './TimerDialog.module.css';
+import clsx from 'clsx';
 
 const cx = classNames.bind(styles);
 
@@ -48,7 +49,7 @@ export default function TimerDialog() {
 
   /** handler */
   useEffect(() => {
-    console.log('타이틀 연필 모야 눌렀나요? ', editingMode);
+    // console.log('Tilte ✏️ click? ', editingMode);
   }, [editingMode]);
 
   const changeEditingMode = () => {
@@ -163,16 +164,15 @@ export default function TimerDialog() {
               value={title}
               size={'large'}
               placeholder="오늘의 목표"
-              className={cx('todayGoal')}
+              className={clsx('text-primary-900')}
             />
-            <Input.Label name="todo" label="할일목록">
-              할 일 목록
-            </Input.Label>
+            <Input.Label name="todo">할 일 목록</Input.Label>
           </>
         )}
-        <div className={cx('inputGroupField')}>
-          <div className={cx('inputField')}>
+        <div className={clsx('mb-3.5 flex w-full')}>
+          <div className={clsx('flex-1')}>
             <Input.Input
+              className={clsx('text-gray-300')}
               size={'normal'}
               name="todo"
               placeholder="할 일을 추가해 주세요."
