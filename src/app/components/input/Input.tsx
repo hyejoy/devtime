@@ -1,23 +1,15 @@
 'use client';
 
-import React, {
-  Children,
-  ComponentProps,
-  JSX,
-  ReactNode,
-  useState,
-} from 'react';
-import classNames from 'classnames/bind';
-import styles from './Input.module.css';
-import TextLabel from '../ui/TextLabel'; // 기존 공용 라벨 활용
+import React, { ComponentProps, JSX, ReactNode, useState } from 'react';
+import clsx from 'clsx';
+import TextLabel from '../ui/TextLabel';
 
-const cx = classNames.bind(styles);
-
+/** --- Interfaces --- */
 interface InputGroupComponent {
   ({ children }: { children: ReactNode }): JSX.Element;
-  Label: typeof TextLabel;
+  Label: typeof Label;
   Input: typeof Input;
-  List: typeof List; // 할 일 목록 영역을 위해 추가 제안
+  List: typeof List;
 }
 
 interface InputProps extends Omit<
@@ -25,55 +17,79 @@ interface InputProps extends Omit<
   'size'
 > {
   onAdd?: () => void;
-  size?: 'normal' | 'large'; // 이제 문자열을 안전하게 사용 가능
+  size?: 'normal' | 'large';
   buttonLabel?: string;
-  classNames?: string;
 }
+
 interface LabelProps extends ComponentProps<'label'> {
   name: string;
   className?: string;
   children?: ReactNode;
 }
 
-// 1. Root: 전체를 감싸는 컨테이너
+/** --- Components --- */
+
+// 1. Root: 전체 컨테이너
 const InputGroupField: InputGroupComponent = ({ children }) => {
-  return <div className={cx('groupContainer')}>{children}</div>;
+  return <div className="flex flex-col">{children}</div>;
 };
 
-const Label = ({ name, ...props }: LabelProps) => {
-  return <label htmlFor={name} className={cx('label')} {...props} />;
+// 2. Label: 폰트 및 간격 적용
+const Label = ({ name, className, ...props }: LabelProps) => {
+  return (
+    <label
+      htmlFor={name}
+      className={clsx(
+        'mb-2 text-[14px] leading-[18px] font-medium text-gray-600',
+        className
+      )}
+      {...props}
+    />
+  );
 };
-// 2. Input: 입력창 + 추가 버튼이 결합된 형태
+
+// 3. Input: 입력창 + 버튼 (기존 .inputWrapper와 통합)
 const Input = ({
   onAdd,
   buttonLabel = '추가',
   size = 'normal',
-  onChange, // 부모로부터 받은 onChange가 있다면 실행하기 위해 추출
+  onChange,
   className,
   ...props
 }: InputProps) => {
   const [inputValue, setInputValue] = useState('');
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    if (onChange) onChange(e); // 외부에서 주입한 핸들러도 작동하게 함
+    if (onChange) onChange(e);
   };
 
   const isTextExist = inputValue.trim().length > 0;
 
   return (
-    <div className={cx('inputWrapper')}>
+    <div className="flex min-w-[568px]">
       <input
-        className={cx('input', `${size}SizeInput`, className)}
+        className={clsx(
+          'flex-1 transition-all duration-200 outline-none',
+          size === 'large'
+            ? 'mb-8 w-full border-none bg-transparent text-[36px] leading-[46px] font-bold placeholder:text-gray-300 focus:text-gray-600'
+            : 'rounded-l-lg border-none bg-gray-100 px-6 py-[18px] text-[16px] text-gray-600',
+          className
+        )}
         onChange={handleInputChange}
         {...props}
       />
       {onAdd && (
         <button
           type="button"
-          // 글자가 있을 때만 'active' 클래스 추가
-          className={cx('addButton', { buttonActive: isTextExist })}
+          className={clsx(
+            'cursor-pointer rounded-r-lg p-[18px] text-[16px] font-bold transition-colors duration-200',
+            isTextExist
+              ? 'text-brand-primary bg-gray-100'
+              : 'bg-gray-100 text-gray-400'
+          )}
           onClick={onAdd}
-          disabled={!isTextExist} // 글자 없을 땐 버튼 비활성화 (선택 사항)
+          disabled={!isTextExist}
         >
           {buttonLabel}
         </button>
@@ -82,9 +98,9 @@ const Input = ({
   );
 };
 
-// 3. List: 아래에 나열될 아이템들을 담는 컨테이너
+// 4. List: 아이템 목록 컨테이너
 const List = ({ children }: { children: ReactNode }) => {
-  return <div className={cx('listContainer')}>{children}</div>;
+  return <div className="mt-4">{children}</div>;
 };
 
 // 네임스페이스 매핑
