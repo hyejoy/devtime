@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import StudyTimeChart from '@/app/components/chart/Chart';
+import StudyTimeChart from '@/app/components/dashboard/Chart';
 import SummaryCard from '@/app/components/dashboard/SummaryCard';
 import { API } from '@/constants/endpoints';
 import { StatsResponse, WeekdayStudyTime } from '@/types/api';
