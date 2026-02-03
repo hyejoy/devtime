@@ -1,11 +1,12 @@
 'use client';
-import { ReactNode } from 'react';
-import Logo from '../components/ui/Logo';
+import { useTimerActions } from '@/store/timer';
+import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
-import Logout from '../components/logout/Logout';
 import { usePathname } from 'next/navigation';
-import clsx from 'clsx';
+import { ReactNode } from 'react';
+import Logout from '../components/logout/Logout';
+import Logo from '../components/ui/Logo';
 
 const NAV_ITEMS = [
   { label: '대시보드', href: '/dashboard' },
@@ -13,8 +14,14 @@ const NAV_ITEMS = [
 ];
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const { setLastStartTimestamp } = useTimerActions();
   const pathname = usePathname();
 
+  // 이동할때도 타이머 작동하도록 설정
+  const linkClick = () => {
+    const now = new Date().toISOString();
+    setLastStartTimestamp(now);
+  };
   return (
     /* .root 스타일 적용 */
     <div className="mx-auto flex min-h-[100dvh] w-[70vw] max-w-[1200px] flex-col">
@@ -31,6 +38,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <nav className="flex flex-1 items-center gap-[2.3rem] text-base leading-normal font-semibold">
           {NAV_ITEMS.map((item) => (
             <Link
+              onClick={linkClick}
               key={item.href}
               href={item.href}
               className={clsx(
