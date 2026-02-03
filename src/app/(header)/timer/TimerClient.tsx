@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
 import classNames from 'classnames/bind';
 import styles from './TimerClient.module.css';
@@ -18,6 +18,7 @@ import {
   useDisplayTime,
   useTotalSeconds,
   useTaskReview,
+  useTimerStauts,
 } from '@/store/timer';
 import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 import { API } from '@/constants/endpoints';
@@ -30,6 +31,7 @@ export default function TimerClient() {
   // Zustand States
   const timerId = useTimerId();
   const isRunning = useIsRunning();
+  const timerStatus = useTimerStauts();
   const lastStartTimestamp = useLastStartTimestamp();
   const title = useTaskTitle();
   const totalActiveSeconds = useTotalSeconds();
@@ -46,12 +48,19 @@ export default function TimerClient() {
     setTotalActiveSeconds,
     setIsRunning,
     saveCurrentTime,
+    setLastStartTimestamp,
   } = useTimerActions();
 
   // Dialog Actions
   const isDialogOpen = useIsDialogOpen();
   const { openDialog } = useDialogActions();
 
+  useEffect(() => {
+    // 페이지 접속시, 타이머 생성 안되어있을땐 lastTime 값 없음 유지
+    if (timerStatus === 'READY') {
+      setLastStartTimestamp('');
+    }
+  }, []);
   // 1. [Hydration] 클라이언트 사이드 데이터 복구 확인
   useEffect(() => {
     setIsHydrated(true);

@@ -221,9 +221,15 @@ export const useTimerStore = create<TimerState>()(
 
         /*** 🚩 API Actions ***/
         startTimerOnServer: async () => {
-          const { lastStartTimestamp, tasks, title, timerId, actions } = get();
+          const {
+            lastStartTimestamp,
+            tasks,
+            title,
+            timerId,
+            actions,
+            timerStatus,
+          } = get();
           const now = new Date().toISOString();
-
           if (!lastStartTimestamp) {
             console.log('🚀처음 생성 시도');
 
@@ -256,6 +262,7 @@ export const useTimerStore = create<TimerState>()(
                 timerId: data.timerId,
                 lastStartTimestamp: now,
                 isRunning: true,
+                timerStatus: 'RUNNING',
               });
 
               useDialogStore.getState().actions.closeDialog();
@@ -263,7 +270,11 @@ export const useTimerStore = create<TimerState>()(
               console.error('타이머 생성 에러:', err);
             }
           } else if (timerId) {
-            set({ lastStartTimestamp: now, isRunning: true });
+            set({
+              lastStartTimestamp: now,
+              isRunning: true,
+              timerStatus: 'RUNNING',
+            });
             useDialogStore.getState().actions.closeDialog();
           }
         },
