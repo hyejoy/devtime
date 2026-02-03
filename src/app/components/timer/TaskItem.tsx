@@ -42,12 +42,12 @@ export default function TaskItem({
   return (
     <div
       className={clsx(
-        'flex min-h-[4.5rem] items-center rounded-lg transition-colors duration-200',
+        'flex min-h-[4.5rem] items-center rounded-lg leading-loose transition-colors duration-200',
         task.isCompleted ? 'bg-gray-400' : 'bg-brand-primary'
       )}
     >
       {/* 1. 심볼 아이콘 */}
-      <div className="flex h-[50px] w-[100px] shrink-0 items-center justify-center pl-4">
+      <div className="justify-cente mr-2 ml-7 flex h-[50px] w-[50px] shrink-0 items-center">
         <Image
           src="/images/timerDialog/symbol.png"
           alt="symbol"
