@@ -10,7 +10,8 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  // 1. Prettier와 충돌하는 ESLint 규칙을 끄기 위해 'prettier' 추가 권장
+  ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   {
     ignores: [
       'node_modules/**',
@@ -20,8 +21,10 @@ const eslintConfig = [
       'next-env.d.ts',
     ],
     rules: {
-      '@typescript-eslint/no-unused-vars': 'warn', //사용하지 않는 변수가 있을 때 경고로 표시
-      '@typescript-eslint/no-explicit-any': 'off', //any 타입을 명시적으로 정의할 수 있도록 허용
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
+      // 필요 시 Prettier 권장 규칙 추가
+      'prettier/prettier': 'off', // ESLint에서 Prettier 에러를 잡지 않도록 설정 (포맷팅은 오직 Prettier가 담당)
     },
   },
 ];
