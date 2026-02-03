@@ -89,7 +89,7 @@ const initialState = {
   isRunning: false,
   totalActiveSeconds: 0,
   displayTime: { hours: '00', mins: '00', secs: '00' },
-  lastStartTimestamp: undefined,
+  lastStartTimestamp: '',
   dailyRecords: {},
   title: '',
   review: '',
@@ -280,8 +280,6 @@ export const useTimerStore = create<TimerState>()(
             actions.getSplitTimesForServer()
           );
 
-          console.log(body);
-
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
               method: 'PUT',
@@ -381,6 +379,8 @@ export const useTimerStore = create<TimerState>()(
             });
 
             if (res.ok) {
+              console.log('ok>>>>>>', res);
+
               actions.timerReset(); // 모든 상태 초기화
               useDialogStore.getState().actions.closeDialog();
             } else {
