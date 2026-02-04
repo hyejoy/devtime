@@ -6,6 +6,14 @@ import SummaryCard from '@/app/components/dashboard/SummaryCard';
 import { API } from '@/constants/endpoints';
 import { StatsResponse, WeekdayStudyTime } from '@/types/api';
 import { formatTime_hours, formatTime_minutes } from '@/utils/formatTime';
+import StudyHeatmap from '@/app/components/dashboard/StudyHeatmap';
+
+/** --- 임시 데이터 --- */
+const today = new Date();
+
+// 1년 전 날짜 설정
+const oneYearAgo = new Date();
+oneYearAgo.setFullYear(today.getFullYear() - 1);
 
 /** --- Interfaces & Types --- */
 interface SummaryItem {
@@ -22,6 +30,12 @@ interface DisplayPart {
 interface FormattedData {
   title: string;
   parts: DisplayPart[];
+}
+
+export interface RawData {
+  date: string;
+  studyTimeHours: number;
+  colorLevel: number;
 }
 
 const CHART_LABELS = ['24시간', '16시간', '8시간'];
@@ -61,8 +75,9 @@ export default function DashboardPage() {
     taskRate: 0,
   });
 
-  const [weekdayStudyTime, setWeekdayStudyTime] =
-    useState<WeekdayStudyTime | null>(null);
+  const [heatmapData, setHeatmapData] = useState<RawData[]>([]);
+
+  const [weekdayStudyTime, setWeekdayStudyTime] = useState<WeekdayStudyTime | null>(null);
 
   /** --- Data Mapping --- */
   const summaryConfigs: SummaryItem[] = [
@@ -106,9 +121,30 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
+  useEffect(() => {
+    const fetchHeatMap = async () => {
+      try {
+        const res = await fetch(`${API.HEATMAP.HEATMAP}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log('학습 히트맵 데이터 조회 (바다):', data.heatmap);
+          setHeatmapData(data);
+        }
+      } catch (err) {
+        console.log('학습 히트맵 데이터 조회 (바다) err : ', err);
+      }
+    };
+
+    fetchHeatMap();
+  }, []);
+
   return (
     <main className="mt-[40px] w-[70vw] flex-1">
-      <section className="flex gap-1.5">
+      <section className="flex gap-4">
         {/* 요약 카드 그리드 */}
         <div className="grid w-2/5 grid-cols-2 gap-4">
           {summaryConfigs.map((config) => {
@@ -148,7 +184,9 @@ export default function DashboardPage() {
       </section>
 
       {/* 하단 추가 섹션들 */}
-      <section className="mt-8">공부시간 바다</section>
+      <section>
+        <StudyHeatmap heatmapData={heatmapData} />
+      </section>
       <section className="mt-8">학습 기록</section>
     </main>
   );
