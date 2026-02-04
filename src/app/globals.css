@@ -1,5 +1,46 @@
-/* 여기에 커스텀 스타일이나 @theme 설정을 추가합니다 */
 @import "tailwindcss";
+@layer components {
+  /*** 공부시간 바다 ***/
+  /* 기본 사각형(rect) 스타일 및 곡률 */
+  .react-calendar-heatmap rect {
+    rx: 2.5px;
+    ry: 2.5px;
+    transition:
+      fill 0.2s ease,
+      stroke 0.2s ease;
+    /* 사각형 테두리 설정 보강 */
+    stroke-width: 0.5px;
+  }
+
+  /* 호버 효과 */
+  .react-calendar-heatmap rect:hover {
+    stroke: #d1d5db; /* gray-300 */
+    stroke-width: 1.5px;
+    cursor: pointer;
+  }
+
+  /* 4. 월 라벨 스타일 */
+  .react-calendar-heatmap .react-calendar-heatmap-month-label {
+    fill: var(--color-gray-600) !important;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .react-calendar-heatmap {
+    margin-left: 1rem;
+    padding: 2px;
+    overflow: visible !important;
+    /* 브라우저가 레이아웃을 계산할 때 테두리를 포함하도록 설정 */
+    box-sizing: content-box;
+  }
+
+  /* SVG 내부의 그룹(g) 요소도 밖으로 나가는 선을 허용하도록 설정 */
+  .react-calendar-heatmap g,
+  .react-calendar-heatmap svg {
+    overflow: visible !important;
+  }
+}
+
 @theme {
   /* styles/tokens/colors.css */
   /* Brand Primary */
@@ -60,28 +101,12 @@
 
   /* hover / active는 overlay gradient */
   --btn-primary-hover-bg:
-    linear-gradient(
-      0deg,
-      var(--color-brand-primary),
-      var(--color-brand-primary)
-    ),
-    linear-gradient(
-      0deg,
-      var(--state-hover-overlay),
-      var(--state-hover-overlay)
-    );
+    linear-gradient(0deg, var(--color-brand-primary), var(--color-brand-primary)),
+    linear-gradient(0deg, var(--state-hover-overlay), var(--state-hover-overlay));
 
   --btn-primary-active-bg:
-    linear-gradient(
-      0deg,
-      var(--color-brand-primary),
-      var(--color-brand-primary)
-    ),
-    linear-gradient(
-      0deg,
-      var(--state-active-overlay),
-      var(--state-active-overlay)
-    );
+    linear-gradient(0deg, var(--color-brand-primary), var(--color-brand-primary)),
+    linear-gradient(0deg, var(--state-active-overlay), var(--state-active-overlay));
 
   --btn-primary-focus-bg: var(--color-brand-primary);
   --btn-primary-disabled-bg: var(--color-gray-400);
@@ -136,96 +161,40 @@
   --color-active-link: var(--color-brand-primary);
 
   /* 상단에서 하단으로 이어지는 깊이감 있는 그라데이션 */
-  --background-image-main-layout: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #f0f2f9 40%,
-    #e2e5f0 100%
-  );
+  --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #f0f2f9 40%, #e2e5f0 100%);
+
+  /** heatmap _ 공부 시간 바다 */
+  --color-heatmap1:
+    "#B8CAFF", --color-heatmap2: "#87A6FF", --color-heatmap3: "var(--color-brand-primary)",
+    --color-heatmap4: "#1E50E5", --color-heatmap5: "#023E99";
 }
 
 :root {
-  --color-brand-primary-10: color-mix(
-    in srgb,
-    var(--color-brand-primary) 10%,
-    transparent
-  );
-  --color-brand-primary-20: color-mix(
-    in srgb,
-    var(--color-brand-primary) 20%,
-    transparent
-  );
-  --color-brand-primary-30: color-mix(
-    in srgb,
-    var(--color-brand-primary) 30%,
-    transparent
-  );
+  --color-brand-primary-10: color-mix(in srgb, var(--color-brand-primary) 10%, transparent);
+  --color-brand-primary-20: color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+  --color-brand-primary-30: color-mix(in srgb, var(--color-brand-primary) 30%, transparent);
 
   --btn-secondary-hover-bg:
-    linear-gradient(
-      0deg,
-      var(--color-primary-light),
-      var(--color-primary-light)
-    ),
-    linear-gradient(
-      0deg,
-      var(--state-hover-overlay),
-      var(--state-hover-overlay)
-    );
+    linear-gradient(0deg, var(--color-primary-light), var(--color-primary-light)),
+    linear-gradient(0deg, var(--state-hover-overlay), var(--state-hover-overlay));
 
   --btn-secondary-active-bg:
-    linear-gradient(
-      0deg,
-      var(--color-primary-light),
-      var(--color-primary-light)
-    ),
-    linear-gradient(
-      0deg,
-      var(--state-hover-overlay),
-      var(--state-hover-overlay)
-    );
+    linear-gradient(0deg, var(--color-primary-light), var(--color-primary-light)),
+    linear-gradient(0deg, var(--state-hover-overlay), var(--state-hover-overlay));
 
   --btn-text-field-hover-bg:
-    --btn-tertiary-hover-bg: linear-gradient(
-        0deg,
-        var(--color-tertiary),
-        var(--color-tertiary)
-      ),
-    linear-gradient(
-      0deg,
-      var(--state-hover-overlay),
-      var(--state-hover-overlay)
-    );
+    --btn-tertiary-hover-bg: linear-gradient(0deg, var(--color-tertiary), var(--color-tertiary)),
+    linear-gradient(0deg, var(--state-hover-overlay), var(--state-hover-overlay));
 
   --btn-tertiary-active-bg:
     linear-gradient(0deg, var(--color-tertiary), var(--color-tertiary)),
-    linear-gradient(
-      0deg,
-      var(--state-active-overlay),
-      var(--state-active-overlay)
-    ),
-    linear-gradient(
-      0deg,
-      var(--color-brand-primary-10),
-      var(--color-brand-primary-10)
-    ),
-    linear-gradient(
-      0deg,
-      var(--state-hover-overlay),
-      var(--state-hover-overlay)
-    );
+    linear-gradient(0deg, var(--state-active-overlay), var(--state-active-overlay)),
+    linear-gradient(0deg, var(--color-brand-primary-10), var(--color-brand-primary-10)),
+    linear-gradient(0deg, var(--state-hover-overlay), var(--state-hover-overlay));
 
   --btn-text-field-active-bg:
-    linear-gradient(
-      0deg,
-      var(--color-brand-primary-10),
-      var(--color-brand-primary-10)
-    ),
-    linear-gradient(
-      0deg,
-      var(--state-active-overlay),
-      var(--state-active-overlay)
-    );
+    linear-gradient(0deg, var(--color-brand-primary-10), var(--color-brand-primary-10)),
+    linear-gradient(0deg, var(--state-active-overlay), var(--state-active-overlay));
 
   /* Gradient */
   --gradient-primary: linear-gradient(
