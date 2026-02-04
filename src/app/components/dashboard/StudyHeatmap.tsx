@@ -72,25 +72,25 @@ const mockData: RawItem[] = [
     formattedTime: '12시간 0초', // 10시간 초과 구간
   },
   {
-    date: '2025-02-02',
+    date: '2025-12-30',
     colorLevel: 1,
     totalSeconds: 3600, // 1시간
     formattedTime: '1시간 0초', // 0-2시간 구간
   },
   {
-    date: '2025-02-02',
+    date: '2025-12-30',
     colorLevel: 1,
     totalSeconds: 3628, // 1시간 28초
     formattedTime: '1시간 28초', // 0-2시간 구간
   },
   {
-    date: '2025-02-02',
+    date: '2025-12-30',
     colorLevel: 1,
     totalSeconds: 3600, // 1시간
     formattedTime: '1시간 0초', // 0-2시간 구간
   },
   {
-    date: '2025-02-02',
+    date: '2025-12-30',
     colorLevel: 1,
     totalSeconds: 3600, // 1시간
     formattedTime: '1시간 0초', // 0-2시간 구간
@@ -159,9 +159,9 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
 
   return (
     <div className="mt-4 w-full rounded-xl bg-white p-6">
-      <h2 className="mb-8 text-xl font-bold text-gray-700">공부 시간 바다</h2>
+      <h2 className="mb-4 text-[18px] font-semibold text-gray-400">공부 시간 바다</h2>
       <div className="flex w-full">
-        <div className="flex flex-col gap-1.5 pt-6 text-[11px] text-gray-600">
+        <div className="flex flex-col gap-1.5 pt-7 text-[12px] font-medium text-gray-500">
           {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
             <span key={day}>{day}</span>
           ))}
@@ -188,22 +188,26 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
               '11월',
               '12월',
             ]}
-            // 1. 타입을 기본 라이브러리 타입으로 받고, 내부에서 'as'로 단언합니다.
+            // 1. 타입을 기본 라이브러리 타입으로 받고, 내부에서 'as'로 단언
             classForValue={(value: ReactCalendarHeatmapValue<string> | undefined) => {
               const data = value as TransformedValue | undefined;
+              // 데이터가 없을 때
+              if (!data || data.totalSeconds === 0) {
+                return 'fill-gray-100 stroke-gray-200 stroke-[0.5px]';
+              }
 
               if (!data || data.colorLevel <= 0)
-                return 'fill-[#F9FAFB] stroke-[#CCD0D6] stroke-[0.5px]';
-              if (data.colorLevel === 5) return 'fill-[#023E99] stroke-[#023E99] stroke-[0.5px]';
-              if (data.colorLevel === 4) return 'fill-[#1E50E5] stroke-[#1E50E5] stroke-[0.5px]';
-              if (data.colorLevel === 3) return 'fill-[#4c79ff] stroke-[#4c79ff] stroke-[0.5px]';
-              if (data.colorLevel <= 2) return 'fill-[#7EA5FA] stroke-[#7EA5FA] stroke-[0.5px]';
-              return 'fill-[#B8CAFF]';
+                if (data.colorLevel === 5) return 'fill-heatmap5 stroke-heatmap5 stroke-[0.5px]';
+              if (data.colorLevel === 4) return 'fill-heatmap4 stroke-heatmap4 stroke-[0.5px]';
+              if (data.colorLevel === 3) return 'fill-heatmap3 stroke-heatmap3 stroke-[0.5px]';
+              if (data.colorLevel === 2) return 'fill-heatmap2 stroke-heatmap2 stroke-[0.5px]';
+
+              return 'fill-heatmap1 stroke-heatmap1 stroke-[0.5px]';
             }}
-            // 2. 툴팁 속성도 마찬가지로 수정합니다.
+            // 2. 툴팁 속성
             tooltipDataAttrs={(value: ReactCalendarHeatmapValue<string> | undefined) => {
               const data = value as TransformedValue | undefined;
-
+              console.log('data!', data);
               return {
                 'data-tooltip-id': tooltipId,
                 'data-tooltip-content': data?.formattedTime
@@ -213,8 +217,21 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
             }}
           />
         </div>
+        {/* 하단 Color 색 */}
       </div>
-      {/* 레전드 부분 생략 (동일) */}
+      <div className="mt-4 flex items-center gap-2 text-[12px]">
+        <span className="text-heatmap1 font-semibold">Shallow</span>
+        <div className="flex">
+          <div className="bg-heatmap1 h-4 w-6 rounded-tl-sm rounded-bl-sm" />
+          <div className="bg-heatmap2 h-4 w-6" />
+          <div className="bg-heatmap3 h-4 w-6" />
+          <div className="bg-heatmap4 h-4 w-6" />
+          <div className="bg-heatmap5 h-4 w-6 rounded-tr-sm rounded-br-sm" />
+        </div>
+        <span className="text-heatmap5 font-semibold">Deep</span>
+      </div>
+      {/* Tooltip */}
+      <Tooltip id={tooltipId} />
     </div>
   );
 }
