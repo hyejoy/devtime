@@ -60,7 +60,7 @@ export default function TimerClient() {
     if (timerStatus === 'READY') {
       setLastStartTimestamp('');
     }
-  }, []);
+  });
   // 1. [Hydration] 클라이언트 사이드 데이터 복구 확인
   useEffect(() => {
     setIsHydrated(true);
