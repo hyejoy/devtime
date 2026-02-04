@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 type MetricPart = { value: number | string; unit?: string };
 
 export interface StatCardProps {
@@ -25,13 +25,13 @@ export default function SummaryCard({
         {title}
       </div>
       <div className="text-primary-900 mt-2 flex items-baseline justify-end">
-        {parts.map((item) => (
-          <>
+        {parts.map((item, index) => (
+          <React.Fragment key={index}>
             <div className="text-[36px] leading-none font-bold">
               {item.value}
             </div>
             <div className="leading-none">{item.unit}</div>
-          </>
+          </React.Fragment>
         ))}
         {/* <div className="text-[36px] leading-none font-bold">32</div>
         <div className="leading-none">분</div> */}
