@@ -1,11 +1,7 @@
 'use client';
 
 import { WeekdayStudyTime } from '@/types/api';
-import {
-  formatTime_hours,
-  formatTime_minutes,
-  formatTime_seconds,
-} from '@/utils/formatTime';
+import { formatTime_hours, formatTime_minutes, formatTime_seconds } from '@/utils/formatTime';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,9 +18,7 @@ interface StudyAvgChartProps {
 }
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
-export default function StudyAvgChart({
-  weekdayStudyTime,
-}: StudyAvgChartProps) {
+export default function StudyAvgChart({ weekdayStudyTime }: StudyAvgChartProps) {
   const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   // 예시: 요일별 평균 공부시간(0~24)
@@ -40,11 +34,7 @@ export default function StudyAvgChart({
     'Saturday',
   ];
 
-  const studySeconds = weekdayStudyTime
-    ? days.map((day) => weekdayStudyTime[day])
-    : [];
-
-  console.log('studySeconds😀', studySeconds);
+  const studySeconds = weekdayStudyTime ? days.map((day) => weekdayStudyTime[day]) : [];
 
   const studyHours = studySeconds.map((s) => formatTime_hours(s));
   const remainHours = studyHours.map((h) => 24 - h);
@@ -56,7 +46,6 @@ export default function StudyAvgChart({
     return `${h > 0 ? `${h}시 ` : ''}${m > 0 ? `${m}분 ` : '0분'}${sec > 0 ? `${sec}초` : ''}`.trim();
   });
 
-  console.log('😼label : ', studyHoursLabel);
   const data: ChartData<'bar'> = {
     labels,
     datasets: [
@@ -72,8 +61,7 @@ export default function StudyAvgChart({
           const study = studyHours[i];
 
           if (study === 0) return 0; // 안 보임
-          if (study === 24)
-            return { topLeft: 8, topRight: 8, bottomLeft: 8, bottomRight: 8 };
+          if (study === 24) return { topLeft: 8, topRight: 8, bottomLeft: 8, bottomRight: 8 };
 
           return { topLeft: 0, topRight: 0, bottomLeft: 8, bottomRight: 8 };
         },
@@ -90,9 +78,8 @@ export default function StudyAvgChart({
           const remain = remainHours[i];
           const study = studyHours[i];
 
-          if (remain === 0) return 0; // 공부가 24시간이면 remain은 안 보임
-
-          if (study === 0) {
+          // if (remain === 0) return 0; // 공부가 24시간이면 remain은 안 보임
+          if (study === 0 || remain === 24 || remain === undefined || study === undefined) {
             // remain이 24시간(전체 바) -> 위/아래 모두 둥글게
             return { topLeft: 8, topRight: 8, bottomLeft: 8, bottomRight: 8 };
           }
@@ -175,9 +162,9 @@ export default function StudyAvgChart({
         />
       </div>
       <div className="flex w-full justify-around pr-5">
-        {labels.map((item) => (
+        {labels.map((item, index) => (
           <div
-            key={item}
+            key={`${item}-${index}`}
             className="text-primary-900 flex h-6 w-6 items-center justify-center rounded-4xl bg-[rgba(255,255,255,0.5)] text-center text-[12px] font-bold"
           >
             {item}
