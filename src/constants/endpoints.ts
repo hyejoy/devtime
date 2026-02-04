@@ -44,4 +44,7 @@ export const API = {
   STATS: {
     STATS: `${PROXY}/stats`,
   },
+  HEATMAP: {
+    HEATMAP: `${PROXY}/heatmap`,
+  },
 } as const;
