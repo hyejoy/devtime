@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   };
   return (
     /* .root 스타일 적용 */
-    <div className="mx-auto flex min-h-[100dvh] w-[70vw] max-w-[1200px] flex-col">
+    <div className="mx-auto flex min-h-[100dvh] w-[70vw] flex-col">
       {/* .headerField 스타일 적용 */}
       <header className="flex pt-4">
         {/* .logoField 스타일 적용 */}
@@ -64,16 +64,14 @@ export default function Layout({ children }: { children: ReactNode }) {
             height={40}
           />
           {/* .profileNickName 스타일 적용 (색상은 CSS 변수 대신 임시로 slate-900 적용) */}
-          <div className="text-base leading-normal font-bold text-slate-900">
-            닉네임입니다
-          </div>
+          <div className="text-base leading-normal font-bold text-slate-900">닉네임입니다</div>
           <Logout />
         </div>
       </header>
 
       {/* .childrenContainer & .childrenField 스타일 적용 */}
       <main className="mx-auto mt-3.5 flex items-center justify-center">
-        <div className="w-full">{children}</div>
+        <div className="min-w-[70vw]">{children}</div>
       </main>
     </div>
   );
