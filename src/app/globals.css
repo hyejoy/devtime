@@ -50,7 +50,8 @@
 
 @theme {
   /* Brand Primary */
-  --font-pretendard: var(--font-pretendard);
+  --font-pretendard: var(--font-pretendard), sans-serif;
+  --font-digital: var(--font-digital), sans-serif;
   --color-brand-primary: #4c79ff;
 
   /* Color scale */
@@ -153,6 +154,13 @@
 
   /* table - 학습 기록 */
   --color-table-header: #4c79ff1a;
+
+  /* 변수명 앞에 'background-image-'를 붙이면 bg- 접두사와 자동 연결됩니다. */
+  --background-image-timer-block: linear-gradient(
+    135deg,
+    rgba(76, 121, 255, 0) 0%,
+    rgba(76, 121, 255, 0.2) 100%
+  );
 }
 
 :root {

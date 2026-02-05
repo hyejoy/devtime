@@ -16,24 +16,24 @@ interface DialogFieldComponent {
 const DialogField = (({ children }: { children: ReactNode }) => {
   const dialogType = useDialogType();
 
-  useEffect(() => {
-    // 1. 현재 스크롤바 너비 계산 (윈도우 전체 너비 - 실제 문서 너비)
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    const originalOverflow = window.getComputedStyle(document.body).overflow;
-    const originalPaddingRight = window.getComputedStyle(document.body).paddingRight;
+  // useEffect(() => {
+  //   // 1. 현재 스크롤바 너비 계산 (윈도우 전체 너비 - 실제 문서 너비)
+  //   const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+  //   const originalOverflow = window.getComputedStyle(document.body).overflow;
+  //   const originalPaddingRight = window.getComputedStyle(document.body).paddingRight;
 
-    // 2. 스크롤 잠금 및 패딩 추가 (흔들림 방지 핵심)
-    document.body.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+  //   // 2. 스크롤 잠금 및 패딩 추가 (흔들림 방지 핵심)
+  //   document.body.style.overflow = 'hidden';
+  //   if (scrollbarWidth > 0) {
+  //     document.body.style.paddingRight = `${scrollbarWidth}px`;
+  //   }
 
-    return () => {
-      // 3. 원래대로 복구
-      document.body.style.overflow = originalOverflow;
-      document.body.style.paddingRight = originalPaddingRight;
-    };
-  }, []);
+  //   return () => {
+  //     // 3. 원래대로 복구
+  //     document.body.style.overflow = originalOverflow;
+  //     document.body.style.paddingRight = originalPaddingRight;
+  //   };
+  // }, []);
 
   return (
     /* .overlay 역할 */

@@ -8,7 +8,6 @@ import styles from './TimerClient.module.css';
 import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import TimerButton from './../../components/timer/TimerButton';
 import TimerDialog from '@/app/components/dialog/timer/TimerDialog';
-
 import {
   useTimerActions,
   useIsRunning,
@@ -22,8 +21,7 @@ import {
 } from '@/store/timer';
 import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 import { API } from '@/constants/endpoints';
-
-const cx = classNames.bind(styles);
+import clsx from 'clsx';
 
 export default function TimerClient() {
   const [isHydrated, setIsHydrated] = useState(false); // ✅ 하이드레이션 체크
@@ -149,69 +147,66 @@ export default function TimerClient() {
   if (!isHydrated) return null;
 
   return (
-    <div className={cx('page')}>
+    <main className="flex flex-col items-center justify-center">
+      {/* <div className={cx('title', lastStartTimestamp ? 'titleRunning' : 'titleDefault')}> */}
       <div
-        className={cx(
-          'title',
-          lastStartTimestamp ? 'titleRunning' : 'titleDefault'
+        className={clsx(
+          'jusntify-ceter mb-20 flex text-7xl font-bold whitespace-nowrap',
+          lastStartTimestamp ? 'text-brand-primary' : 'text-brand-primary-30'
         )}
       >
         <div>{lastStartTimestamp ? title : '오늘도 열심히 달려봐요!'}</div>
       </div>
 
-      <div className={cx('timerContainer')}>
+      <div className={'flex h-auto justify-center'}>
         <TimeDisplay unit="HOURS" value={hours} />
-        <div className={cx('dot')}>:</div>
+        <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+          :
+        </div>
         <TimeDisplay unit="MINUTES" value={mins} />
-        <div className={cx('dot')}>:</div>
+        <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+          :
+        </div>
         <TimeDisplay unit="SECONDS" value={secs} />
       </div>
 
-      <div className={cx('buttonContainer')}>
-        <div className={cx('buttonWrap')}>
-          <div className={cx('playButtonField')}>
-            <TimerButton
-              timerType="start"
-              active={!isRunning}
-              onClick={onStart}
-            />
-            <TimerButton
-              timerType="pause"
-              active={isRunning}
-              onClick={pauseTimerOnServer}
-            />
-            <TimerButton
-              timerType="finish"
-              active={!!lastStartTimestamp}
-              onClick={onFinish}
-            />
-          </div>
+      <div className={'mt-20 flex h-[100px] w-[55%]'}>
+        <div className={'box-border flex flex-1/3 items-center justify-end gap-14'}>
+          <TimerButton timerType="start" active={!isRunning} onClick={onStart} />
+          <TimerButton timerType="pause" active={isRunning} onClick={pauseTimerOnServer} />
+          <TimerButton timerType="finish" active={!!lastStartTimestamp} onClick={onFinish} />
         </div>
 
-        <div className={cx('iconContainer')}>
-          {lastStartTimestamp && (
-            <div className={cx('iconWrap')}>
-              <Image
-                className={cx('iconField')}
-                src="/images/timer/see-todo-active.png"
-                alt="목록"
-                width={55}
-                height={55}
-                onClick={handleEditTasks}
-              />
-              <Image
-                className={cx('iconField')}
-                src="/images/timer/reset-active.png"
-                alt="리셋"
-                width={55}
-                height={55}
-                onClick={resetTimer}
-              />
-            </div>
-          )}
+        <div className={'flex items-center justify-center'}>
+          <div className={'ml-20 flex w-[150px] flex-1 gap-8'}>
+            {lastStartTimestamp && (
+              <>
+                <Image
+                  className={
+                    'flex inline-flex flex-1 cursor-pointer items-center justify-center gap-20'
+                  }
+                  src="/images/timer/see-todo-active.png"
+                  alt="목록"
+                  width={55}
+                  height={55}
+                  onClick={handleEditTasks}
+                />
+                <Image
+                  className={
+                    'flex inline-flex flex-1 cursor-pointer items-center justify-center gap-20'
+                  }
+                  src="/images/timer/reset-active.png"
+                  alt="리셋"
+                  width={55}
+                  height={55}
+                  onClick={resetTimer}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
       {isDialogOpen && <TimerDialog />}
-    </div>
+    </main>
   );
 }
