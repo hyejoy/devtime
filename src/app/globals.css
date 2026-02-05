@@ -40,6 +40,11 @@
   .react-calendar-heatmap svg {
     overflow: visible !important;
   }
+
+  /** pagination */
+  .pg-btn {
+    @apply flex h-6 w-6 items-center justify-center rounded-sm transition-colors;
+  }
 }
 
 @theme {
@@ -143,6 +148,9 @@
   --color-heatmap3: var(--color-brand-primary);
   --color-heatmap4: #1e50e5;
   --color-heatmap5: #023e99;
+
+  /* table - 학습 기록 */
+  --color-table-header: #4c79ff1a;
 }
 
 :root {
