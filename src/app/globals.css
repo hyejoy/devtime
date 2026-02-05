@@ -143,6 +143,7 @@
   --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #f0f2f9 40%, #e2e5f0 100%);
 
   /* heatmap - 공부 시간 바다*/
+  --color-heatmap0: var(--color-gray-50);
   --color-heatmap1: #b8caff;
   --color-heatmap2: #87a6ff;
   --color-heatmap3: var(--color-brand-primary);

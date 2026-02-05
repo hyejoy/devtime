@@ -124,8 +124,10 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
             classForValue={(value) => {
               const data = value as TransformedValue | undefined;
               if (!data || data.totalSeconds === 0) {
-                return 'fill-gray-100 stroke-gray-200 stroke-[0.5px]';
+                // 학습시간 없는 경우
+                return 'fill-white stroke-gray-300 stroke-[0.5px]';
               }
+
               // Tailwind @theme 변수 사용
               switch (data.colorLevel) {
                 case 5:
@@ -156,7 +158,8 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
       <div className="mt-4 flex items-center gap-2 text-[12px]">
         <span className="text-heatmap1 font-semibold">Shallow</span>
         <div className="flex">
-          <div className="bg-heatmap1 h-4 w-6 rounded-tl-sm rounded-bl-sm" />
+          <div className="bg-heatmap0 h-4 w-6 rounded-tl-sm rounded-bl-sm" />
+          <div className="bg-heatmap1 h-4 w-6" />
           <div className="bg-heatmap2 h-4 w-6" />
           <div className="bg-heatmap3 h-4 w-6" />
           <div className="bg-heatmap4 h-4 w-6" />
