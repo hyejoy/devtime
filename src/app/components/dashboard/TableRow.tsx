@@ -1,3 +1,4 @@
+import { useDialogActions } from '@/store/dialog';
 import Image from 'next/image';
 
 interface TableRowProps {
@@ -9,6 +10,7 @@ interface TableRowProps {
   pendingTasks: number;
   achievementRate: string;
   onDelete: (id: string) => void;
+  onClickRow: (id: string) => void;
 }
 
 export default function TableRow({
@@ -20,6 +22,7 @@ export default function TableRow({
   pendingTasks,
   achievementRate,
   onDelete,
+  onClickRow,
 }: TableRowProps) {
   // 오타 수정 및 버블링 방지 추가
   const handleDeleteItem = (e: React.MouseEvent) => {
@@ -29,14 +32,17 @@ export default function TableRow({
       onDelete(id);
     }
   };
+
+  const { openDialog, changeType } = useDialogActions();
+  const handleShowTaskDetail = () => {
+    onClickRow(id);
+    changeType('custom');
+    openDialog();
+  };
   return (
     <tr className="border-b border-gray-200 text-[16px] font-medium text-gray-700 transition-colors hover:bg-gray-50">
       <td className="p-9 pl-10 text-left">{date}</td>
-      <td
-        className="text-primary-900 cursor-pointer font-semibold"
-        // TODO : SHOW POPUP
-        onClick={() => console.log('click')}
-      >
+      <td className="text-primary-900 cursor-pointer font-semibold" onClick={handleShowTaskDetail}>
         {goal}
       </td>
       <td className="">{studyTime}</td>
@@ -51,7 +57,7 @@ export default function TableRow({
             width={17.5}
             height={19.5}
             className="cursor-pointer object-contain"
-            onClick={handleDeleteItem}
+            onClick={handleShowTaskDetail}
           />
         </div>
       </td>

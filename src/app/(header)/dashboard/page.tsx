@@ -5,14 +5,15 @@ import Pagination from '@/app/components/dashboard/Pagination';
 import StudyHeatmap from '@/app/components/dashboard/StudyHeatmap';
 import SummaryCard from '@/app/components/dashboard/SummaryCard';
 import Table from '@/app/components/dashboard/Table';
+import DashboardDialog from '@/app/components/dialog/dashboard/DashboardDialog';
 import { API } from '@/constants/endpoints';
-import { StatsResponse, WeekdayStudyTime } from '@/types/api';
+import { useIsDialogOpen } from '@/store/dialog';
+import { StatsResponse, StudyLogsDetailResponse, WeekdayStudyTime } from '@/types/api';
+import { FormattedData, RawData, StudyLogsResponse, SummaryItem } from '@/types/dashboard';
 import { formatTime_hours, formatTime_minutes } from '@/utils/formatTime';
 import { useEffect, useState } from 'react';
 
-/** --- 임시 데이터 --- */
 const today = new Date();
-
 // 1년 전 날짜 설정
 const oneYearAgo = new Date();
 oneYearAgo.setFullYear(today.getFullYear() - 1);
@@ -28,51 +29,6 @@ const INITIAL_STUDY_LOGS: StudyLogsResponse = {
   studyLogs: [],
 };
 
-/** --- Interfaces & Types --- */
-interface SummaryItem {
-  title: string;
-  value: number;
-  type: 'time' | 'day' | 'percent';
-}
-
-interface DisplayPart {
-  value: number;
-  unit: '시간' | '분' | '일째' | '%';
-}
-
-interface FormattedData {
-  title: string;
-  parts: DisplayPart[];
-}
-
-export interface RawData {
-  date: string;
-  studyTimeHours: number;
-  colorLevel: number;
-}
-
-export interface Pagination {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
-export type StudyLog = {
-  completionRate: number;
-  date: string;
-  id: string;
-  incompleteTasks: number;
-  studyTime: number;
-  todayGoal: string;
-  totalTasks: number;
-};
-
-export interface StudyLogsResponse {
-  pagination: Pagination;
-  studyLogs: StudyLog[];
-}
 const CHART_LABELS = ['24시간', '16시간', '8시간'];
 
 /** --- Utility: 데이터 포맷팅 함수 --- */
@@ -109,9 +65,11 @@ export default function DashboardPage() {
     avgDailyStudyTime: 0,
     taskRate: 0,
   });
-  const [studyLogs, setStudyLogs] = useState<StudyLogsResponse>(INITIAL_STUDY_LOGS);
+  const [studyLogs, setStudyLogs] = useState<StudyLogsResponse | null>(null);
+  const [detailLog, setDetailLog] = useState<StudyLogsDetailResponse | null>(null);
   const [heatmapData, setHeatmapData] = useState<RawData[]>([]);
-
+  const isDialogOpen = useIsDialogOpen();
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [weekdayStudyTime, setWeekdayStudyTime] = useState<WeekdayStudyTime | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   /** --- Data Mapping --- */
@@ -226,69 +184,115 @@ export default function DashboardPage() {
       console.log('학습기록 로그 삭제 에러 : ', err);
     }
   };
+
+  const handleRowClick = (id: string) => {
+    setDetailId(id);
+  };
   /** 학습 기록 (GRID)  데이터 조회 */
   useEffect(() => {
     fetchStudyLogs(1);
   }, []);
 
+  /** 디테일 다이얼로그 정보 불러오기 */
+  useEffect(() => {
+    const fetchLogDetail = async () => {
+      if (!detailId) return;
+      try {
+        const res = await fetch(`${API.STUDYLOGS.DELETE_STUDY_LOG(detailId)}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setDetailLog(data.data);
+          console.log('detail res :::: ', data);
+        }
+      } catch (err) {
+        console.log('로그 디테일 에러 : ', err);
+      }
+    };
+    fetchLogDetail();
+  }, [detailId]);
+
   return (
-    <main className="mt-[40px] w-[70vw] flex-1">
-      <section className="flex gap-4">
-        {/* 요약 카드 그리드 */}
-        <div className="grid w-2/5 grid-cols-2 gap-4">
-          {summaryConfigs.map((config) => {
-            const displayData = formatSummaryData(config);
-            return (
-              <SummaryCard
-                key={displayData.title}
-                title={displayData.title}
-                parts={displayData.parts}
-              />
-            );
-          })}
-        </div>
-
-        {/* 요일별 통계 차트 영역 */}
-        <div className="bg-brand-primary flex w-3/5 overflow-hidden rounded-xl">
-          <div className="w-1/3 pt-6 pl-6 text-[18px] font-semibold text-white">
-            요일별 공부 시간 평균
+    <div>
+      <main className="mt-[40px] w-[70vw] flex-1">
+        <section className="flex gap-4">
+          {/* 요약 카드 그리드 */}
+          <div className="grid w-2/5 grid-cols-2 gap-4">
+            {summaryConfigs.map((config) => {
+              const displayData = formatSummaryData(config);
+              return (
+                <SummaryCard
+                  key={displayData.title}
+                  title={displayData.title}
+                  parts={displayData.parts}
+                />
+              );
+            })}
           </div>
 
-          <div className="mt-12 mr-12 mb-4 flex w-2/3 items-end">
-            {/* Y축 커스텀 라벨 */}
-            <div className="flex h-full w-20 flex-col justify-between pt-3 pb-16 text-nowrap">
-              {CHART_LABELS.map((label) => (
-                <span
-                  key={label}
-                  className="mr-2 border-t border-white/20 text-[12px] text-white/50"
-                >
-                  {label}
-                </span>
-              ))}
+          {/* 요일별 통계 차트 영역 */}
+          <div className="bg-brand-primary flex w-3/5 overflow-hidden rounded-xl">
+            <div className="w-1/3 pt-6 pl-6 text-[18px] font-semibold text-white">
+              요일별 공부 시간 평균
             </div>
-            {/* 차트 컴포넌트 */}
-            <StudyTimeChart weekdayStudyTime={weekdayStudyTime} />
+
+            <div className="mt-12 mr-12 mb-4 flex w-2/3 items-end">
+              {/* Y축 커스텀 라벨 */}
+              <div className="flex h-full w-20 flex-col justify-between pt-3 pb-16 text-nowrap">
+                {CHART_LABELS.map((label) => (
+                  <span
+                    key={label}
+                    className="mr-2 border-t border-white/20 text-[12px] text-white/50"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+              {/* 차트 컴포넌트 */}
+              <StudyTimeChart weekdayStudyTime={weekdayStudyTime} />
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* 하단 추가 섹션들 */}
-      <section>
-        <StudyHeatmap heatmapData={heatmapData} />
-      </section>
-
-      {/* 학습기록 Grid */}
-      <section className="mt-8 mb-16 flex flex-col rounded-xl bg-white p-6 pb-8">
-        <div className="mb-6 text-[18px] font-semibold text-gray-400">학습 기록</div>
-
-        {/* Table 컴포넌트 */}
-        <Table studyLogs={studyLogs.studyLogs} onDelete={onDeleteAndRefresh} />
-
-        {/* Pagination 컴포넌트 : 직접 페이지네이션 상태 관리 */}
-        <section className="mt-9 flex items-center justify-center">
-          <Pagination {...studyLogs.pagination} onPageChange={handleMovePage} />
         </section>
-      </section>
-    </main>
+
+        {/* 하단 추가 섹션들 */}
+        <section>
+          <StudyHeatmap heatmapData={heatmapData} />
+        </section>
+
+        {/* 학습기록 Grid */}
+        <section className="mt-8 mb-16 flex flex-col rounded-xl bg-white p-6 pb-8">
+          <div className="mb-6 text-[18px] font-semibold text-gray-400">학습 기록</div>
+
+          {/* Table 컴포넌트 */}
+          {studyLogs && (
+            <Table
+              onClickRow={handleRowClick}
+              studyLogs={studyLogs.studyLogs}
+              onDelete={onDeleteAndRefresh}
+            />
+          )}
+
+          {/* Pagination 컴포넌트 : 직접 페이지네이션 상태 관리 */}
+          {studyLogs && (
+            <section className="mt-9 flex items-center justify-center">
+              <Pagination {...studyLogs.pagination} onPageChange={handleMovePage} />
+            </section>
+          )}
+        </section>
+        {/* 학습 기록 상세보기 모달 */}
+        {isDialogOpen && detailLog && (
+          <DashboardDialog
+            detailLog={detailLog}
+            onReset={() => {
+              setDetailLog(null); // detail 내용 초기화
+              setDetailId(null); // detail Id 초기화
+            }}
+          />
+        )}
+      </main>
+    </div>
   );
 }

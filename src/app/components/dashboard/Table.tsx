@@ -2,17 +2,17 @@
 
 'use client';
 
-import React from 'react';
-import TableRow from './TableRow';
-import { StudyLog } from '@/app/(header)/dashboard/page';
+import { StudyLog } from '@/types/dashboard';
 import { formated_Time } from '@/utils/formatTime';
+import TableRow from './TableRow';
 
 interface TableProps {
   studyLogs: StudyLog[];
   onDelete: (id: string) => void;
+  onClickRow: (id: string) => void;
 }
 
-export default function StudyTable({ studyLogs, onDelete }: TableProps) {
+export default function StudyTable({ studyLogs, onDelete, onClickRow }: TableProps) {
   return (
     <div className="w-full overflow-hidden rounded-xl bg-white">
       <table className="w-full text-sm">
@@ -39,6 +39,7 @@ export default function StudyTable({ studyLogs, onDelete }: TableProps) {
               pendingTasks={item.incompleteTasks}
               achievementRate={`${item.completionRate}%`}
               onDelete={onDelete}
+              onClickRow={onClickRow}
             />
           ))}
         </tbody>
