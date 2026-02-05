@@ -93,3 +93,17 @@ export interface StatsResponse {
   taskCompletionRate: number; // 목표 달성률(%)
   weekdayStudyTime: WeekdayStudyTime;
 }
+
+export interface StudyLogsDetailResponse {
+  id: string;
+  date: string;
+  todayGoal: string;
+  studyTime: number;
+  tasks: {
+    id: string;
+    content: string;
+    isCompleted: boolean;
+  }[];
+  review: string;
+  completionRate: number;
+}
