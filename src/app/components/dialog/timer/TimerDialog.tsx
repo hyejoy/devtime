@@ -23,6 +23,7 @@ const cx = classNames.bind(styles);
 export default function TimerDialog() {
   /** local state */
   const [editingMode, setEditingMode] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [newTask, setNewTask] = useState('');
 
   /** zustand state */
@@ -52,13 +53,14 @@ export default function TimerDialog() {
     // console.log('Tilte ✏️ click? ', editingMode);
   }, [editingMode]);
 
-  const changeEditingMode = () => {
-    setEditingMode((prev) => !prev);
+  const changeEditingMode = (value: boolean) => {
+    setEditingMode(value);
   };
-  const onAddTask = () => {
+  const handleAddTask = () => {
     if (newTask.trim() === '') return;
-    addTask(newTask);
-    setNewTask('');
+    addTask(newTask); // Zustand에 작업 추가
+    setEditingMode(true); // 즉시 편집 모드 활성화 (아이콘 노출)
+    setNewTask(''); // 입력창 비우기
   };
 
   const saveChanges = () => {
@@ -93,11 +95,7 @@ export default function TimerDialog() {
     switch (timerStatus) {
       case 'READY':
         return (
-          <Button
-            onClick={onStartTimer}
-            variant="secondary"
-            disabled={!isReadyToStart}
-          >
+          <Button onClick={onStartTimer} variant="secondary" disabled={!isReadyToStart}>
             타이머 시작하기
           </Button>
         );
@@ -109,11 +107,7 @@ export default function TimerDialog() {
         );
       case 'DONE':
         return (
-          <Button
-            variant="secondary"
-            disabled={review.length < 15}
-            onClick={onClickDone}
-          >
+          <Button variant="secondary" disabled={review.length < 15} onClick={onClickDone}>
             공부 완료하기
           </Button>
         );
@@ -122,8 +116,7 @@ export default function TimerDialog() {
     }
   };
 
-  const onChangeNewTask = (e: ChangeEvent<HTMLInputElement>) =>
-    setNewTask(e.target.value);
+  const onChangeNewTask = (e: ChangeEvent<HTMLInputElement>) => setNewTask(e.target.value);
 
   const onStartTimer = async () => {
     await startTimerOnServer();
@@ -133,10 +126,8 @@ export default function TimerDialog() {
     finishTimerOnServer();
   };
 
-  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) =>
-    updateTitle(e.target.value);
-  const onReviewChange = (e: ChangeEvent<HTMLTextAreaElement>) =>
-    updateReview(e.target.value);
+  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => updateTitle(e.target.value);
+  const onReviewChange = (e: ChangeEvent<HTMLTextAreaElement>) => updateReview(e.target.value);
 
   /** dialog값 고정 */
   useEffect(() => {
@@ -178,8 +169,8 @@ export default function TimerDialog() {
               placeholder="할 일을 추가해 주세요."
               value={newTask}
               onChange={onChangeNewTask}
-              onKeyDown={(e) => e.key === 'Enter' && onAddTask()}
-              onAdd={onAddTask}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+              onAdd={handleAddTask}
             />
           </div>
         </div>
@@ -191,7 +182,7 @@ export default function TimerDialog() {
             <div className={cx('listHeader')}>
               <div className={cx('content')}>할 일 목록</div>
               {!editingMode && (
-                <div className={cx('button')} onClick={changeEditingMode}>
+                <div className={cx('button')} onClick={() => changeEditingMode(true)}>
                   <Image
                     src="/images/timerDialog/edit_black.png"
                     className={cx('iconButton')}

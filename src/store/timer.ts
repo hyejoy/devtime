@@ -121,12 +121,7 @@ export const useTimerStore = create<TimerState>()(
         setLastStartTimestamp: (time) => set({ lastStartTimestamp: time }),
 
         tick: () => {
-          const {
-            isRunning,
-            lastStartTimestamp,
-            dailyRecords,
-            totalActiveSeconds,
-          } = get();
+          const { isRunning, lastStartTimestamp, dailyRecords, totalActiveSeconds } = get();
 
           if (!isRunning || !lastStartTimestamp) return;
           // 10분(600초)마다 세션 연장 요청
@@ -183,25 +178,18 @@ export const useTimerStore = create<TimerState>()(
         toggleDone: (id) =>
           set((state) => ({
             tasks: state.tasks.map((task) =>
-              task.id === id
-                ? { ...task, isCompleted: !task.isCompleted }
-                : task
+              task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
             ),
           })),
 
         addTask: (content) =>
           set((state) => ({
-            tasks: [
-              { id: nanoid(), content, isCompleted: false },
-              ...state.tasks,
-            ],
+            tasks: [{ id: nanoid(), content, isCompleted: false }, ...state.tasks],
           })),
 
         updateTaskContent: (id, content) =>
           set((state) => ({
-            tasks: state.tasks.map((task) =>
-              task.id === id ? { ...task, content } : task
-            ),
+            tasks: state.tasks.map((task) => (task.id === id ? { ...task, content } : task)),
           })),
 
         deletedTask: (id) =>
@@ -221,14 +209,7 @@ export const useTimerStore = create<TimerState>()(
 
         /*** 🚩 API Actions ***/
         startTimerOnServer: async () => {
-          const {
-            lastStartTimestamp,
-            tasks,
-            title,
-            timerId,
-            actions,
-            timerStatus,
-          } = get();
+          const { lastStartTimestamp, tasks, title, timerId, actions, timerStatus } = get();
           const now = new Date().toISOString();
           if (!lastStartTimestamp) {
             console.log('🚀처음 생성 시도');
@@ -287,9 +268,7 @@ export const useTimerStore = create<TimerState>()(
           set({ isRunning: false });
 
           // 서버에 현재까지의 기록 동기화
-          const body = formatSplitTimesForServer(
-            actions.getSplitTimesForServer()
-          );
+          const body = formatSplitTimesForServer(actions.getSplitTimesForServer());
 
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
@@ -326,9 +305,7 @@ export const useTimerStore = create<TimerState>()(
           // 화면 먼저 멈춤 (UX 최적화)
 
           // 서버에 현재까지의 기록 동기화
-          const body = formatSplitTimesForServer(
-            actions.getSplitTimesForServer()
-          );
+          const body = formatSplitTimesForServer(actions.getSplitTimesForServer());
 
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
@@ -368,9 +345,7 @@ export const useTimerStore = create<TimerState>()(
           const cleanReview = review.trim();
           if (cleanReview.length < 15) return;
 
-          const splitTimes = formatSplitTimesForServer(
-            actions.getSplitTimesForServer()
-          );
+          const splitTimes = formatSplitTimesForServer(actions.getSplitTimesForServer());
 
           const taskList = tasks.map((t) => ({
             content: t.content,
@@ -408,20 +383,13 @@ export const useTimerStore = create<TimerState>()(
           try {
             const { studyLogId } = get();
             if (!studyLogId) return;
-            const res = await fetch(
-              `${API.STUDYLOGS.GET_STUDY_LOG(studyLogId)}`,
-              {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
+            const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(studyLogId)}`, {
+              method: 'GET',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+            });
             const result = await res.json(); // result는 { success: true, data: {...} } 형태
-            if (
-              result.success &&
-              result.data &&
-              Array.isArray(result.data.tasks)
-            ) {
+            if (result.success && result.data && Array.isArray(result.data.tasks)) {
               const fetchedTasks = result.data.tasks;
               set({
                 tasks: fetchedTasks,
@@ -478,7 +446,7 @@ export const useTimerStore = create<TimerState>()(
             }
             if (!res.ok) throw new Error('일시정지 동기화 실패');
           } catch (err) {
-            console.log('할 일 목록 전체 업데이트 실패');
+            console.log('할 일 목록 전체 업데이트 실패', err);
           }
         },
       },
@@ -506,12 +474,9 @@ export const useTimerStauts = () => useTimerStore((state) => state.timerStatus);
 export const useStudyLogId = () => useTimerStore((state) => state.studyLogId);
 export const useTimerId = () => useTimerStore((state) => state.timerId);
 export const useIsRunning = () => useTimerStore((state) => state.isRunning);
-export const useDailyRecords = () =>
-  useTimerStore((state) => state.dailyRecords);
-export const useTotalSeconds = () =>
-  useTimerStore((state) => state.totalActiveSeconds);
-export const useLastStartTimestamp = () =>
-  useTimerStore((state) => state.lastStartTimestamp);
+export const useDailyRecords = () => useTimerStore((state) => state.dailyRecords);
+export const useTotalSeconds = () => useTimerStore((state) => state.totalActiveSeconds);
+export const useLastStartTimestamp = () => useTimerStore((state) => state.lastStartTimestamp);
 export const useDisplayTime = () => useTimerStore((state) => state.displayTime);
 
 export const useTaskTitle = () => useTimerStore((state) => state.title);

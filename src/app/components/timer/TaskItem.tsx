@@ -9,14 +9,10 @@ import CheckBox_ from '../ui/CheckBox_';
 interface TaskItemProps {
   task: Task;
   editingMode: boolean;
-  changeEditingMode: () => void;
+  changeEditingMode: (value: boolean) => void;
 }
 
-export default function TaskItem({
-  task,
-  editingMode = false,
-  changeEditingMode,
-}: TaskItemProps) {
+export default function TaskItem({ task, editingMode = false, changeEditingMode }: TaskItemProps) {
   const status = useTimerStauts();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [content, setContent] = useState(task.content);
@@ -29,14 +25,15 @@ export default function TaskItem({
   const onSave = () => {
     updateTaskContent(task.id, content);
     setIsEditingTitle(false);
-    if (editingMode) changeEditingMode();
+
+    if (editingMode) changeEditingMode(true);
   };
 
   const handleDone = () => toggleDone(task.id);
 
   const deleteTask = () => {
     deletedTask(task.id);
-    if (editingMode) changeEditingMode();
+    if (editingMode) changeEditingMode(true);
   };
 
   return (
@@ -113,18 +110,16 @@ export default function TaskItem({
         )}
 
         {/* 일반 모드: 체크박스 */}
-        {!editingMode &&
-          !isEditingTitle &&
-          (status === 'DONE' || status === 'RUNNING') && (
-            <CheckBox_
-              id={`checkbox${task.id}`}
-              className="whiteCheckbox"
-              width={36}
-              height={36}
-              isChecked={task.isCompleted}
-              onChange={handleDone}
-            />
-          )}
+        {!editingMode && !isEditingTitle && (status === 'DONE' || status === 'RUNNING') && (
+          <CheckBox_
+            id={`checkbox${task.id}`}
+            className="whiteCheckbox"
+            width={36}
+            height={36}
+            isChecked={task.isCompleted}
+            onChange={handleDone}
+          />
+        )}
       </div>
     </div>
   );
