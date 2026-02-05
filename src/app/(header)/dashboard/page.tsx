@@ -1,8 +1,10 @@
 'use client';
 
 import StudyTimeChart from '@/app/components/dashboard/Chart';
+import Pagination from '@/app/components/dashboard/Pagination';
 import StudyHeatmap from '@/app/components/dashboard/StudyHeatmap';
 import SummaryCard from '@/app/components/dashboard/SummaryCard';
+import Table from '@/app/components/dashboard/Table';
 import { API } from '@/constants/endpoints';
 import { StatsResponse, WeekdayStudyTime } from '@/types/api';
 import { formatTime_hours, formatTime_minutes } from '@/utils/formatTime';
@@ -14,6 +16,17 @@ const today = new Date();
 // 1년 전 날짜 설정
 const oneYearAgo = new Date();
 oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+const INITIAL_STUDY_LOGS: StudyLogsResponse = {
+  pagination: {
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0,
+    hasNext: false,
+    hasPrev: false,
+  },
+  studyLogs: [],
+};
 
 /** --- Interfaces & Types --- */
 interface SummaryItem {
@@ -38,6 +51,28 @@ export interface RawData {
   colorLevel: number;
 }
 
+export interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export type StudyLog = {
+  completionRate: number;
+  date: string;
+  id: string;
+  incompleteTasks: number;
+  studyTime: number;
+  todayGoal: string;
+  totalTasks: number;
+};
+
+export interface StudyLogsResponse {
+  pagination: Pagination;
+  studyLogs: StudyLog[];
+}
 const CHART_LABELS = ['24시간', '16시간', '8시간'];
 
 /** --- Utility: 데이터 포맷팅 함수 --- */
@@ -74,11 +109,11 @@ export default function DashboardPage() {
     avgDailyStudyTime: 0,
     taskRate: 0,
   });
-
+  const [studyLogs, setStudyLogs] = useState<StudyLogsResponse>(INITIAL_STUDY_LOGS);
   const [heatmapData, setHeatmapData] = useState<RawData[]>([]);
 
   const [weekdayStudyTime, setWeekdayStudyTime] = useState<WeekdayStudyTime | null>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
   /** --- Data Mapping --- */
   const summaryConfigs: SummaryItem[] = [
     { title: '누적 공부 시간', value: stats.totalStudyTime, type: 'time' },
@@ -91,7 +126,7 @@ export default function DashboardPage() {
     { title: '목표 달성률', value: stats.taskRate, type: 'percent' },
   ];
 
-  /** --- Effects --- */
+  /** --- 요일별 공부 시간 평균 데이터 조회--- */
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -103,7 +138,7 @@ export default function DashboardPage() {
 
         if (res.ok) {
           const data: StatsResponse = await res.json();
-          console.log(data);
+          console.log('요일별 공부시간 평균 데이터 : ', data);
 
           setStats({
             consecutiveDays: data.consecutiveDays,
@@ -121,6 +156,7 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
+  /** 히트맵(공부 시간 바다 ) 데이터 조회  */
   useEffect(() => {
     const fetchHeatMap = async () => {
       try {
@@ -140,6 +176,59 @@ export default function DashboardPage() {
     };
 
     fetchHeatMap();
+  }, []);
+
+  const fetchStudyLogs = async (page: number) => {
+    try {
+      const url = `${API.STUDYLOGS.GET_STUDY_LOGS({
+        page: page,
+        limit: 10,
+      })}`;
+
+      const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const result: StudyLogsResponse = data.data;
+        console.log('학습 기록 (GRID)조회 : ', result);
+        setStudyLogs(result);
+      }
+    } catch (err) {
+      console.log('학습 기록 (GRID)조회 err : ', err);
+    }
+  };
+
+  const handleMovePage = (page: number) => {
+    setCurrentPage(page); // 현재 페이지 상태 업데이트
+    fetchStudyLogs(page);
+  };
+
+  // 삭제 후 현재 페이지 데이터를 다시 불러오기 위함
+  const onDeleteAndRefresh = async (id: string) => {
+    await handleDeleteStudyLog(id);
+  };
+
+  const handleDeleteStudyLog = async (id: string) => {
+    try {
+      const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(id)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        fetchStudyLogs(currentPage);
+      }
+    } catch (err) {
+      console.log('학습기록 로그 삭제 에러 : ', err);
+    }
+  };
+  /** 학습 기록 (GRID)  데이터 조회 */
+  useEffect(() => {
+    fetchStudyLogs(1);
   }, []);
 
   return (
@@ -187,7 +276,19 @@ export default function DashboardPage() {
       <section>
         <StudyHeatmap heatmapData={heatmapData} />
       </section>
-      <section className="mt-8">학습 기록</section>
+
+      {/* 학습기록 Grid */}
+      <section className="mt-8 mb-16 flex flex-col rounded-xl bg-white p-6 pb-8">
+        <div className="mb-6 text-[18px] font-semibold text-gray-400">학습 기록</div>
+
+        {/* Table 컴포넌트 */}
+        <Table studyLogs={studyLogs.studyLogs} onDelete={onDeleteAndRefresh} />
+
+        {/* Pagination 컴포넌트 : 직접 페이지네이션 상태 관리 */}
+        <section className="mt-9 flex items-center justify-center">
+          <Pagination {...studyLogs.pagination} onPageChange={handleMovePage} />
+        </section>
+      </section>
     </main>
   );
 }
