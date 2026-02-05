@@ -139,7 +139,7 @@ export default function TimerDialog() {
 
   return (
     <DialogField>
-      <DialogField.Title type="text">
+      <DialogField.Title>
         {timerStatus === 'DONE' && (
           <div className={cx('isDoneTitleField')}>
             <div className={cx('isDoneMainTitle')}>오늘도 수고하셨어요!</div>
@@ -198,6 +198,7 @@ export default function TimerDialog() {
           <div className={cx('goalContainer')}>
             {tasks!.map((task) => (
               <TaskItem
+                isOnlyRead={false}
                 task={task}
                 key={task.id}
                 editingMode={editingMode}

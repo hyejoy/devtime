@@ -42,7 +42,7 @@ export default function LoginDialog({ dialogType, nextRoute }: Props) {
     const copy = LOGIN_DIALOG_COPY[dialogType];
     return (
       <DialogField>
-        <DialogField.Title type="text" title={copy.title} />
+        <DialogField.Title title={copy.title} />
         <DialogField.Content>{copy.content}</DialogField.Content>
         <DialogField.Button align="full">
           <Button onClick={handleConfirm}>{copy.buttonLabel}</Button>
