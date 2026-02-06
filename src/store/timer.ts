@@ -4,7 +4,15 @@ import { nanoid } from 'nanoid';
 import { useDialogStore } from './dialog';
 import { API } from '@/constants/endpoints';
 import { formatSplitTimesForServer } from '@/utils/timer';
-
+/** TODO
+ * 설계 측면에서 개선해야 할 큰 포인트들 말씀드리면,
+ * API 호출을 스토어 안에서 하는 것
+ * 다른 스토어 (useDialogStore)를 여기서 사용하는 것
+ * 인데요,
+ * API 호출부는 별도로 분리해주세요.
+ * 컴포넌트 또는 커스텀훅에서 API 호출 후 상태 업데이트 시에만 스토어를 활용하시면 됩니다
+ * 스토어끼리의 결합도 제거해주세요. dialog 는 UI 로직이므로 컴포넌트 레벨에서 처리해야 합니다
+ */
 // --- Types ---
 
 export type Task = {
@@ -470,6 +478,12 @@ export const useTimerStore = create<TimerState>()(
 );
 
 // --- Selectors ---
+/*** TODO
+ * 이 부분도 헷갈려요.
+ * use prefix 는 커스텀 훅에 사용되는 네이밍이라
+ * 사용처에서 볼 때 뭘 의미하는지 예상이 잘 안돼요.
+ * 네이밍 변경하시거나 사용처에서 직접 useTimerStore import 해서 참조하는 편이 좋을 것 같아요
+ */
 export const useTimerStauts = () => useTimerStore((state) => state.timerStatus);
 export const useStudyLogId = () => useTimerStore((state) => state.studyLogId);
 export const useTimerId = () => useTimerStore((state) => state.timerId);
