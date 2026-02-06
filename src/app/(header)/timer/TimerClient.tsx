@@ -122,65 +122,61 @@ export default function TimerClient() {
   if (!isHydrated) return null;
 
   return (
-    <main className="flex flex-col items-center justify-center">
-      {/* 메인 페이지 규격에 맞춘 상단 섹션 */}
-      <section className="mt-[10px] mb-[66px] flex flex-col items-center">
-        <div
-          className={clsx(
-            'text-[72px] leading-tight font-bold whitespace-nowrap',
-            totalActiveSeconds ? 'text-brand-primary' : 'text-brand-primary-30'
-          )}
-        >
-          {totalActiveSeconds ? title : '오늘도 열심히 달려봐요!'}
-        </div>
-      </section>
+    <>
+      <main className="flex flex-col items-center justify-center">
+        <section className="mt-[107px] mb-[50px]">
+          <div
+            className={clsx(
+              'text-[72px] font-bold',
+              totalActiveSeconds ? 'text-brand-primary' : 'text-brand-primary-30'
+            )}
+          >
+            {totalActiveSeconds ? title : '오늘도 열심히 달려봐요!'}
+          </div>
+        </section>
 
-      {/* 타이머 디스플레이 영역 */}
-      <div className="flex h-auto items-center justify-center">
-        <TimeDisplay unit="HOURS" value={hours} />
-        <div className="font-pretendard text-brand-primary px-8 py-4 text-[160px] leading-none">
-          :
+        <div className={'flex h-auto justify-center'}>
+          <TimeDisplay unit="HOURS" value={hours} />
+          <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+            :
+          </div>
+          <TimeDisplay unit="MINUTES" value={mins} />
+          <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+            :
+          </div>
+          <TimeDisplay unit="SECONDS" value={secs} />
         </div>
-        <TimeDisplay unit="MINUTES" value={mins} />
-        <div className="font-pretendard text-brand-primary px-8 py-4 text-[160px] leading-none">
-          :
+
+        <div className={'mt-20 flex h-[100px] w-[1020px] items-center justify-start'}>
+          <div className={'flex w-[680px] justify-end gap-14'}>
+            <TimerButton timerType="start" active={!isRunning} onClick={onStart} />
+            <TimerButton timerType="pause" active={isRunning} onClick={pauseTimerOnServer} />
+            <TimerButton timerType="finish" active={!!lastStartTimestamp} onClick={onFinish} />
+          </div>
+          <div className={'flex flex-1 justify-end gap-6'}>
+            {lastStartTimestamp && (
+              <>
+                <Image
+                  className="cursor-pointer transition-opacity hover:opacity-80"
+                  src="/images/timer/see-todo-active.png"
+                  alt="목록"
+                  width={55}
+                  height={55}
+                  onClick={handleEditTasks}
+                />
+                <Image
+                  className="cursor-pointer transition-opacity hover:opacity-80"
+                  src="/images/timer/reset-active.png"
+                  alt="리셋"
+                  width={55}
+                  height={55}
+                  onClick={resetTimer}
+                />
+              </>
+            )}
+          </div>
         </div>
-        <TimeDisplay unit="SECONDS" value={secs} />
-      </div>
-
-      {/* 하단 버튼 및 액션 아이콘 영역 */}
-      <div className="mt-20 flex h-[100px] w-full max-w-[800px] items-center justify-center">
-        {/* 중앙 정렬을 위한 컨테이너 */}
-        <div className="relative flex items-center gap-14">
-          <TimerButton timerType="start" active={!isRunning} onClick={onStart} />
-          <TimerButton timerType="pause" active={isRunning} onClick={pauseTimerOnServer} />
-          <TimerButton timerType="finish" active={!!lastStartTimestamp} onClick={onFinish} />
-
-          {/* 우측 보조 버튼 (목록/리셋) */}
-          {lastStartTimestamp && (
-            <div className="absolute left-full ml-10 flex gap-6">
-              <Image
-                className="cursor-pointer transition-opacity hover:opacity-80"
-                src="/images/timer/see-todo-active.png"
-                alt="목록"
-                width={55}
-                height={55}
-                onClick={handleEditTasks}
-              />
-              <Image
-                className="cursor-pointer transition-opacity hover:opacity-80"
-                src="/images/timer/reset-active.png"
-                alt="리셋"
-                width={55}
-                height={55}
-                onClick={resetTimer}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {isDialogOpen && <TimerDialog />}
-    </main>
+      </main>
+    </>
   );
 }
