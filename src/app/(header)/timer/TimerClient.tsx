@@ -1,9 +1,8 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import classNames from 'classnames/bind';
-import styles from './TimerClient.module.css';
+import clsx from 'clsx';
 
 import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import TimerButton from './../../components/timer/TimerButton';
@@ -16,15 +15,13 @@ import {
   useTaskTitle,
   useDisplayTime,
   useTotalSeconds,
-  useTaskReview,
   useTimerStauts,
 } from '@/store/timer';
 import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 import { API } from '@/constants/endpoints';
-import clsx from 'clsx';
 
 export default function TimerClient() {
-  const [isHydrated, setIsHydrated] = useState(false); // ✅ 하이드레이션 체크
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Zustand States
   const timerId = useTimerId();
@@ -53,53 +50,34 @@ export default function TimerClient() {
   const isDialogOpen = useIsDialogOpen();
   const { openDialog } = useDialogActions();
 
+  // 1. 하이드레이션 및 시간 보정
   useEffect(() => {
-    // 페이지 접속시, 타이머 생성 안되어있을땐 lastTime 값 없음 유지
+    setIsHydrated(true);
     if (timerStatus === 'READY') {
       setLastStartTimestamp('');
     }
-  });
-  // 1. [Hydration] 클라이언트 사이드 데이터 복구 확인
-  useEffect(() => {
-    setIsHydrated(true);
 
-    // 새로고침 시, 실행 중이었다면 서버와 동기화하거나 시간을 보정합니다.
     if (isRunning && lastStartTimestamp) {
       const now = new Date().getTime();
       const last = new Date(lastStartTimestamp).getTime();
       const gap = Math.floor((now - last) / 1000);
-
-      // 흐른 시간만큼 추가 (보정)
       setTotalActiveSeconds(totalActiveSeconds + gap);
     }
   }, []);
 
-  // 2. [Tick] 1초마다 UI 갱신
-  // 1초마다 숫자를 올리는 엔진 (Tick)
+  // 2. 타이머 엔진 (Tick)
   useEffect(() => {
-    // 로컬스토리지에서 복구된 isRunning이 true일 때만 인터벌 실행
     if (!isRunning) return;
-
-    console.log('⏱️ 타이머 엔진 재가동 (Tick)');
-
     const intervalId = setInterval(() => {
       tick();
     }, 1000);
-
-    // 컴포넌트 언마운트 시 인터벌 청소 (메모리 누수 방지)
-    return () => {
-      console.log('🛑 타이머 엔진 정지');
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, [isRunning, tick]);
 
-  // 3. [Sync] 10분마다 서버 자동 저장 (Polling)
+  // 3. 서버 자동 저장 (10분)
   useEffect(() => {
     if (!timerId || !isRunning) return;
-
-    // 10분 = 10 * 60 * 1000 ms
     const TEN_MINUTES = 10 * 60 * 1000;
-
     const intervalId = setInterval(async () => {
       try {
         await saveCurrentTime();
@@ -107,11 +85,9 @@ export default function TimerClient() {
         console.error('동기화 실패:', err);
       }
     }, TEN_MINUTES);
-
     return () => clearInterval(intervalId);
-  }, [timerId, isRunning, pauseTimerOnServer, setIsRunning]);
+  }, [timerId, isRunning, saveCurrentTime]);
 
-  // --- 핸들러 ---
   const onStart = () => {
     if (!timerId) {
       setTimerStatus('READY');
@@ -129,7 +105,7 @@ export default function TimerClient() {
 
   const handleEditTasks = () => {
     setTimerStatus('RUNNING');
-    fetchTaskList(); // 최신 목록 가져오기
+    fetchTaskList();
     openDialog();
   };
 
@@ -143,69 +119,67 @@ export default function TimerClient() {
     }
   };
 
-  // 하이드레이션 전에 빈 화면  방지
   if (!isHydrated) return null;
 
   return (
     <main className="flex flex-col items-center justify-center">
-      {/* <div className={cx('title', lastStartTimestamp ? 'titleRunning' : 'titleDefault')}> */}
-      <div
-        className={clsx(
-          'jusntify-ceter mb-20 flex text-7xl font-bold whitespace-nowrap',
-          totalActiveSeconds ? 'text-brand-primary' : 'text-brand-primary-30'
-        )}
-      >
-        <div>{totalActiveSeconds ? title : '오늘도 열심히 달려봐요!'}</div>
-      </div>
+      {/* 메인 페이지 규격에 맞춘 상단 섹션 */}
+      <section className="mt-[10px] mb-[66px] flex flex-col items-center">
+        <div
+          className={clsx(
+            'text-[72px] leading-tight font-bold whitespace-nowrap',
+            totalActiveSeconds ? 'text-brand-primary' : 'text-brand-primary-30'
+          )}
+        >
+          {totalActiveSeconds ? title : '오늘도 열심히 달려봐요!'}
+        </div>
+      </section>
 
-      <div className={'flex h-auto justify-center'}>
+      {/* 타이머 디스플레이 영역 */}
+      <div className="flex h-auto items-center justify-center">
         <TimeDisplay unit="HOURS" value={hours} />
-        <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+        <div className="font-pretendard text-brand-primary px-8 py-4 text-[160px] leading-none">
           :
         </div>
         <TimeDisplay unit="MINUTES" value={mins} />
-        <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+        <div className="font-pretendard text-brand-primary px-8 py-4 text-[160px] leading-none">
           :
         </div>
         <TimeDisplay unit="SECONDS" value={secs} />
       </div>
 
-      <div className={'mt-20 flex h-[100px] w-[55%]'}>
-        <div className={'box-border flex flex-1/3 items-center justify-end gap-14'}>
+      {/* 하단 버튼 및 액션 아이콘 영역 */}
+      <div className="mt-20 flex h-[100px] w-full max-w-[800px] items-center justify-center">
+        {/* 중앙 정렬을 위한 컨테이너 */}
+        <div className="relative flex items-center gap-14">
           <TimerButton timerType="start" active={!isRunning} onClick={onStart} />
           <TimerButton timerType="pause" active={isRunning} onClick={pauseTimerOnServer} />
           <TimerButton timerType="finish" active={!!lastStartTimestamp} onClick={onFinish} />
-        </div>
 
-        <div className={'flex items-center justify-center'}>
-          <div className={'ml-20 flex w-[150px] flex-1 gap-8'}>
-            {lastStartTimestamp && (
-              <>
-                <Image
-                  className={
-                    'flex inline-flex flex-1 cursor-pointer items-center justify-center gap-20'
-                  }
-                  src="/images/timer/see-todo-active.png"
-                  alt="목록"
-                  width={55}
-                  height={55}
-                  onClick={handleEditTasks}
-                />
-                <Image
-                  className={
-                    'flex inline-flex flex-1 cursor-pointer items-center justify-center gap-20'
-                  }
-                  src="/images/timer/reset-active.png"
-                  alt="리셋"
-                  width={55}
-                  height={55}
-                  onClick={resetTimer}
-                />
-              </>
-            )}
-          </div>
+          {/* 우측 보조 버튼 (목록/리셋) */}
+          {lastStartTimestamp && (
+            <div className="absolute left-full ml-10 flex gap-6">
+              <Image
+                className="cursor-pointer transition-opacity hover:opacity-80"
+                src="/images/timer/see-todo-active.png"
+                alt="목록"
+                width={55}
+                height={55}
+                onClick={handleEditTasks}
+              />
+              <Image
+                className="cursor-pointer transition-opacity hover:opacity-80"
+                src="/images/timer/reset-active.png"
+                alt="리셋"
+                width={55}
+                height={55}
+                onClick={resetTimer}
+              />
+            </div>
+          )}
         </div>
       </div>
+
       {isDialogOpen && <TimerDialog />}
     </main>
   );
