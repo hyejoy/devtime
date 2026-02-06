@@ -152,10 +152,10 @@ export default function TimerClient() {
       <div
         className={clsx(
           'jusntify-ceter mb-20 flex text-7xl font-bold whitespace-nowrap',
-          lastStartTimestamp ? 'text-brand-primary' : 'text-brand-primary-30'
+          totalActiveSeconds ? 'text-brand-primary' : 'text-brand-primary-30'
         )}
       >
-        <div>{lastStartTimestamp ? title : '오늘도 열심히 달려봐요!'}</div>
+        <div>{totalActiveSeconds ? title : '오늘도 열심히 달려봐요!'}</div>
       </div>
 
       <div className={'flex h-auto justify-center'}>
