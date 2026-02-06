@@ -1,10 +1,17 @@
 'use client';
 
-import clsx from 'clsx';
 import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import TimerButton from '@/app/components/timer/TimerButton';
+import LoginDialog from '../components/dialog/login/LoginDialog';
+import Button from '@/app/components/ui/Button';
+import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 
 export default function Page() {
+  const isDialogOpen = useIsDialogOpen();
+  const { openDialog, closeDialog } = useDialogActions();
+  const handleClickStartBtn = () => {
+    openDialog();
+  };
   return (
     <>
       <main className="flex flex-col items-center justify-center">
@@ -29,12 +36,24 @@ export default function Page() {
 
         <div className={'mt-20 flex h-[100px] w-[55%] items-center justify-center'}>
           <div className={'flex items-center gap-14'}>
-            <TimerButton timerType="start" active={true} />
+            <TimerButton timerType="start" active={true} onClick={handleClickStartBtn} />
             <TimerButton timerType="pause" active={false} />
             <TimerButton timerType="finish" active={false} />
           </div>
         </div>
       </main>
+      {isDialogOpen && (
+        <LoginDialog
+          dialogType="need-login"
+          alignButton="align-right"
+          nextRoute={'/login'}
+          buttonChildren={
+            <Button variant="secondary" onClick={closeDialog}>
+              취소
+            </Button>
+          }
+        ></LoginDialog>
+      )}
     </>
   );
 }

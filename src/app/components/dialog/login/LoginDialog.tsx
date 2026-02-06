@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import DialogField from '../DialogField';
 import Button from '../../ui/Button';
 import { useDialogActions } from '@/store/dialog';
+import { ReactNode } from 'react';
 
 const LOGIN_DIALOG_COPY = {
   'duplicate-login': {
@@ -17,16 +18,28 @@ const LOGIN_DIALOG_COPY = {
     content: null,
     buttonLabel: '확인',
   },
+  'need-login': {
+    title: '로그인이 필요합니다.',
+    content: 'DevTime을 사용하려면 로그인이 필요합니다. 로그인 페이지로 이동할까요?',
+    buttonLabel: '로그인하기',
+  },
 } as const;
 
-export type LoginDialogType = 'duplicate-login' | 'login-failed' | null;
+export type LoginDialogType = keyof typeof LOGIN_DIALOG_COPY | null;
 
 interface Props {
   dialogType: LoginDialogType;
   nextRoute?: string | null;
+  alignButton: 'full' | 'align-right';
+  buttonChildren?: ReactNode;
 }
 
-export default function LoginDialog({ dialogType, nextRoute }: Props) {
+export default function LoginDialog({
+  dialogType,
+  nextRoute,
+  alignButton = 'full',
+  buttonChildren,
+}: Props) {
   const { closeDialog } = useDialogActions();
   const router = useRouter();
   const handleConfirm = () => {
@@ -36,18 +49,15 @@ export default function LoginDialog({ dialogType, nextRoute }: Props) {
     }
   };
 
-  if (!dialogType) return null;
-
-  if (dialogType) {
-    const copy = LOGIN_DIALOG_COPY[dialogType];
-    return (
-      <DialogField>
-        <DialogField.Title title={copy.title} />
-        <DialogField.Content>{copy.content}</DialogField.Content>
-        <DialogField.Button align="full">
-          <Button onClick={handleConfirm}>{copy.buttonLabel}</Button>
-        </DialogField.Button>
-      </DialogField>
-    );
-  }
+  const copy = LOGIN_DIALOG_COPY[dialogType!];
+  return (
+    <DialogField>
+      <DialogField.Title title={copy.title} />
+      <DialogField.Content>{copy.content}</DialogField.Content>
+      <DialogField.Button align={alignButton}>
+        {buttonChildren}
+        <Button onClick={handleConfirm}>{copy.buttonLabel}</Button>
+      </DialogField.Button>
+    </DialogField>
+  );
 }
