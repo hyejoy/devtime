@@ -34,12 +34,13 @@ export default function Page() {
           <TimeDisplay unit="SECONDS" value={'00'} />
         </div>
 
-        <div className={'mt-20 flex h-[100px] w-[55%] items-center justify-center'}>
-          <div className={'flex items-center gap-14'}>
+        <div className={'mt-20 flex h-[100px] w-[1024px] items-center justify-center'}>
+          <div className={'flex w-[680px] justify-end gap-14'}>
             <TimerButton timerType="start" active={true} onClick={handleClickStartBtn} />
             <TimerButton timerType="pause" active={false} />
             <TimerButton timerType="finish" active={false} />
           </div>
+          <div className={'flex flex-1 justify-end'}></div>
         </div>
       </main>
       {isDialogOpen && (
