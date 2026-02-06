@@ -6,9 +6,13 @@ export function middleware(req: NextRequest) {
   const accessToken = req.cookies.get('accessToken')?.value;
   const refreshToken = req.cookies.get('refreshToken')?.value;
 
-  const isLoginPage = pathname.startsWith('/login');
+  const isLoginPage = ['/', '/login'].some(
+    (path) => pathname === path || pathname.startsWith('/login')
+  );
   const isProtectedPage =
-    pathname.startsWith('/timer') || pathname.startsWith('/profile');
+    pathname.startsWith('/timer') ||
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/dashboard');
 
   const hasAccess = Boolean(accessToken);
   const hasRefresh = Boolean(refreshToken);
@@ -18,15 +22,13 @@ export function middleware(req: NextRequest) {
     // Access 토큰은 없는데 Refresh 토큰만 있는 경우 -> 토큰 갱신하러 가기
     if (!hasAccess && hasRefresh) {
       console.log('🔄 Access 토큰 만료, Refresh 토큰으로 갱신 시도');
-      return NextResponse.redirect(
-        new URL(`/api/auth/refresh?redirect=${pathname}`, req.url)
-      );
+      return NextResponse.redirect(new URL(`/api/auth/refresh?redirect=${pathname}`, req.url));
     }
 
     // 둘 다 없는 경우 -> 로그인으로
     if (!hasAccess && !hasRefresh) {
-      console.log('🚫 토큰 없음, 로그인 페이지로 이동');
-      return NextResponse.redirect(new URL('/login', req.url));
+      console.log('🚫 토큰 없음, 메인 페이지로 이동');
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
@@ -42,5 +44,11 @@ export function middleware(req: NextRequest) {
 // TODO:케이스(블랙리스트)로 적용
 // → https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher
 export const config = {
-  matcher: ['/timer/:path*', '/profile/:path*', '/login'],
+  matcher: [
+    '/', // 루트 경로 추가
+    '/login',
+    '/timer/:path*',
+    '/profile/:path*',
+    '/dashboard/:path*',
+  ],
 };

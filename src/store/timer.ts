@@ -4,7 +4,15 @@ import { nanoid } from 'nanoid';
 import { useDialogStore } from './dialog';
 import { API } from '@/constants/endpoints';
 import { formatSplitTimesForServer } from '@/utils/timer';
-
+/** TODO
+ * 설계 측면에서 개선해야 할 큰 포인트들 말씀드리면,
+ * API 호출을 스토어 안에서 하는 것
+ * 다른 스토어 (useDialogStore)를 여기서 사용하는 것
+ * 인데요,
+ * API 호출부는 별도로 분리해주세요.
+ * 컴포넌트 또는 커스텀훅에서 API 호출 후 상태 업데이트 시에만 스토어를 활용하시면 됩니다
+ * 스토어끼리의 결합도 제거해주세요. dialog 는 UI 로직이므로 컴포넌트 레벨에서 처리해야 합니다
+ */
 // --- Types ---
 
 export type Task = {
@@ -121,12 +129,7 @@ export const useTimerStore = create<TimerState>()(
         setLastStartTimestamp: (time) => set({ lastStartTimestamp: time }),
 
         tick: () => {
-          const {
-            isRunning,
-            lastStartTimestamp,
-            dailyRecords,
-            totalActiveSeconds,
-          } = get();
+          const { isRunning, lastStartTimestamp, dailyRecords, totalActiveSeconds } = get();
 
           if (!isRunning || !lastStartTimestamp) return;
           // 10분(600초)마다 세션 연장 요청
@@ -183,25 +186,18 @@ export const useTimerStore = create<TimerState>()(
         toggleDone: (id) =>
           set((state) => ({
             tasks: state.tasks.map((task) =>
-              task.id === id
-                ? { ...task, isCompleted: !task.isCompleted }
-                : task
+              task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
             ),
           })),
 
         addTask: (content) =>
           set((state) => ({
-            tasks: [
-              { id: nanoid(), content, isCompleted: false },
-              ...state.tasks,
-            ],
+            tasks: [{ id: nanoid(), content, isCompleted: false }, ...state.tasks],
           })),
 
         updateTaskContent: (id, content) =>
           set((state) => ({
-            tasks: state.tasks.map((task) =>
-              task.id === id ? { ...task, content } : task
-            ),
+            tasks: state.tasks.map((task) => (task.id === id ? { ...task, content } : task)),
           })),
 
         deletedTask: (id) =>
@@ -221,9 +217,8 @@ export const useTimerStore = create<TimerState>()(
 
         /*** 🚩 API Actions ***/
         startTimerOnServer: async () => {
-          const { lastStartTimestamp, tasks, title, timerId, actions } = get();
+          const { lastStartTimestamp, tasks, title, timerId, actions, timerStatus } = get();
           const now = new Date().toISOString();
-
           if (!lastStartTimestamp) {
             console.log('🚀처음 생성 시도');
 
@@ -256,6 +251,7 @@ export const useTimerStore = create<TimerState>()(
                 timerId: data.timerId,
                 lastStartTimestamp: now,
                 isRunning: true,
+                timerStatus: 'RUNNING',
               });
 
               useDialogStore.getState().actions.closeDialog();
@@ -263,7 +259,11 @@ export const useTimerStore = create<TimerState>()(
               console.error('타이머 생성 에러:', err);
             }
           } else if (timerId) {
-            set({ lastStartTimestamp: now, isRunning: true });
+            set({
+              lastStartTimestamp: now,
+              isRunning: true,
+              timerStatus: 'RUNNING',
+            });
             useDialogStore.getState().actions.closeDialog();
           }
         },
@@ -276,9 +276,7 @@ export const useTimerStore = create<TimerState>()(
           set({ isRunning: false });
 
           // 서버에 현재까지의 기록 동기화
-          const body = formatSplitTimesForServer(
-            actions.getSplitTimesForServer()
-          );
+          const body = formatSplitTimesForServer(actions.getSplitTimesForServer());
 
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
@@ -315,9 +313,7 @@ export const useTimerStore = create<TimerState>()(
           // 화면 먼저 멈춤 (UX 최적화)
 
           // 서버에 현재까지의 기록 동기화
-          const body = formatSplitTimesForServer(
-            actions.getSplitTimesForServer()
-          );
+          const body = formatSplitTimesForServer(actions.getSplitTimesForServer());
 
           try {
             const res = await fetch(`${API.TIMER.ITEM(timerId)}`, {
@@ -357,9 +353,7 @@ export const useTimerStore = create<TimerState>()(
           const cleanReview = review.trim();
           if (cleanReview.length < 15) return;
 
-          const splitTimes = formatSplitTimesForServer(
-            actions.getSplitTimesForServer()
-          );
+          const splitTimes = formatSplitTimesForServer(actions.getSplitTimesForServer());
 
           const taskList = tasks.map((t) => ({
             content: t.content,
@@ -397,20 +391,13 @@ export const useTimerStore = create<TimerState>()(
           try {
             const { studyLogId } = get();
             if (!studyLogId) return;
-            const res = await fetch(
-              `${API.STUDYLOGS.GET_STUDY_LOG(studyLogId)}`,
-              {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
+            const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(studyLogId)}`, {
+              method: 'GET',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+            });
             const result = await res.json(); // result는 { success: true, data: {...} } 형태
-            if (
-              result.success &&
-              result.data &&
-              Array.isArray(result.data.tasks)
-            ) {
+            if (result.success && result.data && Array.isArray(result.data.tasks)) {
               const fetchedTasks = result.data.tasks;
               set({
                 tasks: fetchedTasks,
@@ -467,7 +454,7 @@ export const useTimerStore = create<TimerState>()(
             }
             if (!res.ok) throw new Error('일시정지 동기화 실패');
           } catch (err) {
-            console.log('할 일 목록 전체 업데이트 실패');
+            console.log('할 일 목록 전체 업데이트 실패', err);
           }
         },
       },
@@ -491,16 +478,19 @@ export const useTimerStore = create<TimerState>()(
 );
 
 // --- Selectors ---
+/*** TODO
+ * 이 부분도 헷갈려요.
+ * use prefix 는 커스텀 훅에 사용되는 네이밍이라
+ * 사용처에서 볼 때 뭘 의미하는지 예상이 잘 안돼요.
+ * 네이밍 변경하시거나 사용처에서 직접 useTimerStore import 해서 참조하는 편이 좋을 것 같아요
+ */
 export const useTimerStauts = () => useTimerStore((state) => state.timerStatus);
 export const useStudyLogId = () => useTimerStore((state) => state.studyLogId);
 export const useTimerId = () => useTimerStore((state) => state.timerId);
 export const useIsRunning = () => useTimerStore((state) => state.isRunning);
-export const useDailyRecords = () =>
-  useTimerStore((state) => state.dailyRecords);
-export const useTotalSeconds = () =>
-  useTimerStore((state) => state.totalActiveSeconds);
-export const useLastStartTimestamp = () =>
-  useTimerStore((state) => state.lastStartTimestamp);
+export const useDailyRecords = () => useTimerStore((state) => state.dailyRecords);
+export const useTotalSeconds = () => useTimerStore((state) => state.totalActiveSeconds);
+export const useLastStartTimestamp = () => useTimerStore((state) => state.lastStartTimestamp);
 export const useDisplayTime = () => useTimerStore((state) => state.displayTime);
 
 export const useTaskTitle = () => useTimerStore((state) => state.title);

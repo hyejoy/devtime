@@ -1,33 +1,59 @@
 'use client';
 
-import Link from 'next/link';
+import TimeDisplay from '@/app/components/timer/TimeDisplay';
+import TimerButton from '@/app/components/timer/TimerButton';
+import LoginDialog from '../components/dialog/login/LoginDialog';
+import Button from '@/app/components/ui/Button';
+import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 
 export default function Page() {
+  const isDialogOpen = useIsDialogOpen();
+  const { openDialog, closeDialog } = useDialogActions();
+  const handleClickStartBtn = () => {
+    openDialog();
+  };
   return (
     <>
-      <h1>Main Page</h1>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <Link href="/signup">회원가입</Link>
-        <Link href="/login">로그인</Link>
-        <Link href="/timer">타이머</Link>
-      </div>
-      {/* <DialogField>
-        <DialogField.Title
-          type="text"
-          title="프로필 설정을 건너뛸까요?"
-          onClick={onClick}
-        />
-        <DialogField.Content>
-          <div>
-            프로필을 설정하지 않을 경우 일부 기능 사용에 제한이 생길 수
-            있습니다. 그래도 프로필 설정을 건너뛰시겠습니까?
+      <main className="flex flex-col items-center justify-center">
+        <section className="mt-[85px] mb-[50px]">
+          <div className="text-primary-900 text-[72px] font-bold">WELCOME</div>
+          <div className="text-primary-900 flex justify-center text-[14px] font-normal">
+            DevTime을 사용하려면 로그인이 필요합니다.
           </div>
-        </DialogField.Content>
-        <DialogField.Button align="align-right">
-          <Button variant="secondary">건너뛰기</Button>
-          <Button>계속 설정하기</Button>
-        </DialogField.Button>
-      </DialogField> */}
+        </section>
+
+        <div className={'flex h-auto justify-center'}>
+          <TimeDisplay unit="HOURS" value={'00'} />
+          <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+            :
+          </div>
+          <TimeDisplay unit="MINUTES" value={'00'} />
+          <div className={'font-pretendard text-brand-primary box-border px-8 py-4 text-[160px]'}>
+            :
+          </div>
+          <TimeDisplay unit="SECONDS" value={'00'} />
+        </div>
+
+        <div className={'mt-20 flex h-[100px] w-[55%] items-center justify-center'}>
+          <div className={'flex items-center gap-14'}>
+            <TimerButton timerType="start" active={true} onClick={handleClickStartBtn} />
+            <TimerButton timerType="pause" active={false} />
+            <TimerButton timerType="finish" active={false} />
+          </div>
+        </div>
+      </main>
+      {isDialogOpen && (
+        <LoginDialog
+          dialogType="need-login"
+          alignButton="align-right"
+          nextRoute={'/login'}
+          buttonChildren={
+            <Button variant="secondary" onClick={closeDialog}>
+              취소
+            </Button>
+          }
+        ></LoginDialog>
+      )}
     </>
   );
 }

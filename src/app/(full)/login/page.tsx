@@ -7,19 +7,12 @@ import TextLinkRow from '@/app/components/ui/TextLinkRow';
 import { API } from '@/constants/endpoints';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import {
-  LoginField,
-  LoginHelperMessage,
-  LoginInput,
-  LoginValid,
-} from '@/types/login';
+import { LoginField, LoginHelperMessage, LoginInput, LoginValid } from '@/types/login';
 import classNames from 'classnames/bind';
 import Image from 'next/image';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
-import LoginDialog, {
-  LoginDialogType,
-} from '@/app/components/dialog/login/LoginDialog';
+import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
 import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
 
 const cx = classNames.bind(styles);
@@ -113,6 +106,13 @@ export default function Page() {
     return Object.values(regexValidity).some((v) => !v);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // 페이지 새로고침 방지
+    if (!isLoginButtonDisabled()) {
+      onClickLoginButton();
+    }
+  };
+
   async function onClickLoginButton() {
     try {
       const res = await fetch(`${API.AUTH.LOGIN}`, {
@@ -154,48 +154,48 @@ export default function Page() {
     }
   }
 
-  const onKeyDownEnter = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.code === 'Enter') onClickLoginButton();
-  };
   return (
     <div className={cx('page')}>
       <div className={cx('container')}>
         <Image src="/images/bg/signup-bg.png" alt="background" fill priority />
-        <div className={cx('loginForm')}>
-          <div className={cx('logoContainer')}>
-            <Logo direction="vertical" width="6rem" height="5.5rem" />
-          </div>
-          {(Object.keys(values) as Array<LoginField>).map((key) => {
-            return (
-              <React.Fragment key={key}>
-                <TextLabel label={LABEL_MAP[key]} name={key} />
-                <TextFieldInput
-                  id={key}
-                  name={key}
-                  value={values[key]}
-                  placeholder={MESSAGE.LOGIN[key]}
-                  onChange={onChangeInput}
-                  onKeyDown={onKeyDownEnter}
-                  feedbackMessage={feedbackMessage[key]}
-                  type={key === 'password' ? 'password' : 'text'}
-                />
-              </React.Fragment>
-            );
-          })}
+        <form onSubmit={handleSubmit}>
+          <div className={cx('loginForm')}>
+            <div className={cx('logoContainer')}>
+              <Logo direction="vertical" width="6rem" height="5.5rem" />
+            </div>
+            {(Object.keys(values) as Array<LoginField>).map((key) => {
+              return (
+                <React.Fragment key={key}>
+                  <TextLabel label={LABEL_MAP[key]} name={key} />
+                  <TextFieldInput
+                    id={key}
+                    name={key}
+                    value={values[key]}
+                    placeholder={MESSAGE.LOGIN[key]}
+                    onChange={onChangeInput}
+                    feedbackMessage={feedbackMessage[key]}
+                    type={key === 'password' ? 'password' : 'text'}
+                  />
+                </React.Fragment>
+              );
+            })}
 
-          <Button
-            disabled={isLoginButtonDisabled()}
-            onClick={onClickLoginButton}
-          >
-            로그인
-          </Button>
-          <div className={cx('signupLink')}>
-            <TextLinkRow label="회원가입" href="/signup" />
+            <Button
+              className="w-full bg-red-200"
+              type="submit"
+              disabled={isLoginButtonDisabled()}
+              onClick={onClickLoginButton}
+            >
+              로그인
+            </Button>
+            <div className={cx('signupLink')}>
+              <TextLinkRow label="회원가입" href="/signup" />
+            </div>
           </div>
-        </div>
+        </form>
       </div>
       {IsDialogOpen && (
-        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} />
+        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} alignButton="full" />
       )}
     </div>
   );

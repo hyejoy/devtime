@@ -1,21 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import clsx from 'clsx';
 import { Task, useTimerActions, useTimerStauts } from '@/store/timer';
+import clsx from 'clsx';
+import Image from 'next/image';
+import { useState } from 'react';
 import CheckBox_ from '../ui/CheckBox_';
 
 interface TaskItemProps {
   task: Task;
   editingMode: boolean;
-  changeEditingMode: () => void;
+  changeEditingMode?: (value: boolean) => void;
+  isOnlyRead: boolean;
 }
 
 export default function TaskItem({
   task,
   editingMode = false,
   changeEditingMode,
+  isOnlyRead = false,
 }: TaskItemProps) {
   const status = useTimerStauts();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -29,27 +31,29 @@ export default function TaskItem({
   const onSave = () => {
     updateTaskContent(task.id, content);
     setIsEditingTitle(false);
-    if (editingMode) changeEditingMode();
+
+    if (editingMode) changeEditingMode!(true);
   };
 
   const handleDone = () => toggleDone(task.id);
 
   const deleteTask = () => {
     deletedTask(task.id);
-    if (editingMode) changeEditingMode();
+    if (editingMode) changeEditingMode!(true);
   };
 
   return (
     <div
       className={clsx(
-        'flex min-h-[4.5rem] items-center rounded-lg transition-colors duration-200',
-        task.isCompleted ? 'bg-gray-400' : 'bg-brand-primary'
+        'flex min-h-[4.5rem] items-center rounded-lg leading-loose transition-colors duration-200',
+        !isOnlyRead && task.isCompleted ? 'bg-gray-400' : 'bg-brand-primary',
+        isOnlyRead && task.isCompleted ? 'bg-gray-200' : 'bg-brand-primary'
       )}
     >
       {/* 1. 심볼 아이콘 */}
-      <div className="flex h-[50px] w-[100px] shrink-0 items-center justify-center pl-4">
+      <div className="justify-cente mr-2 ml-7 flex h-[50px] w-[50px] shrink-0 items-center">
         <Image
-          src="/images/timerDialog/symbol.png"
+          src={`/images/timerDialog/${task.isCompleted ? 'darkSymbol' : 'symbol'}.png`}
           alt="symbol"
           width={42}
           height={42}
@@ -59,7 +63,7 @@ export default function TaskItem({
 
       {/* 2. 텍스트 영역 또는 입력창 */}
       <div className="flex flex-1 items-center px-4">
-        {isEditingTitle ? (
+        {isEditingTitle && !isOnlyRead ? (
           <input
             type="text"
             className="w-full rounded bg-transparent py-2 text-[1rem] font-medium text-white outline-none placeholder:text-white/50"
@@ -70,7 +74,12 @@ export default function TaskItem({
             autoFocus
           />
         ) : (
-          <div className="min-h-[1.5rem] text-[1rem] font-medium break-all text-white">
+          <div
+            className={clsx(
+              'min-h-[1.5rem] text-[1rem] font-medium break-all', // 공통 스타일
+              isOnlyRead && task.isCompleted ? 'text-gray-400' : 'text-white' // 상태에 따른 색상 선택
+            )}
+          >
             {task.content}
           </div>
         )}
@@ -79,7 +88,7 @@ export default function TaskItem({
       {/* 3. 버튼 영역 (편집/삭제/체크박스) */}
       <div className="flex items-center gap-4 pr-5">
         {/* 편집 모드: 연필 & 삭제 아이콘 */}
-        {editingMode && !isEditingTitle && (
+        {editingMode && !isEditingTitle && !isOnlyRead && (
           <div className="flex gap-3">
             <Image
               src="/images/timerDialog/edit.png"
@@ -101,7 +110,7 @@ export default function TaskItem({
         )}
 
         {/* 수정 완료 모드: 체크 아이콘 */}
-        {isEditingTitle && (
+        {isEditingTitle && !isOnlyRead && (
           <Image
             src="/images/timerDialog/check.png"
             alt="check"
@@ -115,6 +124,7 @@ export default function TaskItem({
         {/* 일반 모드: 체크박스 */}
         {!editingMode &&
           !isEditingTitle &&
+          !isOnlyRead &&
           (status === 'DONE' || status === 'RUNNING') && (
             <CheckBox_
               id={`checkbox${task.id}`}
