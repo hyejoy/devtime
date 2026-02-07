@@ -129,10 +129,10 @@ export default function TimerClient() {
           <div
             className={clsx(
               'text-[72px] font-bold',
-              totalActiveSeconds ? 'text-brand-primary' : 'text-brand-primary-30'
+              timerStatus === 'RUNNING' ? 'text-brand-primary' : 'text-brand-primary-30'
             )}
           >
-            {totalActiveSeconds ? title : '오늘도 열심히 달려봐요!'}
+            {timerStatus === 'RUNNING' ? title : '오늘도 열심히 달려봐요!'}
           </div>
         </section>
 
@@ -152,10 +152,10 @@ export default function TimerClient() {
           <div className={'flex w-[680px] justify-end gap-14'}>
             <TimerButton timerType="start" active={!isRunning} onClick={onStart} />
             <TimerButton timerType="pause" active={isRunning} onClick={pauseTimerOnServer} />
-            <TimerButton timerType="finish" active={!!lastStartTimestamp} onClick={onFinish} />
+            <TimerButton timerType="finish" active={timerStatus === 'RUNNING'} onClick={onFinish} />
           </div>
           <div className={'flex flex-1 justify-end gap-6'}>
-            {lastStartTimestamp && (
+            {timerStatus === 'RUNNING' && (
               <>
                 <Image
                   className="cursor-pointer transition-opacity hover:opacity-80"
