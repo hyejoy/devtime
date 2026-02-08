@@ -1,0 +1,7 @@
+/*  v4 필수: 메인 CSS 파일을 참조하여 유틸리티(h-6 등)를 불러옵니다. */
+@reference "../../globals.css";
+
+/* Pagination.module.css */
+.paginationButton {
+  @apply flex h-6 w-6 items-center justify-center rounded-sm transition-colors;
+}

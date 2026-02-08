@@ -5,6 +5,7 @@ import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatm
 import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
+import styles from './StudyHeatmap.module.css';
 
 /** --- 서버 응답 데이터 타입 --- */
 interface RawItem {
@@ -90,10 +91,10 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
   {
   }
   return (
-    <div className="mt-4 w-full rounded-xl bg-white p-6">
+    <div className={`${styles.heatmapContainer}`}>
       <h2 className="mb-4 text-[18px] font-semibold text-gray-400">공부 시간 바다</h2>
       <div className="flex w-full">
-        <div className="flex flex-col gap-1.5 pt-7 text-[12px] font-medium text-gray-500">
+        <div className="flex flex-col gap-[8px] pt-7 text-[12px] font-medium text-gray-600">
           {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
             <span key={day}>{day}</span>
           ))}
