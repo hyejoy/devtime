@@ -25,7 +25,7 @@ export default function DashboardDialog({
       </DialogField.Title>
       <DialogField.Content>
         <div className="flex h-[492px] flex-col gap-3 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {tasks && tasks.map((task) => <TaskItem key={task.id} editingMode={false} task={task} />)}
+          {tasks && tasks.map((task) => <TaskItem key={task.id} editingMode={true} task={task} />)}
         </div>
         <div className="mt-9 mb-9 flex flex-col gap-2">
           <div className="text-[14px] font-medium text-gray-600">한줄소감</div>
