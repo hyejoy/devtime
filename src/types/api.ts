@@ -76,15 +76,34 @@ export interface ActiveTimerResponse {
   };
 }
 
-// {
-//     "message": "타이머가 시작되었습니다.",
-//     "studyLogId": "d6043963-aebd-4069-8c9f-b0d61452c348",
-//     "timerId": "82ca1967-ce23-4511-a00e-0876c0d899c5",
-//     "startTime": "2026-01-26T09:26:39.891Z"
-// }
+export interface WeekdayStudyTime {
+  Monday: number;
+  Tuesday: number;
+  Wednesday: number;
+  Thursday: number;
+  Friday: number;
+  Saturday: number;
+  Sunday: number;
+}
 
-//   "success": false,
-//   "error": {
-//     "message": "로그인이 필요합니다.",
-//     "statusCode": 401
-//   }
+export interface StatsResponse {
+  consecutiveDays: number; // 연속 공부 일수
+  totalStudyTime: number; // 총 공부시간(초)
+  averageDailyStudyTime: number; // 일 평균 공부시간(초)
+  taskCompletionRate: number; // 목표 달성률(%)
+  weekdayStudyTime: WeekdayStudyTime;
+}
+
+export interface StudyLogsDetailResponse {
+  id: string;
+  date: string;
+  todayGoal: string;
+  studyTime: number;
+  tasks: {
+    id: string;
+    content: string;
+    isCompleted: boolean;
+  }[];
+  review: string;
+  completionRate: number;
+}

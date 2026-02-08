@@ -5,13 +5,9 @@ import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation'; // 경로 확인을 위해 추가
 
 // 세션체크 제외 페이지
-const EXCLUDING_PATH = ['/login', '/signup'];
+const EXCLUDING_PATH = ['/', '/login', '/signup'];
 
-export default function AuthSesseionProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function AuthSessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {

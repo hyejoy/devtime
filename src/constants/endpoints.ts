@@ -33,12 +33,17 @@ export const API = {
       if (page) params.append('page', String(page));
       if (limit) params.append('limit', String(limit));
       if (date) params.append('date', date);
-      // 2. 파라미터가 하나라도 있으면 '?'와 함께 리턴, 없으면 기본 경로만 리턴
+      // 2. 파라미터가 하나라도 있면 '?'와 함께 리턴, 없으면 기본 경로만 리턴
       const queryString = params.toString();
-      return `/api/study-logs${queryString ? `?${queryString}` : ''}`;
+      return `${PROXY}/study-logs${queryString ? `?${queryString}` : ''}`;
     },
-    GET_STUDY_LOG: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
-    DELETE_STUDY_LOG: (studyLogId: string) =>
-      `${PROXY}/study-logs/${studyLogId}`,
+    GET_DETAIL_STUDY_LOG: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
+    DELETE_STUDY_LOG: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
+  },
+  STATS: {
+    STATS: `${PROXY}/stats`,
+  },
+  HEATMAP: {
+    HEATMAP: `${PROXY}/heatmap`,
   },
 } as const;

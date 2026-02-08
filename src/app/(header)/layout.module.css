@@ -27,14 +27,6 @@
   line-height: 1.5;
 }
 
-.linkField a {
-  text-decoration: none;
-  color: var(--color-primary-900);
-}
-
-.linkField a:hover {
-  text-decoration: none;
-}
 .profileField {
   display: flex;
   white-space: nowrap;
@@ -62,4 +54,17 @@
   box-sizing: border-box;
   padding-top: clamp(5rem, 10vh, 7rem);
   padding-bottom: clamp(5rem, 10vh, 7rem);
+}
+
+/* 예시 */
+.active {
+  color: #7c4dff; /* 원하는 강조 색상 */
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.notActive {
+  color: red;
+  font-weight: normal;
+  text-decoration: none;
 }
