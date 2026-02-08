@@ -167,12 +167,12 @@ export default function TimerClient() {
             <TimerButton timerType="pause" active={isRunning} onClick={handleTimerPause} />
             <TimerButton
               timerType="finish"
-              active={!!lastStartTimestamp}
+              active={timerStatus !== 'READY'}
               onClick={handleTimerStop}
             />
           </div>
           <div className={'flex flex-1 justify-end gap-6'}>
-            {lastStartTimestamp && (
+            {timerStatus !== 'READY' && (
               <>
                 <Image
                   className="cursor-pointer transition-opacity hover:opacity-80"
