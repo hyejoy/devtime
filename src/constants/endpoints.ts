@@ -15,8 +15,10 @@ export const API = {
     SIGNUP: '/api/signup',
   },
   TIMER: {
-    TIMERS: `${PROXY}/timers`, // GET, POST용
-    ITEM: (id: string) => `${PROXY}/timers/${id}`, // PUT, DELETE용
+    GETLIST: `${PROXY}/timers`,
+    START: `${PROXY}/timers`,
+    UPDATE: (id: string) => `${PROXY}/timers/${id}`,
+    DELETE: (id: string) => `${PROXY}/timers/${id}`,
     STOP: (id: string) => `${PROXY}/timers/${id}/stop`, // STOP용
   },
   TASK: {

@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import DialogField from '../DialogField';
 import Button from '../../ui/Button';
-import { useDialogActions } from '@/store/dialog';
 import { ReactNode } from 'react';
+import { useDialogStore } from '@/store/dialog';
 
 const LOGIN_DIALOG_COPY = {
   'duplicate-login': {
@@ -40,7 +40,7 @@ export default function LoginDialog({
   alignButton = 'full',
   buttonChildren,
 }: Props) {
-  const { closeDialog } = useDialogActions();
+  const { closeDialog } = useDialogStore();
   const router = useRouter();
   const handleConfirm = () => {
     closeDialog();
@@ -51,7 +51,7 @@ export default function LoginDialog({
 
   const copy = LOGIN_DIALOG_COPY[dialogType!];
   return (
-    <DialogField>
+    <DialogField dialogType="alert">
       <DialogField.Title title={copy.title} />
       <DialogField.Content>{copy.content}</DialogField.Content>
       <DialogField.Button align={alignButton}>
