@@ -1,4 +1,4 @@
-import { useDialogActions } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialog';
 import Image from 'next/image';
 
 interface TableRowProps {
@@ -33,10 +33,9 @@ export default function TableRow({
     }
   };
 
-  const { openDialog, changeType } = useDialogActions();
+  const { openDialog } = useDialogStore();
   const handleShowTaskDetail = () => {
     onClickRow(id);
-    changeType('custom');
     openDialog();
   };
   return (
