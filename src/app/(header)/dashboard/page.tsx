@@ -6,6 +6,7 @@ import StudyHeatmap from '@/app/components/dashboard/StudyHeatmap';
 import SummaryCard from '@/app/components/dashboard/SummaryCard';
 import Table from '@/app/components/dashboard/Table';
 import DashboardDialog from '@/app/components/dialog/dashboard/DashboardDialog';
+import TimerLogDeleteDialog from '@/app/components/dialog/dashboard/TimerLogDeleteDialog';
 import { API } from '@/constants/endpoints';
 import { useDialogStore } from '@/store/dialog';
 import { StatsResponse, StudyLogsDetailResponse, WeekdayStudyTime } from '@/types/api';
@@ -70,6 +71,7 @@ export default function DashboardPage() {
   const [heatmapData, setHeatmapData] = useState<RawData[]>([]);
   const { isOpen } = useDialogStore();
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [weekdayStudyTime, setWeekdayStudyTime] = useState<WeekdayStudyTime | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   /** --- Data Mapping --- */
@@ -164,14 +166,10 @@ export default function DashboardPage() {
     fetchStudyLogs(page);
   };
 
-  // 삭제 후 현재 페이지 데이터를 다시 불러오기 위함
-  const onDeleteAndRefresh = async (id: string) => {
-    await handleDeleteStudyLog(id);
-  };
-
-  const handleDeleteStudyLog = async (id: string) => {
+  const handleDeleteStudyLog = async () => {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(id)}`, {
+      const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(deleteId)}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -188,6 +186,10 @@ export default function DashboardPage() {
   const handleRowClick = (id: string) => {
     setDetailId(id);
   };
+
+  const hadleDeleteId = (id: string | null) => {
+    setDeleteId(id);
+  };
   /** 학습 기록 (GRID)  데이터 조회 */
   useEffect(() => {
     fetchStudyLogs(1);
@@ -198,7 +200,7 @@ export default function DashboardPage() {
     const fetchLogDetail = async () => {
       if (!detailId) return;
       try {
-        const res = await fetch(`${API.STUDYLOGS.DELETE_STUDY_LOG(detailId)}`, {
+        const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(detailId)}`, {
           method: 'GET',
           credentials: 'include',
         });
@@ -271,7 +273,7 @@ export default function DashboardPage() {
             <Table
               onClickRow={handleRowClick}
               studyLogs={studyLogs.studyLogs}
-              onDelete={onDeleteAndRefresh}
+              onChangeDeletId={hadleDeleteId}
             />
           )}
 
@@ -283,7 +285,8 @@ export default function DashboardPage() {
           )}
         </section>
         {/* 학습 기록 상세보기 모달 */}
-        {isOpen && detailLog && (
+        {/* 상세보기: ID가 있고 상세 데이터도 준비되었을 때 */}
+        {isOpen && detailId && detailLog && (
           <DashboardDialog
             detailLog={detailLog}
             onReset={() => {
@@ -291,6 +294,10 @@ export default function DashboardPage() {
               setDetailId(null); // detail Id 초기화
             }}
           />
+        )}
+        {/* 삭제: 삭제용 ID가 있을 때 */}
+        {isOpen && deleteId && (
+          <TimerLogDeleteDialog onChangeDeleteId={hadleDeleteId} onDelete={handleDeleteStudyLog} />
         )}
       </main>
     </div>
