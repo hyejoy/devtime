@@ -1,26 +1,19 @@
 'use client';
 
+import { useTimerStore } from '@/store/timer';
+import { Task } from '@/types/timer';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import CheckBox_ from '../ui/CheckBox_';
-import { Task } from '@/types/timer';
-import { useTimerStore } from '@/store/timer';
-import { usePathname } from 'next/navigation';
 
 interface TaskItemProps {
   task: Task;
   editingMode: boolean;
   onChangeEditMode?: (value: boolean) => void;
 }
-/**
- * TODO
- * 이 3가지 상태가 이름만 봐서는 헷갈려요,,
- * (편집 모드인데 , 타이틀 수정 중은 아니고, read only 다??)
- * 편집을 할 수 있는 상태인지 아닌 상태인지 구분이 잘 안가서
- * 편집할 수 있는 대상을 이름에 좀 더 명확하게 포함시킨다거나,
- * 3가지가 전부 꼭 필요한 상태인지 등 고민해보시면 좋겠어요!
- */
+
 export default function TaskItem({ task, editingMode = false, onChangeEditMode }: TaskItemProps) {
   // zustand
   const { updateTaskContent, deletedTask, toggleDone } = useTimerStore((state) => state.actions);
