@@ -3,8 +3,8 @@
 'use client';
 
 import { StudyLog } from '@/types/dashboard';
-import { formated_Time } from '@/utils/formatTime';
 import TableRow from './TableRow';
+import { formattedTime } from '@/utils/formatTime';
 
 interface TableProps {
   studyLogs: StudyLog[];
@@ -34,7 +34,7 @@ export default function StudyTable({ studyLogs, onDelete, onClickRow }: TablePro
               id={item.id}
               date={item.date}
               goal={item.todayGoal}
-              studyTime={formated_Time(item.studyTime)}
+              studyTime={formattedTime(item.studyTime)}
               totalTasks={item.totalTasks}
               pendingTasks={item.incompleteTasks}
               achievementRate={`${item.completionRate}%`}

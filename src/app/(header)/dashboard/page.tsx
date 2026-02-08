@@ -7,10 +7,10 @@ import SummaryCard from '@/app/components/dashboard/SummaryCard';
 import Table from '@/app/components/dashboard/Table';
 import DashboardDialog from '@/app/components/dialog/dashboard/DashboardDialog';
 import { API } from '@/constants/endpoints';
-import { useIsDialogOpen } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialog';
 import { StatsResponse, StudyLogsDetailResponse, WeekdayStudyTime } from '@/types/api';
 import { FormattedData, RawData, StudyLogsResponse, SummaryItem } from '@/types/dashboard';
-import { formatTime_hours, formatTime_minutes } from '@/utils/formatTime';
+import { formatTimeHours, formatTimeMinutes } from '@/utils/formatTime';
 import { useEffect, useState } from 'react';
 
 const today = new Date();
@@ -39,8 +39,8 @@ const formatSummaryData = (item: SummaryItem): FormattedData => {
     return {
       title,
       parts: [
-        { value: formatTime_hours(value), unit: '시간' },
-        { value: formatTime_minutes(value), unit: '분' },
+        { value: formatTimeHours(value), unit: '시간' },
+        { value: formatTimeMinutes(value), unit: '분' },
       ],
     };
   }
@@ -68,7 +68,7 @@ export default function DashboardPage() {
   const [studyLogs, setStudyLogs] = useState<StudyLogsResponse | null>(null);
   const [detailLog, setDetailLog] = useState<StudyLogsDetailResponse | null>(null);
   const [heatmapData, setHeatmapData] = useState<RawData[]>([]);
-  const isDialogOpen = useIsDialogOpen();
+  const { isOpen } = useDialogStore();
   const [detailId, setDetailId] = useState<string | null>(null);
   const [weekdayStudyTime, setWeekdayStudyTime] = useState<WeekdayStudyTime | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -283,7 +283,7 @@ export default function DashboardPage() {
           )}
         </section>
         {/* 학습 기록 상세보기 모달 */}
-        {isDialogOpen && detailLog && (
+        {isOpen && detailLog && (
           <DashboardDialog
             detailLog={detailLog}
             onReset={() => {

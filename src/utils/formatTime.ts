@@ -1,21 +1,21 @@
 /**
  * 밀리초(ms)를 입력받아 '시'를 반환합니다.
  */
-export const formatTime_hours = (ms: number) => {
+export const formatTimeHours = (ms: number) => {
   return Math.floor(ms / (1000 * 3600));
 };
 
 /**
  * 밀리초(ms)를 입력받아 '분'을 반환합니다.
  */
-export const formatTime_minutes = (ms: number) => {
+export const formatTimeMinutes = (ms: number) => {
   return Math.floor((ms % (1000 * 3600)) / (1000 * 60));
 };
 
 /**
  * 밀리초(ms)를 입력받아 '초'를 반환합니다.
  */
-export const formatTime_seconds = (ms: number) => {
+export const formatTimeSeconds = (ms: number) => {
   return Math.floor((ms % (1000 * 60)) / 1000);
 };
 
@@ -23,7 +23,7 @@ export const formatTime_seconds = (ms: number) => {
  * 밀리초(ms)를 입력받아 'H시간 M분 S초' 형태로 포맷팅합니다.
  * @param ms - 서버에서 받은 studyTime (ms 단위)
  */
-export const formated_Time = (ms: number) => {
+export const formattedTime = (ms: number) => {
   // 1. 밀리초를 초(s) 단위로 환산
   const seconds = Math.floor(ms / 1000);
 
