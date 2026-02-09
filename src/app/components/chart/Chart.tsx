@@ -11,6 +11,7 @@ import {
   ChartOptions,
   ChartData,
 } from 'chart.js';
+import { memo } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 interface StudyAvgChartProps {
@@ -18,7 +19,7 @@ interface StudyAvgChartProps {
 }
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
-export default function StudyAvgChart({ weekdayStudyTime }: StudyAvgChartProps) {
+const StudyAvgChart = ({ weekdayStudyTime }: StudyAvgChartProps) => {
   const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   // 예시: 요일별 평균 공부시간(0~24)
@@ -177,4 +178,6 @@ export default function StudyAvgChart({ weekdayStudyTime }: StudyAvgChartProps) 
       </div>
     </div>
   );
-}
+};
+
+export default memo(StudyAvgChart);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 type MetricPart = { value: number | string; unit?: string };
 
 export interface StatCardProps {
@@ -9,7 +9,7 @@ export interface StatCardProps {
   isLoading?: boolean;
 }
 
-export default function SummaryCard({ title, parts, onClick, variant, isLoading }: StatCardProps) {
+export const SummaryCard = ({ title, parts, onClick, variant, isLoading }: StatCardProps) => {
   return (
     <div key={title} className="flex h-[124px] flex-col justify-center rounded-3xl bg-white p-8">
       <div className="flex text-[18px] font-semibold text-gray-400">{title}</div>
@@ -25,4 +25,6 @@ export default function SummaryCard({ title, parts, onClick, variant, isLoading 
       </div>
     </div>
   );
-}
+};
+
+export default memo(SummaryCard);

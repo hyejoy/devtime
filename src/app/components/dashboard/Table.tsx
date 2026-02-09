@@ -5,14 +5,14 @@
 import { StudyLog } from '@/types/dashboard';
 import TableRow from './TableRow';
 import { formattedTime } from '@/utils/formatTime';
+import { memo } from 'react';
 
 interface TableProps {
   studyLogs: StudyLog[];
   onClickRow: (id: string) => void;
   onChangeDeletId: (id: string) => void;
 }
-
-export default function StudyTable({ studyLogs, onClickRow, onChangeDeletId }: TableProps) {
+const StudyTable = ({ studyLogs, onClickRow, onChangeDeletId }: TableProps) => {
   return (
     <div className="w-full overflow-hidden rounded-xl bg-white">
       <table className="w-full text-sm">
@@ -46,4 +46,5 @@ export default function StudyTable({ studyLogs, onClickRow, onChangeDeletId }: T
       </table>
     </div>
   );
-}
+};
+export default memo(StudyTable);

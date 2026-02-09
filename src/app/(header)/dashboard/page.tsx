@@ -12,24 +12,12 @@ import { useDialogStore } from '@/store/dialog';
 import { StatsResponse, StudyLogsDetailResponse, WeekdayStudyTime } from '@/types/api';
 import { FormattedData, RawData, StudyLogsResponse, SummaryItem } from '@/types/dashboard';
 import { formatTimeHours, formatTimeMinutes } from '@/utils/formatTime';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const today = new Date();
 // 1년 전 날짜 설정
 const oneYearAgo = new Date();
 oneYearAgo.setFullYear(today.getFullYear() - 1);
-
-const INITIAL_STUDY_LOGS: StudyLogsResponse = {
-  pagination: {
-    currentPage: 1,
-    totalPages: 0,
-    totalItems: 0,
-    hasNext: false,
-    hasPrev: false,
-  },
-  studyLogs: [],
-};
-
 const CHART_LABELS = ['24시간', '16시간', '8시간'];
 
 /** --- Utility: 데이터 포맷팅 함수 --- */
@@ -70,23 +58,46 @@ export default function DashboardPage() {
   const [detailLog, setDetailLog] = useState<StudyLogsDetailResponse | null>(null);
   const [heatmapData, setHeatmapData] = useState<RawData[]>([]);
   const { isOpen } = useDialogStore();
-  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null); // 주범
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [weekdayStudyTime, setWeekdayStudyTime] = useState<WeekdayStudyTime | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   /** --- Data Mapping --- */
-  const summaryConfigs: SummaryItem[] = [
-    { title: '누적 공부 시간', value: stats.totalStudyTime, type: 'time' },
-    { title: '누적 공부 일수', value: stats.consecutiveDays, type: 'day' },
-    {
-      title: '하루 평균 공부 시간',
-      value: stats.avgDailyStudyTime,
-      type: 'time',
-    },
-    { title: '목표 달성률', value: stats.taskRate, type: 'percent' },
-  ];
 
-  /** --- 요일별 공부 시간 평균 데이터 조회--- */
+  // 요일별 공부시간 메모이제이션
+  const memoizedWeekdayStudyTime = useMemo(() => {
+    return weekdayStudyTime;
+  }, [weekdayStudyTime]);
+
+  // 히트맵 데이터 메모이제이션
+  const memoizedHeatmapData = useMemo(() => {
+    return heatmapData;
+  }, [heatmapData]);
+
+  const memoizedStudyLogs = useMemo(() => {
+    return studyLogs;
+  }, [studyLogs]);
+
+  // 요약 카드 설정 메모이제이션
+  const summaryConfigs: SummaryItem[] = useMemo(
+    () => [
+      { title: '누적 공부 시간', value: stats.totalStudyTime, type: 'time' },
+      { title: '누적 공부 일수', value: stats.consecutiveDays, type: 'day' },
+      { title: '하루 평균 공부 시간', value: stats.avgDailyStudyTime, type: 'time' },
+      { title: '목표 달성률', value: stats.taskRate, type: 'percent' },
+    ],
+    [stats]
+  ); // stats가 바뀔 때만 배열 재생성
+
+  // 포맷팅된 요약 카드 데이터 메모이제이션
+  const formattedSummaryConfigs = useMemo(() => {
+    return summaryConfigs.map((config) => ({
+      ...config,
+      display: formatSummaryData(config),
+    }));
+  }, [summaryConfigs]);
+
+  // 첫 진입시 대시보드 데이터 조회
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -138,7 +149,8 @@ export default function DashboardPage() {
     fetchHeatMap();
   }, []);
 
-  const fetchStudyLogs = async (page: number) => {
+  /** 학습 기록 (GRID) 데이터 조회 함수 */
+  const fetchStudyLogs = useCallback(async (page: number) => {
     try {
       const url = `${API.STUDYLOGS.GET_STUDY_LOGS({
         page: page,
@@ -159,14 +171,15 @@ export default function DashboardPage() {
     } catch (err) {
       console.log('학습 기록 (GRID)조회 err : ', err);
     }
-  };
+  }, []);
 
   const handleMovePage = (page: number) => {
     setCurrentPage(page); // 현재 페이지 상태 업데이트
     fetchStudyLogs(page);
   };
 
-  const handleDeleteStudyLog = async () => {
+  /** 학습기록 로그 삭제 처리 */
+  const handleDeleteStudyLog = useCallback(async () => {
     if (!deleteId) return;
     try {
       const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(deleteId)}`, {
@@ -181,15 +194,16 @@ export default function DashboardPage() {
     } catch (err) {
       console.log('학습기록 로그 삭제 에러 : ', err);
     }
-  };
+  }, [deleteId, currentPage, fetchStudyLogs]);
 
-  const handleRowClick = (id: string) => {
+  const handleRowClick = useCallback((id: string) => {
     setDetailId(id);
-  };
+  }, []); // id 설정 로직 고정
 
-  const hadleDeleteId = (id: string | null) => {
+  const handleDeleteId = useCallback((id: string | null) => {
     setDeleteId(id);
-  };
+  }, []); // id 설정 로직 고정
+
   /** 학습 기록 (GRID)  데이터 조회 */
   useEffect(() => {
     fetchStudyLogs(1);
@@ -223,16 +237,13 @@ export default function DashboardPage() {
         <section className="flex gap-4">
           {/* 요약 카드 그리드 */}
           <div className="grid w-2/5 grid-cols-2 gap-4">
-            {summaryConfigs.map((config) => {
-              const displayData = formatSummaryData(config);
-              return (
-                <SummaryCard
-                  key={displayData.title}
-                  title={displayData.title}
-                  parts={displayData.parts}
-                />
-              );
-            })}
+            {formattedSummaryConfigs.map((item) => (
+              <SummaryCard
+                key={item.display.title}
+                title={item.display.title}
+                parts={item.display.parts} // 이제 이 parts는 메모리 주소가 고정됩니다.
+              />
+            ))}
           </div>
 
           {/* 요일별 통계 차트 영역 */}
@@ -254,14 +265,14 @@ export default function DashboardPage() {
                 ))}
               </div>
               {/* 차트 컴포넌트 */}
-              <StudyTimeChart weekdayStudyTime={weekdayStudyTime} />
+              <StudyTimeChart weekdayStudyTime={memoizedWeekdayStudyTime} />
             </div>
           </div>
         </section>
 
-        {/* 하단 추가 섹션들 */}
+        {/* 공부 시간 바다 */}
         <section>
-          <StudyHeatmap heatmapData={heatmapData} />
+          <StudyHeatmap heatmapData={memoizedHeatmapData} />
         </section>
 
         {/* 학습기록 Grid */}
@@ -269,11 +280,11 @@ export default function DashboardPage() {
           <div className="mb-6 text-[18px] font-semibold text-gray-400">학습 기록</div>
 
           {/* Table 컴포넌트 */}
-          {studyLogs && (
+          {memoizedStudyLogs && (
             <Table
               onClickRow={handleRowClick}
-              studyLogs={studyLogs.studyLogs}
-              onChangeDeletId={hadleDeleteId}
+              studyLogs={memoizedStudyLogs.studyLogs}
+              onChangeDeletId={handleDeleteId}
             />
           )}
 
@@ -297,7 +308,7 @@ export default function DashboardPage() {
         )}
         {/* 삭제: 삭제용 ID가 있을 때 */}
         {isOpen && deleteId && (
-          <TimerLogDeleteDialog onChangeDeleteId={hadleDeleteId} onDelete={handleDeleteStudyLog} />
+          <TimerLogDeleteDialog onChangeDeleteId={handleDeleteId} onDelete={handleDeleteStudyLog} />
         )}
       </main>
     </div>

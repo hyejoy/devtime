@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip } from 'react-tooltip';
@@ -36,7 +36,7 @@ const todayMonth = now.getMonth();
 const startDate = new Date(todayYear - 1, todayMonth + 1, 1); // 시작일: 1년 전 이번 달 1일
 const endDate = now;
 
-export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
+const StudyHeatmap = ({ heatmapData }: HeatmapProps) => {
   const tooltipId = 'study-heatmap-tooltip';
 
   // 💠 데이터 변환 및 레벨 재계산 로직
@@ -172,4 +172,6 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
       <Tooltip id={tooltipId} />
     </div>
   );
-}
+};
+
+export default memo(StudyHeatmap);

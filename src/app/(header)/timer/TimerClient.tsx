@@ -2,7 +2,7 @@
 
 import clsx from 'clsx';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import TimerDialog from '@/app/components/dialog/timer/TimerDialog';
 import TimeDisplay from '@/app/components/timer/TimeDisplay';
@@ -78,9 +78,9 @@ export default function TimerClient() {
     }
   }, [totalActiveMs]);
 
-  const handleEditingMode = (isEditing: boolean) => {
+  const handleEditingMode = useCallback((isEditing: boolean) => {
     setEditingMode(isEditing);
-  };
+  }, []);
 
   const handleTimerStart = async () => {
     // 첫 타이머 실행
@@ -111,7 +111,6 @@ export default function TimerClient() {
     try {
       await timerService.delete(timerId);
       timerReset();
-      alert('타이머가 초기화 되었습니다.');
     } catch (err) {
       console.error('삭제 실패": ', err);
       alert('타이머 삭제 중 오류가 발생했습니다.');
