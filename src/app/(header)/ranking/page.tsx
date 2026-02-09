@@ -89,7 +89,7 @@ export default function Page() {
   }, [hasNextPage, isLoading, sortBy]);
 
   return (
-    <main className="mt-10">
+    <main className="mt-10 w-full">
       <section>
         <div className="flex h-[54px] w-fit cursor-pointer items-center justify-start gap-1 rounded-lg bg-white">
           <div

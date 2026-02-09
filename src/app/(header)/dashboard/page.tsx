@@ -232,85 +232,80 @@ export default function DashboardPage() {
   }, [detailId]);
 
   return (
-    <div>
-      <main className="mt-[40px] w-[70vw] flex-1">
-        <section className="flex gap-4">
-          {/* 요약 카드 그리드 */}
-          <div className="grid w-2/5 grid-cols-2 gap-4">
-            {formattedSummaryConfigs.map((item) => (
-              <SummaryCard
-                key={item.display.title}
-                title={item.display.title}
-                parts={item.display.parts} // 이제 이 parts는 메모리 주소가 고정됩니다.
-              />
-            ))}
-          </div>
-
-          {/* 요일별 통계 차트 영역 */}
-          <div className="bg-brand-primary flex w-3/5 overflow-hidden rounded-xl">
-            <div className="w-1/3 pt-6 pl-6 text-[18px] font-semibold text-white">
-              요일별 공부 시간 평균
-            </div>
-
-            <div className="mt-12 mr-12 mb-4 flex w-2/3 items-end">
-              {/* Y축 커스텀 라벨 */}
-              <div className="flex h-full w-20 flex-col justify-between pt-3 pb-16 text-nowrap">
-                {CHART_LABELS.map((label) => (
-                  <span
-                    key={label}
-                    className="mr-2 border-t border-white/20 text-[12px] text-white/50"
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-              {/* 차트 컴포넌트 */}
-              <StudyTimeChart weekdayStudyTime={memoizedWeekdayStudyTime} />
-            </div>
-          </div>
-        </section>
-
-        {/* 공부 시간 바다 */}
-        <section>
-          <StudyHeatmap heatmapData={memoizedHeatmapData} />
-        </section>
-
-        {/* 학습기록 Grid */}
-        <section className="mt-8 mb-16 flex flex-col rounded-xl bg-white p-6 pb-8">
-          <div className="mb-6 text-[18px] font-semibold text-gray-400">학습 기록</div>
-
-          {/* Table 컴포넌트 */}
-          {memoizedStudyLogs && (
-            <Table
-              onClickRow={handleRowClick}
-              studyLogs={memoizedStudyLogs.studyLogs}
-              onChangeDeletId={handleDeleteId}
+    <main className="mt-[40px] w-full">
+      <section className="flex gap-4">
+        {/* 요약 카드 그리드 */}
+        <div className="grid w-2/5 grid-cols-2 gap-4">
+          {formattedSummaryConfigs.map((item) => (
+            <SummaryCard
+              key={item.display.title}
+              title={item.display.title}
+              parts={item.display.parts} // 이제 이 parts는 메모리 주소가 고정됩니다.
             />
-          )}
+          ))}
+        </div>
 
-          {/* Pagination 컴포넌트 : 직접 페이지네이션 상태 관리 */}
-          {studyLogs && (
-            <section className="mt-9 flex items-center justify-center">
-              <Pagination {...studyLogs.pagination} onPageChange={handleMovePage} />
-            </section>
-          )}
-        </section>
-        {/* 학습 기록 상세보기 모달 */}
-        {/* 상세보기: ID가 있고 상세 데이터도 준비되었을 때 */}
-        {isOpen && detailId && detailLog && (
-          <DashboardDialog
-            detailLog={detailLog}
-            onReset={() => {
-              setDetailLog(null); // detail 내용 초기화
-              setDetailId(null); // detail Id 초기화
-            }}
+        {/* 요일별 통계 차트 영역 */}
+        <div className="bg-brand-primary flex w-3/5 overflow-hidden rounded-xl">
+          <div className="w-1/3 pt-6 pl-6 text-[18px] font-semibold text-white">
+            요일별 공부 시간 평균
+          </div>
+
+          <div className="mt-12 mr-12 mb-4 flex w-2/3 items-end">
+            {/* Y축 커스텀 라벨 */}
+            <div className="flex h-full w-20 flex-col justify-between pt-3 pb-16 text-nowrap">
+              {CHART_LABELS.map((label) => (
+                <span key={label} className="mr-2 border-white/20 text-[12px] text-white/50">
+                  {label}
+                </span>
+              ))}
+            </div>
+            {/* 차트 컴포넌트 */}
+            <StudyTimeChart weekdayStudyTime={memoizedWeekdayStudyTime} />
+          </div>
+        </div>
+      </section>
+
+      {/* 공부 시간 바다 */}
+      <section>
+        <StudyHeatmap heatmapData={memoizedHeatmapData} />
+      </section>
+
+      {/* 학습기록 Grid */}
+      <section className="mt-8 mb-16 flex flex-col rounded-xl bg-white p-6 pb-8">
+        <div className="mb-6 text-[18px] font-semibold text-gray-400">학습 기록</div>
+
+        {/* Table 컴포넌트 */}
+        {memoizedStudyLogs && (
+          <Table
+            onClickRow={handleRowClick}
+            studyLogs={memoizedStudyLogs.studyLogs}
+            onChangeDeletId={handleDeleteId}
           />
         )}
-        {/* 삭제: 삭제용 ID가 있을 때 */}
-        {isOpen && deleteId && (
-          <TimerLogDeleteDialog onChangeDeleteId={handleDeleteId} onDelete={handleDeleteStudyLog} />
+
+        {/* Pagination 컴포넌트 : 직접 페이지네이션 상태 관리 */}
+        {studyLogs && (
+          <section className="mt-9 flex items-center justify-center">
+            <Pagination {...studyLogs.pagination} onPageChange={handleMovePage} />
+          </section>
         )}
-      </main>
-    </div>
+      </section>
+      {/* 학습 기록 상세보기 모달 */}
+      {/* 상세보기: ID가 있고 상세 데이터도 준비되었을 때 */}
+      {isOpen && detailId && detailLog && (
+        <DashboardDialog
+          detailLog={detailLog}
+          onReset={() => {
+            setDetailLog(null); // detail 내용 초기화
+            setDetailId(null); // detail Id 초기화
+          }}
+        />
+      )}
+      {/* 삭제: 삭제용 ID가 있을 때 */}
+      {isOpen && deleteId && (
+        <TimerLogDeleteDialog onChangeDeleteId={handleDeleteId} onDelete={handleDeleteStudyLog} />
+      )}
+    </main>
   );
 }

@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* global.css */
+@utility hide-scrollbar {
+  /* Chrome, Safari, Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE and Edge */
+  -ms-overflow-style: none;
+}
+
 @theme {
   /* Brand Primary */
   --font-pretendard: var(--font-pretendard), sans-serif;

@@ -94,7 +94,7 @@ const StudyHeatmap = ({ heatmapData }: HeatmapProps) => {
     <div className={`${styles.heatmapContainer}`}>
       <h2 className="mb-4 text-[18px] font-semibold text-gray-400">공부 시간 바다</h2>
       <div className="flex w-full">
-        <div className="flex flex-col gap-[8px] pt-7 text-[12px] font-medium text-gray-600">
+        <div className="mt-[24px] flex h-[159px] flex-col justify-between text-[12px] font-medium text-gray-600">
           {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
             <span key={day}>{day}</span>
           ))}
