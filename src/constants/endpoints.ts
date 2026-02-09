@@ -25,11 +25,7 @@ export const API = {
     UPDATE: (studyLogId: string) => `${PROXY}/${studyLogId}/tasks`, //  PUT
   },
   STUDYLOGS: {
-    GET_STUDY_LOGS: ({
-      page,
-      limit,
-      date,
-    }: { page?: number; limit?: number; date?: string } = {}) => {
+    GET: ({ page, limit, date }: { page?: number; limit?: number; date?: string } = {}) => {
       // 1. 기본값 설정 (값이 안 들어올 경우 대비)
       const params = new URLSearchParams();
       if (page) params.append('page', String(page));
@@ -39,8 +35,8 @@ export const API = {
       const queryString = params.toString();
       return `${PROXY}/study-logs${queryString ? `?${queryString}` : ''}`;
     },
-    GET_DETAIL_STUDY_LOG: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
-    DELETE_STUDY_LOG: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
+    DETAIL: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
+    DELETE: (studyLogId: string) => `${PROXY}/study-logs/${studyLogId}`,
   },
   STATS: {
     STATS: `${PROXY}/stats`,
