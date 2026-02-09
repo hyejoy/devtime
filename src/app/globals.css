@@ -94,7 +94,8 @@
   --btn-text-field-disabled-text: var(--color-gray-400);
 
   --color-active-link: var(--color-brand-primary);
-  --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #f0f2f9 40%, #e2e5f0 100%);
+  /* --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #f0f2f9 40%, #e2e5f0 100%); */
+  --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #dfe4f2 50%, #b8c1d9 100%);
 
   /* heatmap - 공부 시간 바다*/
   --color-heatmap0: var(--color-gray-50);
