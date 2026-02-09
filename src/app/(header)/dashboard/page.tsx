@@ -152,7 +152,7 @@ export default function DashboardPage() {
   /** 학습 기록 (GRID) 데이터 조회 함수 */
   const fetchStudyLogs = useCallback(async (page: number) => {
     try {
-      const url = `${API.STUDYLOGS.GET_STUDY_LOGS({
+      const url = `${API.STUDYLOGS.GET({
         page: page,
         limit: 10,
       })}`;
@@ -182,7 +182,7 @@ export default function DashboardPage() {
   const handleDeleteStudyLog = useCallback(async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(deleteId)}`, {
+      const res = await fetch(`${API.STUDYLOGS.DELETE(deleteId)}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -214,7 +214,7 @@ export default function DashboardPage() {
     const fetchLogDetail = async () => {
       if (!detailId) return;
       try {
-        const res = await fetch(`${API.STUDYLOGS.GET_DETAIL_STUDY_LOG(detailId)}`, {
+        const res = await fetch(`${API.STUDYLOGS.DETAIL(detailId)}`, {
           method: 'GET',
           credentials: 'include',
         });
