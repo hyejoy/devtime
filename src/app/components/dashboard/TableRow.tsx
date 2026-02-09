@@ -1,5 +1,6 @@
-import { useDialogActions } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialog';
 import Image from 'next/image';
+import { memo, useCallback } from 'react';
 
 interface TableRowProps {
   id: string;
@@ -9,11 +10,11 @@ interface TableRowProps {
   totalTasks: number;
   pendingTasks: number;
   achievementRate: string;
-  onDelete: (id: string) => void;
   onClickRow: (id: string) => void;
+  onChangeDeletId: (id: string) => void;
 }
 
-export default function TableRow({
+const TableRow = ({
   id,
   date,
   goal,
@@ -21,24 +22,28 @@ export default function TableRow({
   totalTasks,
   pendingTasks,
   achievementRate,
-  onDelete,
   onClickRow,
-}: TableRowProps) {
-  // 오타 수정 및 버블링 방지 추가
-  const handleDeleteItem = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm('정말로 삭제하시겠습니까?')) {
-      // 간단한 확인 절차 추가
-      onDelete(id);
-    }
-  };
+  onChangeDeletId,
+}: TableRowProps) => {
+  const openDialog = useDialogStore((state) => state.openDialog);
+  const handleDeleteItem = useCallback(
+    (e: React.MouseEvent) => {
+      // 버블링 방지
+      e.stopPropagation();
+      onChangeDeletId(id);
+      openDialog();
+    },
+    [id, onChangeDeletId]
+  );
 
-  const { openDialog, changeType } = useDialogActions();
-  const handleShowTaskDetail = () => {
-    onClickRow(id);
-    changeType('custom');
-    openDialog();
-  };
+  const handleShowTaskDetail = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      openDialog();
+      onClickRow(id);
+    },
+    [id, onClickRow]
+  );
   return (
     <tr className="border-b border-gray-200 text-[16px] font-medium text-gray-700 transition-colors hover:bg-gray-50">
       <td className="p-9 pl-10 text-left">{date}</td>
@@ -50,17 +55,18 @@ export default function TableRow({
       <td className="p-1">{pendingTasks}</td>
       <td className="p-1">{achievementRate}</td>
       <td className="p-4">
-        <div className="flex items-baseline justify-end pr-6">
+        <div className="flex items-baseline justify-end pr-6" onClick={handleDeleteItem}>
           <Image
             src="/images/table/delete.png"
             alt="del"
             width={17.5}
             height={19.5}
             className="cursor-pointer object-contain"
-            onClick={handleShowTaskDetail}
           />
         </div>
       </td>
     </tr>
   );
-}
+};
+
+export default memo(TableRow);

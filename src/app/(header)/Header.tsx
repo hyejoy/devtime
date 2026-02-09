@@ -1,12 +1,12 @@
 'use client';
 
-import { useTimerActions } from '@/store/timer';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Logo from '../components/ui/Logo';
 import Logout from '../components/logout/Logout';
+import { useTimerStore } from '@/store/timer';
 
 const NAV_ITEMS = [
   { label: '대시보드', href: '/dashboard' },
@@ -19,7 +19,7 @@ const LOGIN_ITEMS = [
 ];
 
 export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
-  const { setLastStartTimestamp } = useTimerActions();
+  const { setLastStartTimestamp } = useTimerStore((state) => state.actions);
   const pathname = usePathname();
 
   const linkClick = () => {

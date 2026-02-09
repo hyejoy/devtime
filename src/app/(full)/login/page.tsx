@@ -13,15 +13,17 @@ import Image from 'next/image';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
 import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
-import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialog';
+import { useTimerStore } from '@/store/timer';
 
 const cx = classNames.bind(styles);
 
 //  # 헤더 없고 전체 화면 사용하는 페이지
 export default function Page() {
   /** zustand */
-  const IsDialogOpen = useIsDialogOpen();
-  const { openDialog, closeDialog } = useDialogActions();
+
+  const { openDialog, closeDialog, isOpen } = useDialogStore();
+  const { timerReset } = useTimerStore((state) => state.actions);
 
   /** state */
   const [values, setValues] = useState<LoginInput>({
@@ -96,7 +98,7 @@ export default function Page() {
     return;
   };
 
-  const onChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name as LoginField;
     const value = e.target.value;
     handleFieldChange(name, value);
@@ -109,11 +111,11 @@ export default function Page() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // 페이지 새로고침 방지
     if (!isLoginButtonDisabled()) {
-      onClickLoginButton();
+      handleLoginButton();
     }
   };
 
-  async function onClickLoginButton() {
+  async function handleLoginButton() {
     try {
       const res = await fetch(`${API.AUTH.LOGIN}`, {
         method: 'POST',
@@ -127,6 +129,10 @@ export default function Page() {
         credentials: 'include',
       });
       const data = await res.json();
+
+      if (res.ok) {
+        timerReset();
+      }
       // 로그인 실패 처리
       if (!res.ok) {
         console.warn('로그인 실패:', data.message);
@@ -172,7 +178,7 @@ export default function Page() {
                     name={key}
                     value={values[key]}
                     placeholder={MESSAGE.LOGIN[key]}
-                    onChange={onChangeInput}
+                    onChange={handleChangeInput}
                     feedbackMessage={feedbackMessage[key]}
                     type={key === 'password' ? 'password' : 'text'}
                   />
@@ -184,7 +190,7 @@ export default function Page() {
               className="w-full bg-red-200"
               type="submit"
               disabled={isLoginButtonDisabled()}
-              onClick={onClickLoginButton}
+              onClick={handleLoginButton}
             >
               로그인
             </Button>
@@ -194,9 +200,7 @@ export default function Page() {
           </div>
         </form>
       </div>
-      {IsDialogOpen && (
-        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} alignButton="full" />
-      )}
+      {isOpen && <LoginDialog dialogType={dialogType} nextRoute={nextRoute} alignButton="full" />}
     </div>
   );
 }

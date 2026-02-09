@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
+import styles from './StudyHeatmap.module.css';
 
 /** --- 서버 응답 데이터 타입 --- */
 interface RawItem {
@@ -35,7 +36,7 @@ const todayMonth = now.getMonth();
 const startDate = new Date(todayYear - 1, todayMonth + 1, 1); // 시작일: 1년 전 이번 달 1일
 const endDate = now;
 
-export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
+const StudyHeatmap = ({ heatmapData }: HeatmapProps) => {
   const tooltipId = 'study-heatmap-tooltip';
 
   // 💠 데이터 변환 및 레벨 재계산 로직
@@ -90,10 +91,10 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
   {
   }
   return (
-    <div className="mt-4 w-full rounded-xl bg-white p-6">
+    <div className={`${styles.heatmapContainer}`}>
       <h2 className="mb-4 text-[18px] font-semibold text-gray-400">공부 시간 바다</h2>
       <div className="flex w-full">
-        <div className="flex flex-col gap-1.5 pt-7 text-[12px] font-medium text-gray-500">
+        <div className="flex flex-col gap-[8px] pt-7 text-[12px] font-medium text-gray-600">
           {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
             <span key={day}>{day}</span>
           ))}
@@ -171,4 +172,6 @@ export default function StudyHeatmap({ heatmapData }: HeatmapProps) {
       <Tooltip id={tooltipId} />
     </div>
   );
-}
+};
+
+export default memo(StudyHeatmap);

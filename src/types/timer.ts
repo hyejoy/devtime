@@ -16,3 +16,25 @@ export interface timerSummary {
     isCompleted: boolean;
   }[];
 }
+export type Task = {
+  id: string;
+  content: string;
+  isCompleted: boolean;
+};
+
+export interface DisplayTime {
+  hours: string;
+  mins: string;
+  secs: string;
+}
+
+export type TimerStatus = 'READY' | 'RUNNING' | 'DONE' | 'PAUSE';
+
+export interface SplitTimesForServer {
+  splitTimes: SplitTime[];
+  review: string;
+  tasks: {
+    content: string;
+    isCompleted: boolean;
+  }[];
+}
