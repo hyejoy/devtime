@@ -44,4 +44,22 @@ export const API = {
   HEATMAP: {
     HEATMAP: `${PROXY}/heatmap`,
   },
+  RANKING: {
+    GET: ({
+      sortBy,
+      page = 1,
+      limit = 10,
+    }: {
+      sortBy?: 'total' | 'avg';
+      page?: number;
+      limit?: number;
+    }) => {
+      const params = new URLSearchParams();
+      if (sortBy) params.append('sortBy', sortBy);
+      if (page) params.append('page', String(page));
+      if (limit) params.append('limit', String(limit));
+      const queryString = params.toString();
+      return `${PROXY}/rankings${queryString ? `?${queryString}` : ''}`;
+    },
+  },
 } as const;
