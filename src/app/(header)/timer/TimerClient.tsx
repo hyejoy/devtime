@@ -40,7 +40,6 @@ export default function TimerClient() {
   const {
     setLastStartTimestamp,
     setTotalActiveMs,
-    tick,
     setTimerStatus,
     setIsRunning,
     timerReset,
@@ -71,15 +70,6 @@ export default function TimerClient() {
       setTotalActiveMs(totalActiveMs + gap);
     }
   }, []);
-
-  /** 타이머 엔진 · tick */
-  useEffect(() => {
-    if (!isRunning) return;
-    const intervalId = setInterval(() => {
-      tick();
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, [isRunning, tick]);
 
   /** 10분 마다 실행 */
   useEffect(() => {

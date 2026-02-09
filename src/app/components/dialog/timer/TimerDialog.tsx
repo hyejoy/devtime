@@ -176,16 +176,18 @@ export default function TimerDialog({ isEditingMode, onChangeEditingMode }: Time
     }
     closeDialog();
   };
+
+  // 타이머 종료
   const onClickDone = async () => {
+    const payload = getSplitTimesForServer();
+    if (!payload) return;
     settingDoneTimer();
+
     try {
-      await timerService.stop(timerId, {
-        review,
-        splitTimes: getSplitTimesForServer(),
-        tasks,
-      });
-      timerReset(); // 타이머 초기화
+      await timerService.stop(timerId, payload);
+      timerReset();
       closeDialog();
+      alert('학습이 종료 되었습니다.');
     } catch (err) {
       console.error('타이머 종료 실패 : ', err);
     }

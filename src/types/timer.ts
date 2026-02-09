@@ -29,3 +29,12 @@ export interface DisplayTime {
 }
 
 export type TimerStatus = 'READY' | 'RUNNING' | 'DONE' | 'PAUSE';
+
+export interface SplitTimesForServer {
+  splitTimes: SplitTime[];
+  review: string;
+  tasks: {
+    content: string;
+    isCompleted: boolean;
+  }[];
+}

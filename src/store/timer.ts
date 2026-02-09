@@ -1,4 +1,4 @@
-import { DisplayTime, SplitTime, Task, TimerStatus } from '@/types/timer';
+import { DisplayTime, SplitTime, SplitTimesForServer, Task, TimerStatus } from '@/types/timer';
 import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -36,7 +36,7 @@ interface TimerState {
     tick: () => void;
     timerReset: () => void;
     createSplitTime: (startTime: string) => SplitTime;
-    getSplitTimesForServer: () => SplitTime[];
+    getSplitTimesForServer: () => SplitTimesForServer | undefined;
     updateTodayGoal: (todayGoal: string) => void;
     updateReview: (review: string) => void;
     toggleDone: (id: string) => void;
@@ -85,47 +85,55 @@ export const useTimerStore = create<TimerState>()(
         setLastStartTimestamp: (time) => set({ lastStartTimestamp: time }),
 
         tick: () => {
-          const { isRunning, lastStartTimestamp, dailyRecords, totalActiveMs } = get();
-
-          if (!isRunning || !lastStartTimestamp) return;
-
           const now = new Date();
           const todayKey = now.toISOString().split('T')[0];
 
-          // 1초마다 1000ms씩 증가
-          const nextTotalMs = totalActiveMs + 1000;
-          const updateRecords = { ...dailyRecords };
-          updateRecords[todayKey] = (updateRecords[todayKey] || 0) + 1000;
+          set((state) => {
+            // 1. 실행 중이 아니면 상태 변경 없이 그대로 반환
+            if (!state.isRunning || !state.lastStartTimestamp) return state;
 
-          // 디스플레이 계산용 (ms -> s)
-          const totalSeconds = Math.floor(nextTotalMs / 1000);
-          const h = Math.floor(totalSeconds / 3600)
-            .toString()
-            .padStart(2, '0');
-          const m = Math.floor((totalSeconds % 3600) / 60)
-            .toString()
-            .padStart(2, '0');
-          const s = (totalSeconds % 60).toString().padStart(2, '0');
+            // 2. 값 계산
+            const nextTotalMs = state.totalActiveMs + 1000;
+            const nextDailyMs = (state.dailyRecords[todayKey] || 0) + 1000;
 
-          set({
-            dailyRecords: updateRecords,
-            totalActiveMs: nextTotalMs,
-            displayTime: { hours: h, mins: m, secs: s },
+            const totalSeconds = Math.floor(nextTotalMs / 1000);
+            const h = Math.floor(totalSeconds / 3600)
+              .toString()
+              .padStart(2, '0');
+            const m = Math.floor((totalSeconds % 3600) / 60)
+              .toString()
+              .padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+
+            //  3. 새로운 객체를 반환하여 상태 업데이트
+            return {
+              totalActiveMs: nextTotalMs,
+              dailyRecords: {
+                ...state.dailyRecords,
+                [todayKey]: nextDailyMs,
+              },
+              displayTime: { hours: h, mins: m, secs: s },
+            };
           });
         },
 
         // 타이머 종료시 splitTimes 값
-        getSplitTimesForServer: () => {
-          const { dailyRecords } = get();
-          const now = new Date().toISOString();
-          return Object.entries(dailyRecords).map(([date, ms]) => {
-            const isToday = new Date().toISOString().split('T')[0] === date;
+        getSplitTimesForServer: (): SplitTimesForServer | undefined => {
+          const { review, lastStartTimestamp, tasks, totalActiveMs } = get();
 
-            return {
-              date: isToday ? now : new Date(date).toISOString(),
-              timeSpent: ms, // ms 단위를 반환 (전송 직전 유틸에서 s로 변환됨)
-            };
-          });
+          // 시작 시간이 없으면 전송 불가
+          if (!lastStartTimestamp) return undefined;
+          return {
+            review,
+            splitTimes: [
+              {
+                date: new Date().toISOString(),
+                // 계산식 대신, 화면에 흐르고 있는 실제 ms 값을 그대로 보냄
+                timeSpent: totalActiveMs,
+              },
+            ],
+            tasks,
+          };
         },
 
         createSplitTime: (startTime) => {
