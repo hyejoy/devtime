@@ -2,8 +2,7 @@
 
 import { HelperLink } from '@/types/common';
 import TextLinkRow from '../ui/TextLinkRow';
-import styles from './UserFormContainer.module.css';
-
+import clsx from 'clsx';
 /** TODO
  * body와 extra를 나누는 기준이 모호할 수도 있겠다는 생각이 드네요!
  * '선택적' '보조' 라는 것은 무엇을 기준으로 하는지. 필수 입력 여부?
@@ -17,24 +16,23 @@ type Props = {
   helperLink?: HelperLink; // 하단 helper 링크
   /** 하단 helper 링크 */
 };
-export default function UserFormContainer({
-  title,
-  body,
-  extra,
-  footerAction,
-  helperLink,
-}: Props) {
+export default function UserFormContainer({ title, body, extra, footerAction, helperLink }: Props) {
   return (
-    <div className={styles.formInner}>
-      <div className={styles.formTitle}>{title}</div>
+    <div
+      className={clsx(
+        'flex max-h-[80vh] max-w-[50vh] flex-1',
+        'flex-col justify-center bg-white py-8'
+      )}
+    >
+      <div className="text-brand-primary w-full text-center text-[1.3rem] leading-8 font-bold">
+        {title}
+      </div>
 
       {body && <section>{body}</section>}
 
-      {extra && <section className={styles.extra}>{extra}</section>}
+      {extra && <section>{extra}</section>}
 
-      {footerAction && (
-        <div className={styles.footerAction}>{footerAction}</div>
-      )}
+      {footerAction && <div className="flex flex-col">{footerAction}</div>}
 
       {helperLink && (
         <TextLinkRow

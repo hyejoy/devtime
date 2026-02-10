@@ -7,13 +7,7 @@ import { MESSAGE } from '@/constants/signupMessage';
 import { signup } from '@/services/signup';
 import { duplicateCheckApiMap, SignupRequest } from '@/types/api';
 import { HelperLink } from '@/types/common';
-import {
-  DuplicateField,
-  DuplicateState,
-  SignField,
-  SignInput,
-  SignValid,
-} from '@/types/signup';
+import { DuplicateField, DuplicateState, SignField, SignInput, SignValid } from '@/types/signup';
 import classNames from 'classnames/bind';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
@@ -26,15 +20,13 @@ export default function Page() {
   /* input values */
   const [values, setValues] = useState<SignInput>({
     id: '',
-    nickName: '',
+    nickname: '',
     password: '',
     checkPassword: '',
   });
 
   /* validation (regex level) */
-  const [regexValidity, setRegexValidity] = useState<
-    Pick<SignValid, 'id' | 'password'>
-  >({
+  const [regexValidity, setRegexValidity] = useState<Pick<SignValid, 'id' | 'password'>>({
     id: false,
     password: false,
   });
@@ -42,13 +34,13 @@ export default function Page() {
   /* duplicate check */
   const [duplicateChecked, setDuplicateChecked] = useState<DuplicateState>({
     id: false,
-    nickName: false,
+    nickname: false,
   });
 
   /* feedback messages */
   const [feedbackMessage, setFeedbackMessage] = useState<SignInput>({
     id: '',
-    nickName: '',
+    nickname: '',
     password: '',
     checkPassword: '',
   });
@@ -59,11 +51,9 @@ export default function Page() {
   /* final validation state */
   const fieldValidityMap: SignValid = {
     id: regexValidity.id && duplicateChecked.id,
-    nickName: duplicateChecked.nickName,
+    nickname: duplicateChecked.nickname,
     password: regexValidity.password,
-    checkPassword:
-      values.checkPassword === values.password &&
-      values.checkPassword.length > 0,
+    checkPassword: values.checkPassword === values.password && values.checkPassword.length > 0,
   };
 
   const updateDuplicateStatus = (name: DuplicateField, isCheck: boolean) => {
@@ -132,9 +122,9 @@ export default function Page() {
           return;
         }
 
-        case 'nickName': {
+        case 'nickname': {
           if (!value) {
-            updateFieldMessage(name, MESSAGE.REQUIRED.nickName);
+            updateFieldMessage(name, MESSAGE.REQUIRED.nickname);
             return;
           }
 
@@ -145,9 +135,7 @@ export default function Page() {
 
           updateFieldMessage(
             name,
-            isDuplicateConfirmed
-              ? MESSAGE.NICKNAME_AVAILABLE
-              : MESSAGE.NICKNAME_DUPLICATED
+            isDuplicateConfirmed ? MESSAGE.NICKNAME_AVAILABLE : MESSAGE.NICKNAME_DUPLICATED
           );
           return;
         }
@@ -158,10 +146,7 @@ export default function Page() {
             return;
           }
           const isValid = passwordRegex.test(values.password);
-          updateFieldMessage(
-            'password',
-            isValid ? '' : MESSAGE.PASSWORD_INVALID
-          );
+          updateFieldMessage('password', isValid ? '' : MESSAGE.PASSWORD_INVALID);
 
           updateFieldMessage(
             'checkPassword',
@@ -181,14 +166,7 @@ export default function Page() {
         }
       }
     },
-    [
-      MESSAGE,
-      passwordRegex,
-      updateFieldMessage,
-      values.id,
-      values.password,
-      values.checkPassword,
-    ]
+    [MESSAGE, passwordRegex, updateFieldMessage, values.id, values.password, values.checkPassword]
   );
   const handleFieldChange = (name: keyof SignInput, value: string) => {
     setValues((prev) => {
@@ -197,17 +175,16 @@ export default function Page() {
       // 1️⃣ 필드별 유효성 계산
       const fieldValidMap: Record<SignField, boolean> = {
         id: emailRegex.test(next.id),
-        nickName: true, // 닉네임은 regex 검증 없음 (중복확인만)
+        nickname: true, // 닉네임은 regex 검증 없음 (중복확인만)
         password: passwordRegex.test(next.password),
-        checkPassword:
-          next.checkPassword.length > 0 && next.checkPassword === next.password,
+        checkPassword: next.checkPassword.length > 0 && next.checkPassword === next.password,
       };
 
       // 2️⃣ 유효성 반영
       const isValid = fieldValidMap[name];
 
       // 3️⃣ 중복확인 상태 리셋
-      if (name === 'id' || name === 'nickName') {
+      if (name === 'id' || name === 'nickname') {
         updateDuplicateChecked(name, false);
         handleFeedbackMessage(name, next, isValid, false);
       } else if (name === 'password') {
@@ -252,16 +229,11 @@ export default function Page() {
 
     invalidFieldKeys.map((key) => {
       if (key === 'id') {
-        handleFeedbackMessage(
-          key,
-          values,
-          regexValidity['id'],
-          duplicateChecked['id']
-        );
+        handleFeedbackMessage(key, values, regexValidity['id'], duplicateChecked['id']);
         return;
       }
-      if (key === 'nickName') {
-        handleFeedbackMessage(key, values, true, duplicateChecked['nickName']);
+      if (key === 'nickname') {
+        handleFeedbackMessage(key, values, true, duplicateChecked['nickname']);
         return;
       }
       if (key === 'password') {
@@ -282,15 +254,13 @@ export default function Page() {
       validateAndMarkInvalidFields(); // helper message 설정
 
       // false 값있는지 확인
-      const invalidFields = Object.entries(fieldValidityMap).filter(
-        ([_, isValid]) => !isValid
-      );
+      const invalidFields = Object.entries(fieldValidityMap).filter(([_, isValid]) => !isValid);
       // false 하나라도 있으면 리턴
       if (invalidFields.length || !isTermChecked) return;
 
       const signupInfo: SignupRequest = {
         email: values['id'],
-        nickname: values['nickName'],
+        nickname: values['nickname'],
         password: values['password'],
         confirmPassword: values['checkPassword'],
       };
@@ -303,12 +273,11 @@ export default function Page() {
 
     // 아이디/닉네임 중복 확인, 네 가지 입력 정보의 유효성 검증,
     // 이용 약관의 동의함 체크까지 모두 이루어져야 '회원가입' 버튼이 활성화
-    const isSignupEnabled =
-      !Object.values(fieldValidityMap).some((v) => !v) && isTermChecked;
+    const isSignupEnabled = !Object.values(fieldValidityMap).some((v) => !v) && isTermChecked;
 
     return (
-      <div className={cx('bottomButtonField')}>
-        <Button onClick={onSignup} disabled={!isSignupEnabled}>
+      <div className="mb-[2rem]">
+        <Button className="w-full" onClick={onSignup} disabled={!isSignupEnabled}>
           회원가입
         </Button>
       </div>
@@ -332,7 +301,6 @@ export default function Page() {
             isRegexValidityMap={regexValidity}
             feedbackMessages={feedbackMessage}
             onChangeValue={handleFieldChange}
-            onChangeValidation={updateFieldValidity}
             onConfirmDuplicate={handleDuplicateCheck}
           />
         </>
