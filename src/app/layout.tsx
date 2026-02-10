@@ -4,7 +4,7 @@ import '@/styles/tokens/colors.css';
 import { ReactNode, useEffect } from 'react';
 import { digitalNumber, pretendard } from '../../public/fonts/font';
 import './globals.css';
-import { useTimerStore } from '@/store/timer';
+import { useTimerStore } from '@/store/timerStore';
 
 //   fontFamily: 'var(--font-pretendard)',
 export default function RootLayout({ children }: { children: ReactNode }) {

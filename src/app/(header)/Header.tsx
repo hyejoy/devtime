@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Logo from '../components/ui/Logo';
 import Logout from '../components/logout/Logout';
-import { useTimerStore } from '@/store/timer';
+import { useTimerStore } from '@/store/timerStore';
 
 const NAV_ITEMS = [
   { label: '대시보드', href: '/dashboard' },
@@ -55,7 +55,7 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
 
       {/* 로그인(O) 프로필 영역 노출 */}
       {isLoggedIn && (
-        <div className="flex w-auto items-center gap-2 whitespace-nowrap">
+        <div className="relative flex w-auto items-center gap-2 whitespace-nowrap">
           <Image
             className="cursor-pointer rounded-full object-cover"
             src="/images/profile/profile.png"
@@ -65,6 +65,10 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
           />
           <div className="text-base leading-normal font-bold text-slate-900">닉네임입니다</div>
           <Logout />
+          <div className="absolute top-10 flex w-[130px] flex-col bg-red-300 px-3 py-4">
+            <div className="w-[106px] bg-yellow-300">마이페이지</div>
+            <div>로그아웃</div>
+          </div>
         </div>
       )}
       {/* 로그인(X) 프로필 영역 노출 */}

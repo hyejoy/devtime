@@ -13,8 +13,8 @@ import Image from 'next/image';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
 import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
-import { useDialogStore } from '@/store/dialog';
-import { useTimerStore } from '@/store/timer';
+import { useDialogStore } from '@/store/dialogStore';
+import { useTimerStore } from '@/store/timerStore';
 
 const cx = classNames.bind(styles);
 

@@ -1,5 +1,5 @@
 import Button from '@/app/components/ui/Button';
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 import { StudyLogsDetailResponse } from '@/types/api';
 import TaskItem from '../../timer/TaskItem';
 import DialogField from '../DialogField';

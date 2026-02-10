@@ -1,7 +1,7 @@
 'use client';
 
 import { API } from '@/constants/endpoints';
-import { useTimerStore } from '@/store/timer'; // 타이머 스토어 임포트
+import { useTimerStore } from '@/store/timerStore'; // 타이머 스토어 임포트
 
 export default function Logout() {
   // 타이머 초기화 액션을 가져옵니다.

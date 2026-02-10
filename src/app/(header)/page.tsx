@@ -4,7 +4,7 @@ import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import TimerButton from '@/app/components/timer/TimerButton';
 import LoginDialog from '../components/dialog/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 
 export default function Page() {
   const { isOpen, openDialog, closeDialog } = useDialogStore();

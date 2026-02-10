@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import DialogField from '../DialogField';
 import Button from '../../ui/Button';
 import { ReactNode } from 'react';
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 
 const LOGIN_DIALOG_COPY = {
   'duplicate-login': {

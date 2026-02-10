@@ -1,4 +1,4 @@
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 import Image from 'next/image';
 import { memo, useCallback } from 'react';
 

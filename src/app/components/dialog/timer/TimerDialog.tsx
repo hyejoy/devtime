@@ -1,7 +1,7 @@
 'use client';
 import { timerService } from '@/services/timerService';
-import { useDialogStore } from '@/store/dialog';
-import { useTimerStore } from '@/store/timer';
+import { useDialogStore } from '@/store/dialogStore';
+import { useTimerStore } from '@/store/timerStore';
 import classNames from 'classnames/bind';
 import clsx from 'clsx';
 import Image from 'next/image';

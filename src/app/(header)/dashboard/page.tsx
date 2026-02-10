@@ -8,7 +8,7 @@ import Table from '@/app/components/dashboard/Table';
 import DashboardDialog from '@/app/components/dialog/dashboard/DashboardDialog';
 import TimerLogDeleteDialog from '@/app/components/dialog/dashboard/TimerLogDeleteDialog';
 import { API } from '@/constants/endpoints';
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 import { StatsResponse, StudyLogsDetailResponse, WeekdayStudyTime } from '@/types/api';
 import { FormattedData, RawData, StudyLogsResponse, SummaryItem } from '@/types/dashboard';
 import { formatTimeHours, formatTimeMinutes } from '@/utils/formatTime';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 import DialogField from '../DialogField';
 import Button from '@/app/components/ui/Button';
 
