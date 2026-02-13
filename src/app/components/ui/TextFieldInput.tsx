@@ -1,35 +1,49 @@
 'use client';
 
-import React, { ComponentProps, forwardRef, InputHTMLAttributes } from 'react';
-import styles from './TextFieldInput.module.css';
-import classNames from 'classnames/bind';
-
-// classnames 적용
-const cx = classNames.bind(styles);
+import React, { ComponentProps, forwardRef } from 'react';
+import clsx from 'clsx';
 
 interface Props extends ComponentProps<'input'> {
   isValid?: boolean;
   feedbackMessage?: string;
-  placeholder?: string;
-  className?: string;
+  /** 피드백 메시지를 위한 하단 공간을 항상 확보할지 여부 */
+  hasFeedback?: boolean;
 }
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
-  // TODO: InputBorder 오타로 인식하심
-  ({ isValid, feedbackMessage, placeholder, className, ...props }, ref) => {
-    const InputBorer =
-      !isValid && Boolean(feedbackMessage) ? 'negativeBorder' : '';
-    const messageTextType = isValid ? 'positive' : 'negative';
+  (
+    { isValid = true, feedbackMessage, hasFeedback = false, placeholder, className, ...props },
+    ref
+  ) => {
+    const isError = !isValid && Boolean(feedbackMessage);
+    const feedbackColor = isValid ? 'text-green-500' : 'text-red-500';
 
     return (
-      <div className={cx('inputBox')}>
+      <div className="flex w-full flex-col select-none">
         <input
           ref={ref}
-          className={cx('input', InputBorer, className)}
           placeholder={placeholder}
+          className={clsx(
+            'h-[44px] w-full flex-1 rounded-[5px] border bg-[#f9f9f9] px-4 py-[12px] text-[14px] leading-[20px] transition-all outline-none placeholder:text-gray-300',
+            isError ? 'border-red-500' : 'border-transparent focus:border-blue-400',
+            className
+          )}
           {...props}
         />
-        <div className={cx('feedback', messageTextType)}>{feedbackMessage}</div>
+
+        {/*  hasFeedback이 true일 때만 공간을 유지하고, 
+             메시지가 있을 때만 실제로 보여줍니다. */}
+        {hasFeedback && (
+          <div
+            className={clsx(
+              'mt-1 mb-1 min-h-[1rem] text-[12px] leading-4 font-medium transition-opacity select-none',
+              feedbackColor,
+              feedbackMessage ? 'visible opacity-100' : 'invisible opacity-0'
+            )}
+          >
+            {feedbackMessage || ' '}
+          </div>
+        )}
       </div>
     );
   }
