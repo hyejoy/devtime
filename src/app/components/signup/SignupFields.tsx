@@ -88,7 +88,7 @@ const NicknameField = ({
 // 비밀번호 그룹 (비밀번호 + 확인)
 const PasswordGroup = ({ values, validity, feedback, onChange, inputRefs }: any) => {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <div>
         <TextLabel name="password" label="비밀번호" />
         <TextFieldInput

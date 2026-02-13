@@ -20,25 +20,25 @@ export default function UserFormContainer({ title, body, extra, footerAction, he
   return (
     <div
       className={clsx(
-        'flex max-h-[80vh] max-w-[50vh] flex-1',
-        'flex-col justify-center bg-white py-8'
+        // 1. 크기 및 중앙 정렬: 너비는 100%로 시작하되, 최대 너비(max-w)를 제한함
+        'mx-auto h-[780px] w-full max-w-[420px]',
+        // 2. 레이아웃: 내부 요소들을 세로로 정렬
+        'flex flex-col',
+        // 3. 기존 노란 배경 대신 실제 서비스 톤으로 예시 (필요시 bg-yellow-200 유지)
+        'box-border bg-yellow-200 transition-all select-none'
       )}
     >
-      <div className="text-brand-primary w-full text-center text-[1.3rem] leading-8 font-bold">
+      <div className="text-brand-primary mb-[36px] bg-red-300 text-center text-[1.3rem] leading-8 font-bold">
         {title}
       </div>
-
       {body && <section>{body}</section>}
-
       {extra && <section>{extra}</section>}
-
       {footerAction && <div className="flex flex-col">{footerAction}</div>}
-
       {helperLink && (
         <TextLinkRow
-          question={helperLink.text}
+          question={helperLink.label}
           href={helperLink.href}
-          label={helperLink.label}
+          label={helperLink.text}
           isBold={true}
         />
       )}
