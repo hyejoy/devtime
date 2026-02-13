@@ -181,6 +181,7 @@ export default function Page() {
                     onChange={handleChangeInput}
                     feedbackMessage={feedbackMessage[key]}
                     type={key === 'password' ? 'password' : 'text'}
+                    hasFeedback={true}
                   />
                 </React.Fragment>
               );

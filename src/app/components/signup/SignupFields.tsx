@@ -37,6 +37,7 @@ const IdField = ({
           placeholder={MESSAGE.REQUIRED.id}
           feedbackMessage={feedback}
           isValid={isValid}
+          hasFeedback={true}
         />
         <Button variant="secondary" disabled={isIdConfirmDisabled} onClick={() => onConfirm('id')}>
           중복확인
@@ -70,6 +71,7 @@ const NicknameField = ({
           placeholder={MESSAGE.REQUIRED.nickname}
           feedbackMessage={feedback}
           isValid={isValid}
+          hasFeedback={true}
         />
         <Button
           variant="secondary"
@@ -98,6 +100,7 @@ const PasswordGroup = ({ values, validity, feedback, onChange, inputRefs }: any)
           placeholder={MESSAGE.REQUIRED.password}
           feedbackMessage={feedback.password}
           isValid={validity.password}
+          hasFeedback={true}
         />
       </div>
       <div>
@@ -111,6 +114,7 @@ const PasswordGroup = ({ values, validity, feedback, onChange, inputRefs }: any)
           placeholder={MESSAGE.REQUIRED.checkPassword}
           feedbackMessage={feedback.checkPassword}
           isValid={validity.checkPassword}
+          hasFeedback={true}
         />
       </div>
     </div>
