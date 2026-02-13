@@ -12,8 +12,6 @@ import classNames from 'classnames/bind';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import SignupFields from '../../components/signup/SignupFields';
-import styles from './page.module.css';
-const cx = classNames.bind(styles);
 
 export default function Page() {
   const router = useRouter();
