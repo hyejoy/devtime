@@ -1,17 +1,25 @@
-import Link from 'next/link';
+'use client';
+import ProfileSetupField from '@/app/components/profileSetup/ProfileSetupField';
+import Button from '@/app/components/ui/Button';
+import UserFormContainer from '@/app/components/userform/UserFormContainer';
+import { HelperLink } from '@/types/common';
+import { useCallback } from 'react';
 
+const helperLink: HelperLink = {
+  href: '/timer',
+  label: '다음에 하시겠어요?',
+  text: '건너뛰기',
+};
 export default function Page() {
+  const SaveButton = useCallback(() => {
+    return <Button className="">저장하기</Button>;
+  }, []);
   return (
-    <>
-      <h1>프로필 설정 페이지</h1>
-      <h1>
-        프로필 설정 페이지 프로필 설정: 기본 로그인 후 isFirstLogin 속성의 값이
-        true일 경우 프로필 설정 페이지로 이동한다. 프로필 설정 페이지는 회원가입
-        이후 첫 로그인일 때에만 진입한다. 프로필 설정 여부와 관계 없이(프로필
-        설정을 건너뛰기 하더라도) 두 번째 로그인부터는 바로 타이머 페이지로
-        이동한다.
-      </h1>
-      <Link href={'/timer'}>타이머</Link>
-    </>
+    <UserFormContainer
+      title="프로필 설정"
+      body={<ProfileSetupField />}
+      footerAction={<SaveButton />}
+      helperLink={helperLink}
+    />
   );
 }
