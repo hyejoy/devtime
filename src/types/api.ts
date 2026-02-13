@@ -110,4 +110,7 @@ export interface StudyLogsDetailResponse {
 }
 
 export type ProfileGetResponse = ApiResponse<'/api/profile', 'get'>;
+
 export type ProfilePostRequest = ApiRequest<'/api/profile', 'post'>;
+
+export type TechStackGetResponse = ApiResponse<'/api/tech-stacks', 'get'>['results'];

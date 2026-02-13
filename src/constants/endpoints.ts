@@ -1,7 +1,7 @@
 import { PROXY_BASE } from '@/config/env';
+import { ApiRequest } from '@/types/api/helpers';
 
 const PROXY = PROXY_BASE;
-
 export const API = {
   AUTH: {
     LOGIN: '/api/auth/login',
@@ -61,5 +61,19 @@ export const API = {
       const queryString = params.toString();
       return `${PROXY}/rankings${queryString ? `?${queryString}` : ''}`;
     },
+  },
+  PROFILE: {
+    CREATE: `${PROXY}/profile`, //POST
+    GET: `${PROXY}/profile`, //GET
+    UPDATE: `${PROXY}/profile`, // PUT
+  },
+  TECHSTACK: {
+    GET: (keyword: string) => {
+      const params = new URLSearchParams();
+      params.append('keyword', keyword);
+      const queryString = params.toString();
+      return `${PROXY}/tech-stacks${queryString ? `?keyword=${keyword}` : ''}`;
+    }, // GET
+    UPDATE: `${PROXY}/tech-stacks`, // POST
   },
 } as const;
