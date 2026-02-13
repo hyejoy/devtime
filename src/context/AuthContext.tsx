@@ -2,37 +2,65 @@
 
 import { API } from '@/constants/endpoints';
 import { ReactNode, useEffect } from 'react';
-import { usePathname } from 'next/navigation'; // 경로 확인을 위해 추가
+import { usePathname } from 'next/navigation';
+import { profileService } from '@/services/profileService';
+import { TechStackItem } from '@/types/profile';
+import { useIsLogin, useProfileActions, useProfileStore } from '@/store/profileStore';
 
-// 세션체크 제외 페이지
 const EXCLUDING_PATH = ['/', '/login', '/signup'];
 
 export default function AuthSessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { initProfile, setLogin } = useProfileActions();
+  const isLogin = useIsLogin();
 
   useEffect(() => {
     const isExclude = EXCLUDING_PATH.find((path) => path === pathname);
-    if (isExclude) return; // 세션 체크 제외
+    if (isExclude) return;
 
     const initSession = async () => {
       try {
         const res = await fetch(`${API.AUTH.SESSION}`);
 
         if (res.ok) {
-          console.log('세션 연결 성공');
-        } else {
-          console.warn('⚠️ 세션이 만료되었습니다. 로그아웃 처리합니다.');
+          if (!isLogin) {
+            const resData = await profileService.get();
 
-          // 로그아웃 API 호출
-          const logoutRes = await fetch(`${API.AUTH.LOGOUT}`, {
+            /** 💡 데이터 변환 로직 (Transform) */
+            // 1. string[]을 TechStackItem[]로 변환
+            const transformedTechStacks: TechStackItem[] =
+              resData.profile?.techStacks?.map((name, index) => ({
+                id:
+                  typeof crypto.randomUUID !== 'undefined'
+                    ? crypto.randomUUID()
+                    : Math.random().toString(36).substring(2, 11),
+                name: name,
+              })) || [];
+
+            // 2. 스토어 규격에 맞게 객체 재구성
+            const formattedData = {
+              email: resData.email,
+              nickname: resData.nickname,
+              profile: {
+                career: resData.profile?.career || '',
+                purpose: resData.profile?.purpose || '취업 준비',
+                goal: resData.profile?.goal || '',
+                techStacks: transformedTechStacks,
+                profileImage: resData.profile?.profileImage || '',
+              },
+            };
+
+            // 3. 업데이트
+            initProfile(formattedData);
+            setLogin(true);
+            localStorage.setItem('user-nickname', resData.nickname);
+          }
+        } else {
+          setLogin(false);
+          await fetch(`${API.AUTH.LOGOUT}`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
             credentials: 'include',
           });
-
-          // 결과와 상관없이 클라이언트 쿠키 정리 및 이동
           window.location.href = '/login';
         }
       } catch (err) {
@@ -41,7 +69,7 @@ export default function AuthSessionProvider({ children }: { children: ReactNode 
     };
 
     initSession();
-  }, [pathname]); // 경로가 바뀔 때마다 체크하되, /login은 제외됨
+  }, [pathname, isLogin, initProfile, setLogin]);
 
   return <>{children}</>;
 }
