@@ -3,19 +3,12 @@
 import Button from '@/app/components/ui/Button';
 import { profileService } from '@/services/profileService';
 import { useProfileStore } from '@/store/profileStore';
+import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
 export default function ProfileSaveButton() {
+  const router = useRouter();
   const { profile } = useProfileStore();
-
-  // 전체 저장하기
-  const SaveButton = useCallback(() => {
-    return (
-      <Button onClick={handleSaveProfile} className="mb-4">
-        저장하기
-      </Button>
-    );
-  }, []);
 
   const handleSaveProfile = async () => {
     const { career, purpose, goal, techStacks, profileImage } = profile;
@@ -38,6 +31,7 @@ export default function ProfileSaveButton() {
     try {
       const res = await profileService.update(body);
       console.log('♥️ 저장되었습니다! . ', res);
+      router.replace('/timer');
     } catch (err) {
       console.log('회원정보 저장 에러:', err);
     }

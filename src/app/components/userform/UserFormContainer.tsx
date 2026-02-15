@@ -14,7 +14,6 @@ type Props = {
   extra?: React.ReactNode; // 선택적 보조 영역(약관 / 프로필 이미지)
   footerAction?: React.ReactNode; // Call To Action 버튼
   helperLink?: HelperLink; // 하단 helper 링크
-  /** 하단 helper 링크 */
 };
 export default function UserFormContainer({ title, body, extra, footerAction, helperLink }: Props) {
   return (
@@ -37,9 +36,12 @@ export default function UserFormContainer({ title, body, extra, footerAction, he
       {helperLink && (
         <TextLinkRow
           question={helperLink.label}
-          href={helperLink.href}
           label={helperLink.text}
           isBold={true}
+          // href가 있을 때만 전달 (없으면 undefined)
+          {...(helperLink.href && { href: helperLink.href as `/${string}` })}
+          // onClick이 있을 때만 전달
+          {...(helperLink.onClick && { onClick: helperLink.onClick })}
         />
       )}
     </div>
