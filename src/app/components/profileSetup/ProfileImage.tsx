@@ -1,0 +1,103 @@
+'use client';
+
+import TextLabel from '@/app/components/ui/TextLabel';
+import { ChangeEvent, useRef, useState } from 'react';
+import Image from 'next/image';
+import clsx from 'clsx';
+import { PlusIcon } from 'lucide-react';
+import { API } from '@/constants/endpoints';
+import { ApiRequest, ApiResponse } from '@/types/api/helpers';
+import { useProfileActions } from '@/store/profileStore';
+
+export default function ProfileImage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setProfile } = useProfileActions();
+  /** state */
+
+  type Image = {
+    file: File;
+    previewUrl: string;
+  };
+
+  const [image, setImages] = useState<Image>();
+  const handleSelectImage = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; // 한 개만 선택한다고 가정
+    if (!file) return;
+
+    // 브라우저 미리 보기
+    setImages({ file, previewUrl: URL.createObjectURL(file) });
+
+    // 2. API 요청 데이터 준비
+    const requestBody: ApiRequest<'/api/file/presigned-url', 'post'> = {
+      fileName: file.name,
+      contentType: file.type,
+    };
+    try {
+      // Presigne URL 발급 요청
+      const res = await fetch(`${API.FILE.UPLOAD}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }, // Header 추가
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!res.ok) throw new Error('이미지 업로드 실패');
+      const { presignedUrl, key }: ApiResponse<'/api/file/presigned-url', 'post'> =
+        await res.json();
+
+      // 스토리지(S3) 실제 업로드
+      const uploadRes = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: file,
+      });
+
+      if (!uploadRes.ok) throw new Error('스토리지 업로드 실패');
+      setProfile('profileImage', key);
+      return key;
+    } catch (error) {
+      console.log('이미지 업로드 에러', error);
+    } finally {
+      e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
+    }
+  };
+  return (
+    <div className="flex flex-col">
+      <div className="mt-[40px] mb-9 bg-green-200">
+        <TextLabel label="프로필 이미지" name="ProfileImage" />
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleSelectImage}
+        />
+        <div className="flex gap-[12px]">
+          <div
+            className={clsx(
+              'border-brand-primary h-[120px] w-[120px] rounded-md border bg-white text-2xl',
+              'flex cursor-pointer items-center justify-center',
+              image ? 'border-none' : 'border-dashed'
+            )}
+            onClick={() => {
+              fileInputRef.current?.click();
+            }}
+          >
+            {image ? (
+              <Image src={image.previewUrl} alt="background" width={120} height={120} />
+            ) : (
+              // <Image
+              //   className="object-cover"
+              //   src="/images/profile/addIcon.png"
+              //   alt="background"
+              // />
+              <PlusIcon className="text-brand-primary h-[23.85px] w-[23.85px]" />
+            )}
+          </div>
+          <div className="flex flex-col justify-end text-[14px] font-medium text-gray-600">
+            5MB 미만의 .png .jpg 파일
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

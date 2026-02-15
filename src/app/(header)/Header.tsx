@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Logo from '../components/ui/Logo';
 import Logout from '../components/logout/Logout';
 import { useTimerStore } from '@/store/timerStore';
+import { useProfileStore } from '@/store/profileStore';
 
 const NAV_ITEMS = [
   { label: '대시보드', href: '/dashboard' },
@@ -18,9 +19,18 @@ const LOGIN_ITEMS = [
   { label: '회원가입', href: '/signup' },
 ];
 
-export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function Header({
+  isLoggedIn,
+  initialNickname,
+}: {
+  isLoggedIn: boolean;
+  initialNickname: string;
+}) {
   const { setLastStartTimestamp } = useTimerStore((state) => state.actions);
   const pathname = usePathname();
+  const { nickname } = useProfileStore();
+
+  const displayNickname = nickname || initialNickname;
 
   const linkClick = () => {
     const now = new Date().toISOString();
@@ -28,7 +38,7 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
   };
 
   return (
-    <header className="flex pt-4">
+    <header className="relative flex pt-4">
       <div className="mr-12 cursor-pointer">
         <Link href={'/timer'}>
           <Logo direction="horizontal" height="40px" width="148px" />
@@ -55,7 +65,7 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
 
       {/* 로그인(O) 프로필 영역 노출 */}
       {isLoggedIn && (
-        <div className="relative flex w-auto items-center gap-2 whitespace-nowrap">
+        <div className="flex w-auto items-center gap-2 whitespace-nowrap">
           <Image
             className="cursor-pointer rounded-full object-cover"
             src="/images/profile/profile.png"
@@ -63,12 +73,7 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
             width={40}
             height={40}
           />
-          <div className="text-base leading-normal font-bold text-slate-900">닉네임입니다</div>
-          <Logout />
-          <div className="absolute top-10 flex w-[130px] flex-col bg-red-300 px-3 py-4">
-            <div className="w-[106px] bg-yellow-300">마이페이지</div>
-            <div>로그아웃</div>
-          </div>
+          <div className="text-base leading-normal font-bold text-slate-900">{displayNickname}</div>
         </div>
       )}
       {/* 로그인(X) 프로필 영역 노출 */}
@@ -88,6 +93,11 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
           </nav>
         </div>
       )}
+      <div className="absolute top-20 flex w-[130px] flex-col bg-red-300 px-3 py-4">
+        <div className="w-[106px] bg-yellow-300">마이페이지</div>
+        <Logout />
+        <div>로그아웃</div>
+      </div>
     </header>
   );
 }

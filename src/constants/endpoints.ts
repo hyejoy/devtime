@@ -76,4 +76,7 @@ export const API = {
     }, // GET
     UPDATE: `${PROXY}/tech-stacks`, // POST
   },
+  FILE: {
+    UPLOAD: `${PROXY}/file/presigned-url`, // POST
+  },
 } as const;

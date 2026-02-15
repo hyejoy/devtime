@@ -1,5 +1,6 @@
 import { API } from '@/constants/endpoints';
 import { ApiRequest, ApiResponse } from '@/types/api/helpers';
+import { UpdateProfileResType } from '@/types/profile';
 
 export const profileService = {
   /**--- 회원 정보 조회 ---- */
@@ -32,9 +33,14 @@ export const profileService = {
   },
 
   /**--- 회원 정보 수정 ---- */
-  update: async (
-    body: ApiRequest<'/api/profile', 'put'>
-  ): Promise<ApiResponse<'/api/profile', 'put'>> => {
+  update: async (body: {
+    nickname: string;
+    career: string;
+    purpose: string;
+    techStacks: string[];
+    profileImage: string;
+    password: string;
+  }): Promise<UpdateProfileResType> => {
     const res = await fetch(`${API.PROFILE.UPDATE}`, {
       method: 'PUT',
       credentials: 'include',

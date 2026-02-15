@@ -2,6 +2,7 @@ import { API_BASE_URL } from '@/config/env';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  reactStrictMode: false, // strict mode 비활성화
   async rewrites() {
     return [
       {

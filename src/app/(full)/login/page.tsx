@@ -15,6 +15,7 @@ import styles from './page.module.css';
 import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
 import { useDialogStore } from '@/store/dialogStore';
 import { useTimerStore } from '@/store/timerStore';
+import { useProfileActions } from '@/store/profileStore';
 
 const cx = classNames.bind(styles);
 
@@ -24,6 +25,7 @@ export default function Page() {
 
   const { openDialog, closeDialog, isOpen } = useDialogStore();
   const { timerReset } = useTimerStore((state) => state.actions);
+  const { setPassword } = useProfileActions();
 
   /** state */
   const [values, setValues] = useState<LoginInput>({
@@ -156,7 +158,9 @@ export default function Page() {
       // 네트워크 장애 등 예상치 못한 에러 발생 시
       console.error('네트워크 에러:', err);
       setDialogType('login-failed');
-      openDialog();
+    } finally {
+      // zustand  저장
+      setPassword(values.password);
     }
   }
 

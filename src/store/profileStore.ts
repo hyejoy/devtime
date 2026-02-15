@@ -1,5 +1,3 @@
-import { PROFILE_DEFAULT } from '@/constants/profile';
-import { ProfileGetResponse, ProfilePostRequest } from '@/types/api';
 import { Profile, TechStackItem } from '@/types/profile';
 import { create } from 'zustand';
 import { combine } from 'zustand/middleware';
@@ -21,7 +19,7 @@ export type ProfileUpdatePayload = NonNullable<Profile['profile']>;
 
 export const useProfileStore = create(
   immer(
-    combine({ ...initialState, isLogin: false }, (set) => ({
+    combine({ ...initialState, password: '', isLogin: false }, (set) => ({
       actions: {
         setLogin: (value: boolean) =>
           set((state) => {
@@ -55,6 +53,10 @@ export const useProfileStore = create(
             state.profile = initialState.profile;
             state.isLogin = false;
           });
+        },
+
+        setPassword: (password: string) => {
+          set((state) => (state.password = password));
         },
       },
     }))

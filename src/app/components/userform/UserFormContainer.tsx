@@ -28,7 +28,7 @@ export default function UserFormContainer({ title, body, extra, footerAction, he
         'box-border bg-yellow-200 transition-all select-none'
       )}
     >
-      <div className="text-brand-primary mb-[36px] bg-red-300 text-center text-[1.3rem] leading-8 font-bold">
+      <div className="text-brand-primary mb-4 bg-red-300 text-center text-[1.3rem] leading-8 font-bold">
         {title}
       </div>
       {body && <section>{body}</section>}

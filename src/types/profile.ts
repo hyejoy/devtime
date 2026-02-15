@@ -26,3 +26,13 @@ export type OnChangeType = <K extends keyof ProfilePostRequest>(
   key: K,
   value: ProfilePostRequest[K]
 ) => void;
+
+export type UpdateProfileResType = {
+  nickname: string;
+  career: string;
+  purpose: string;
+  goal: string;
+  techStacks: string[];
+  profileImage: string;
+  password: string;
+};
