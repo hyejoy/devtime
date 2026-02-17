@@ -1,15 +1,15 @@
-'use client';
 import DialogField from '@/app/components/dialog/DialogField';
 import Button from '@/app/components/ui/Button';
 import { useDialogStore } from '@/store/dialogStore';
+import { useProfileActions } from '@/store/profileStore';
+import { RoutePath } from '@/types/common';
 import { useRouter } from 'next/navigation';
-export default function ProfileSkipDialog() {
-  const router = useRouter();
-  const { closeDialog } = useDialogStore();
-  const handleSkip = () => {
-    closeDialog();
-    router.replace('/timer');
-  };
+
+interface Props {
+  nextRoute: RoutePath;
+}
+
+export default function ProfileSkipDialog({ nextRoute }: Props) {
   return (
     <DialogField dialogType="alert">
       <DialogField.Title title="프로필 설정을 건너뛸까요?" />
@@ -18,7 +18,7 @@ export default function ProfileSkipDialog() {
         건너뛰시겠습니까?
       </DialogField.Content>
       <DialogField.Button align="align-right">
-        <Button onClick={handleSkip}>건너뛰기</Button>
+        <Button nextRoute={nextRoute}>건너뛰기</Button>
       </DialogField.Button>
     </DialogField>
   );

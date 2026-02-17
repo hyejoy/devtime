@@ -9,11 +9,12 @@ type DialogType = 'alert' | 'custom';
 
 interface DialogFieldProps {
   children: ReactNode;
-  dialogType?: DialogType; // 선택적으로 받으려면 ? 추가
+  dialogType?: DialogType;
+  nextRouter?: string;
 }
 
 interface DialogFieldComponent {
-  ({ dialogType, children }: DialogFieldProps): JSX.Element | null;
+  ({ dialogType, nextRouter, children }: DialogFieldProps): JSX.Element | null;
   Title: typeof Title;
   Content: typeof Content;
   Button: typeof Button;
