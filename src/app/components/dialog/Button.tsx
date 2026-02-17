@@ -7,5 +7,9 @@ interface Props extends ComponentProps<'div'> {
   children: ReactNode;
 }
 export default function Button({ align, children, ...props }: Props) {
-  return <div className={cx(align, 'container')}>{children}</div>;
+  return (
+    <div className={cx(align, 'container')} {...props}>
+      {children}
+    </div>
+  );
 }

@@ -1,38 +1,130 @@
 'use client';
 
+import { ChangeEvent, useRef } from 'react';
 import Button from '@/app/components/ui/Button';
 import TextLabel from '@/app/components/ui/TextLabel';
-import { MESSAGE } from '@/constants/signupMessage';
-import {
-  DuplicateField,
-  DuplicateState,
-  SignField,
-  SignInput,
-  SignValid,
-} from '@/types/signup';
-import { ChangeEvent, useRef } from 'react';
 import TextFieldInput from '../ui/TextFieldInput';
-import styles from './SignupFields.module.css';
+import { MESSAGE } from '@/constants/signupMessage';
+import { DuplicateField, DuplicateState, SignField, SignInput, SignValid } from '@/types/signup';
 
-// 💡상수들은 매 렌더링마다 새로 정의될 필요가 없으니 컴포넌트 밖에서 정의
-const buttonLabel: Record<DuplicateField, '중복확인'> = {
-  id: '중복확인',
-  nickName: '중복확인',
+/** ------------------------------------------------------------------------------
+ * 1. 하위 컴포넌트 추출 (추상화)
+ * 각 필드의 구체적인 로직(중복확인 조건, 라벨, 플레이스홀더 등)을 캡슐화합니다.
+ * ------------------------------------------------------------------------------ */
+
+// 아이디 필드
+const IdField = ({
+  value,
+  isValid,
+  isRegExpValid,
+  isDuplicateChecked,
+  feedback,
+  onChange,
+  onConfirm,
+  inputRef,
+}: any) => {
+  const isIdConfirmDisabled = !value || !isRegExpValid || isDuplicateChecked;
+
+  return (
+    <div>
+      <TextLabel name="id" label="아이디" />
+      <div className="flex flex-row gap-2">
+        <TextFieldInput
+          ref={inputRef}
+          value={value}
+          onChange={(e) => onChange(e, 'id')}
+          name="id"
+          placeholder={MESSAGE.REQUIRED.id}
+          feedbackMessage={feedback}
+          isValid={isValid}
+          hasFeedback={true}
+        />
+        <Button variant="secondary" disabled={isIdConfirmDisabled} onClick={() => onConfirm('id')}>
+          중복확인
+        </Button>
+      </div>
+    </div>
+  );
 };
 
-const LABEL_MAP: Record<keyof SignInput, string> = {
-  id: '아이디',
-  nickName: '닉네임',
-  password: '비밀번호',
-  checkPassword: '비밀번호 확인',
+// 닉네임 필드
+const NicknameField = ({
+  value,
+  isValid,
+  isDuplicateChecked,
+  feedback,
+  onChange,
+  onConfirm,
+  inputRef,
+}: any) => {
+  const isNicknameConfirmDisabled = !value || isDuplicateChecked;
+
+  return (
+    <div>
+      <TextLabel name="nickname" label="닉네임" />
+      <div className="flex flex-row gap-2">
+        <TextFieldInput
+          ref={inputRef}
+          value={value}
+          onChange={(e) => onChange(e, 'nickname')}
+          name="nickname"
+          placeholder={MESSAGE.REQUIRED.nickname}
+          feedbackMessage={feedback}
+          isValid={isValid}
+          hasFeedback={true}
+        />
+        <Button
+          variant="secondary"
+          disabled={isNicknameConfirmDisabled}
+          onClick={() => onConfirm('nickname')}
+        >
+          중복확인
+        </Button>
+      </div>
+    </div>
+  );
 };
 
-const PLACEHOLDER_MAP: Record<keyof SignInput, string> = {
-  id: MESSAGE.REQUIRED.id,
-  nickName: MESSAGE.REQUIRED.nickName,
-  password: MESSAGE.REQUIRED.password,
-  checkPassword: MESSAGE.REQUIRED.checkPassword,
+// 비밀번호 그룹 (비밀번호 + 확인)
+const PasswordGroup = ({ values, validity, feedback, onChange, inputRefs }: any) => {
+  return (
+    <div className="flex flex-col">
+      <div>
+        <TextLabel name="password" label="비밀번호" />
+        <TextFieldInput
+          ref={inputRefs.password}
+          value={values.password}
+          onChange={(e) => onChange(e, 'password')}
+          name="password"
+          type="password"
+          placeholder={MESSAGE.REQUIRED.password}
+          feedbackMessage={feedback.password}
+          isValid={validity.password}
+          hasFeedback={true}
+        />
+      </div>
+      <div>
+        <TextLabel name="checkPassword" label="비밀번호 확인" />
+        <TextFieldInput
+          ref={inputRefs.checkPassword}
+          value={values.checkPassword}
+          onChange={(e) => onChange(e, 'checkPassword')}
+          name="checkPassword"
+          type="password"
+          placeholder={MESSAGE.REQUIRED.checkPassword}
+          feedbackMessage={feedback.checkPassword}
+          isValid={validity.checkPassword}
+          hasFeedback={true}
+        />
+      </div>
+    </div>
+  );
 };
+
+/** ------------------------------------------------------------------------------
+ * 2. 메인 컴포넌트 (SignupFields)
+ * 상세 로직은 숨기고 전체 필드의 나열(맥락)만 관리합니다.
+ * ------------------------------------------------------------------------------ */
 
 type Props = {
   values: SignInput;
@@ -40,9 +132,7 @@ type Props = {
   isDuplicateCheckedMap: DuplicateState;
   isRegexValidityMap: Pick<SignValid, 'id' | 'password'>;
   feedbackMessages: SignInput;
-  /* handlers */
   onChangeValue: (name: keyof SignInput, value: string) => void;
-  onChangeValidation: (name: keyof SignValid, value: boolean) => void;
   onConfirmDuplicate: (field: DuplicateField) => void;
 };
 
@@ -55,82 +145,47 @@ export default function SignupFields({
   onChangeValue,
   onConfirmDuplicate,
 }: Props) {
-  /* refs */
   const inputRefs = {
     id: useRef<HTMLInputElement>(null),
-    nickName: useRef<HTMLInputElement>(null),
+    nickname: useRef<HTMLInputElement>(null),
     password: useRef<HTMLInputElement>(null),
     checkPassword: useRef<HTMLInputElement>(null),
   } as const;
 
-  const isDuplicateButtonDisabled = (key: 'id' | 'nickName') => {
-    if (key === 'id') {
-      return (
-        !values.id || // 값 없음
-        !isRegexValidityMap.id || // ❗ 정규식 실패
-        isDuplicateCheckedMap.id // 이미 중복확인 완료
-      );
-    }
-
-    if (key === 'nickName') {
-      return !values.nickName || isDuplicateCheckedMap.nickName;
-    }
-
-    return true;
+  const handleFieldChange = (e: ChangeEvent<HTMLInputElement>, key: SignField) => {
+    onChangeValue(key, e.target.value);
   };
 
-  const onChangeFieldValue = (
-    e: ChangeEvent<HTMLInputElement>,
-    key: SignField
-  ) => {
-    const value = e.target.value;
-    onChangeValue(key, value);
-  };
   return (
-    <>
-      <div className={styles.textFieldContainer}>
-        {/* TODO: 이렇게 한번에 처리하려다보니 추상화 과정에서 고민하신 것도 있는 것 같은데,
-        각 인풋의 기능이나 validation 방식이 다양한 경우 무리해서 합치지 않아도 된다고 생각해요!
-        values, LABEL_MAP, PLACEHOLDER_MAP 등 별도로 분리된 변수들을 살펴야하는 점,
-        103~107, 111 과 같이 어쩔 수 없이 분기 처리하는 부분 때문에 컨텍스트가 나뉘는 점 때문에 가독성 관점에서는 
-        오히려 불리한 것 같기도 하고요
-        완전 동일한 케이스는 아니지만 이 문서도 참고해보시면 좋아요 
-        → https://frontend-fundamentals.com/code-quality/code/examples/login-start-page.html
-        */}
-        {(Object.keys(values) as Array<keyof SignInput>).map((key) => {
-          return (
-            <div key={key}>
-              <TextLabel name={key} label={LABEL_MAP[key]} />
-              <div className={styles.textField}>
-                <TextFieldInput
-                  ref={inputRefs[key]}
-                  value={values[key]}
-                  onChange={(e) => onChangeFieldValue(e, key)}
-                  name={key}
-                  placeholder={PLACEHOLDER_MAP[key]}
-                  type={
-                    key === 'password' || key === 'checkPassword'
-                      ? 'password'
-                      : 'text'
-                  }
-                  feedbackMessage={feedbackMessages[key]}
-                  isValid={fieldValidity[key]}
-                />
-                {(key === 'id' || key === 'nickName') && (
-                  <Button
-                    id={key}
-                    variant="secondary"
-                    disabled={isDuplicateButtonDisabled(key)}
-                    onClick={() => onConfirmDuplicate(key)}
-                  >
-                    {buttonLabel[key]}
-                  </Button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </>
+    <div className="flex w-full flex-col gap-[0.2rem] select-none">
+      <IdField
+        value={values.id}
+        isValid={fieldValidity.id}
+        isRegExpValid={isRegexValidityMap.id}
+        isDuplicateChecked={isDuplicateCheckedMap.id}
+        feedback={feedbackMessages.id}
+        onChange={handleFieldChange}
+        onConfirm={onConfirmDuplicate}
+        inputRef={inputRefs.id}
+      />
+
+      <NicknameField
+        value={values.nickname}
+        isValid={fieldValidity.nickname}
+        isDuplicateChecked={isDuplicateCheckedMap.nickname}
+        feedback={feedbackMessages.nickname}
+        onChange={handleFieldChange}
+        onConfirm={onConfirmDuplicate}
+        inputRef={inputRefs.nickname}
+      />
+
+      <PasswordGroup
+        values={values}
+        validity={fieldValidity}
+        feedback={feedbackMessages}
+        onChange={handleFieldChange}
+        inputRefs={inputRefs}
+      />
+    </div>
   );
 }

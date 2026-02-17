@@ -2,6 +2,7 @@ import { checkEmail, checkNickname } from '@/services/signup';
 import { DuplicateField } from './signup';
 import { BasicStructure } from './common';
 import { SplitTime } from './timer';
+import { ApiRequest, ApiResponse } from '@/types/api/helpers';
 
 export interface RefreshToken {
   success: boolean;
@@ -19,7 +20,7 @@ export type DuplicateCheckApi = (value: string) => Promise<SignUpCheckResponse>;
 
 export const duplicateCheckApiMap: Record<DuplicateField, DuplicateCheckApi> = {
   id: checkEmail,
-  nickName: checkNickname,
+  nickname: checkNickname,
 };
 
 export interface SignupResponse {
@@ -107,3 +108,9 @@ export interface StudyLogsDetailResponse {
   review: string;
   completionRate: number;
 }
+
+export type ProfileGetResponse = ApiResponse<'/api/profile', 'get'>;
+
+export type ProfilePostRequest = ApiRequest<'/api/profile', 'post'>;
+
+export type TechStackGetResponse = ApiResponse<'/api/tech-stacks', 'get'>['results'];

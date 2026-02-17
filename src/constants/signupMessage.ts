@@ -2,7 +2,7 @@ export const MESSAGE = {
   /* 기본 입력 안내 */
   REQUIRED: {
     id: '이메일 주소 형식으로 입력해 주세요.',
-    nickName: '닉네임을 입력해 주세요.',
+    nickname: '닉네임을 입력해 주세요.',
     password: '비밀번호를 입력해 주세요.',
     checkPassword: '비밀번호를 다시 입력해 주세요.',
   },

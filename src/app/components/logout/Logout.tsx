@@ -1,10 +1,11 @@
 'use client';
 
 import { API } from '@/constants/endpoints';
-import { useTimerStore } from '@/store/timer'; // 타이머 스토어 임포트
+import { useTimerStore } from '@/store/timerStore';
+import { LogOut } from 'lucide-react';
 
 export default function Logout() {
-  // 타이머 초기화 액션을 가져옵니다.
+  // 타이머 초기화 액션
   const timerReset = useTimerStore((state) => state.actions.timerReset);
 
   const handleLogout = async () => {
@@ -45,12 +46,11 @@ export default function Logout() {
 
   return (
     <button
-      className="w-30 rounded-3xl bg-gray-200"
+      className="flex w-30 cursor-pointer items-center gap-3 pt-4 leading-normal text-gray-600"
       type="button"
       onClick={handleLogout}
-      style={{ cursor: 'pointer' }}
     >
-      로그아웃
+      <LogOut className="h-4 w-[15px]" /> 로그아웃
     </button>
   );
 }

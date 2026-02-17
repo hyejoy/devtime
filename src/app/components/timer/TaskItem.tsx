@@ -1,6 +1,6 @@
 'use client';
 
-import { useTimerStore } from '@/store/timer';
+import { useTimerStore } from '@/store/timerStore';
 import { Task } from '@/types/timer';
 import clsx from 'clsx';
 import Image from 'next/image';

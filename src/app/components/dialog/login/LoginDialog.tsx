@@ -3,8 +3,9 @@
 import { useRouter } from 'next/navigation';
 import DialogField from '../DialogField';
 import Button from '../../ui/Button';
-import { ReactNode } from 'react';
-import { useDialogStore } from '@/store/dialog';
+import { memo, ReactNode } from 'react';
+import { useDialogStore } from '@/store/dialogStore';
+import { RoutePath } from '@/types/common';
 
 const LOGIN_DIALOG_COPY = {
   'duplicate-login': {
@@ -29,7 +30,7 @@ export type LoginDialogType = keyof typeof LOGIN_DIALOG_COPY | null;
 
 interface Props {
   dialogType: LoginDialogType;
-  nextRoute?: string | null;
+  nextRoute?: RoutePath;
   alignButton: 'full' | 'align-right';
   buttonChildren?: ReactNode;
 }
@@ -40,15 +41,6 @@ export default function LoginDialog({
   alignButton = 'full',
   buttonChildren,
 }: Props) {
-  const { closeDialog } = useDialogStore();
-  const router = useRouter();
-  const handleConfirm = () => {
-    closeDialog();
-    if (nextRoute) {
-      router.replace(nextRoute);
-    }
-  };
-
   const copy = LOGIN_DIALOG_COPY[dialogType!];
   return (
     <DialogField dialogType="alert">
@@ -56,7 +48,7 @@ export default function LoginDialog({
       <DialogField.Content>{copy.content}</DialogField.Content>
       <DialogField.Button align={alignButton}>
         {buttonChildren}
-        <Button onClick={handleConfirm}>{copy.buttonLabel}</Button>
+        <Button {...(nextRoute && { nextRoute })}>{copy.buttonLabel}</Button>
       </DialogField.Button>
     </DialogField>
   );

@@ -4,7 +4,7 @@ import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import TimerButton from '@/app/components/timer/TimerButton';
 import LoginDialog from '../components/dialog/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
-import { useDialogStore } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 
 export default function Page() {
   const { isOpen, openDialog, closeDialog } = useDialogStore();
@@ -47,11 +47,7 @@ export default function Page() {
           dialogType="need-login"
           alignButton="align-right"
           nextRoute={'/login'}
-          buttonChildren={
-            <Button variant="secondary" onClick={closeDialog}>
-              취소
-            </Button>
-          }
+          buttonChildren={<Button variant="secondary">취소</Button>}
         ></LoginDialog>
       )}
     </>

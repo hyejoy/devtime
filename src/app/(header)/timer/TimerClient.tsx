@@ -7,8 +7,8 @@ import { useCallback, useEffect, useState } from 'react';
 import TimerDialog from '@/app/components/dialog/timer/TimerDialog';
 import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import { timerService } from '@/services/timerService';
-import { useDialogStore } from '@/store/dialog';
-import { useTimerStore } from '@/store/timer';
+import { useDialogStore } from '@/store/dialogStore';
+import { useTimerStore } from '@/store/timerStore';
 import TimerButton from './../../components/timer/TimerButton';
 import { useShallow } from 'zustand/react/shallow';
 

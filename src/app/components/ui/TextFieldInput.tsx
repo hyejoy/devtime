@@ -1,35 +1,37 @@
 'use client';
 
-import React, { ComponentProps, forwardRef, InputHTMLAttributes } from 'react';
-import styles from './TextFieldInput.module.css';
-import classNames from 'classnames/bind';
-
-// classnames 적용
-const cx = classNames.bind(styles);
+import React, { ComponentProps, forwardRef } from 'react';
 
 interface Props extends ComponentProps<'input'> {
   isValid?: boolean;
   feedbackMessage?: string;
-  placeholder?: string;
-  className?: string;
+  hasFeedback?: boolean;
 }
 
 const TextFieldInput = forwardRef<HTMLInputElement, Props>(
-  // TODO: InputBorder 오타로 인식하심
-  ({ isValid, feedbackMessage, placeholder, className, ...props }, ref) => {
-    const InputBorer =
-      !isValid && Boolean(feedbackMessage) ? 'negativeBorder' : '';
-    const messageTextType = isValid ? 'positive' : 'negative';
+  ({ isValid, feedbackMessage, hasFeedback = false, className, ...props }, ref) => {
+    // 에러 발생 시(유효하지 않고 메시지가 있을 때) 테두리 색상 결정
+    const isError = !isValid && Boolean(feedbackMessage);
+
+    // 상태에 따른 피드백 텍스트 색상 결정
+    const feedbackTextColor = isValid
+      ? 'text-[var(--color-feedback-positive)]'
+      : 'text-[var(--color-feedback-negative)]';
 
     return (
-      <div className={cx('inputBox')}>
+      <div className="flex w-full flex-col select-none">
         <input
           ref={ref}
-          className={cx('input', InputBorer, className)}
-          placeholder={placeholder}
+          className={`box-border h-[44px] min-w-0 flex-1 rounded-[5px] border bg-[var(--input-text-field-bg)] px-4 py-3 text-[14px] leading-[20px] text-[var(--input-text-field-text)] transition-colors outline-none placeholder:text-[var(--color-gray-300)] ${isError ? 'border-[var(--color-feedback-negative)]' : 'border-transparent'} ${className} `}
           {...props}
         />
-        <div className={cx('feedback', messageTextType)}>{feedbackMessage}</div>
+        {hasFeedback && (
+          <div
+            className={`mt-[0.3rem] mb-[0.3rem] min-h-[1rem] text-[12px] leading-[1rem] font-medium select-none ${feedbackTextColor}`}
+          >
+            {feedbackMessage}
+          </div>
+        )}
       </div>
     );
   }

@@ -1,7 +1,10 @@
+export type RoutePath = `/${string}`;
+
 export type HelperLink = {
   text: string;
   label: string;
-  href: `/${string}`;
+  href?: RoutePath;
+  onClick?: () => void;
 };
 export interface BasicStructure {
   success?: boolean;
