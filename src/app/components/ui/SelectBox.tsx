@@ -1,6 +1,6 @@
 import TextLabel from '@/app/components/ui/TextLabel';
-import { ProfileUpdatePayload } from '@/store/profileStore';
 import { ProfilePostRequest } from '@/types/api';
+import { OnChangeType } from '@/types/profile';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -17,7 +17,7 @@ interface CustomSelectProps {
   options: Option[];
   keyType: keyof ProfilePostRequest;
   value: any;
-  onChange: <K extends keyof ProfileUpdatePayload>(key: K, value: ProfileUpdatePayload[K]) => void;
+  onChange: OnChangeType;
   error?: string;
 }
 
@@ -48,7 +48,6 @@ export const SelectBox = ({
   }, []);
 
   const onChangeValue = (value: string) => {
-    console.log('click');
     onChange(keyType, value);
     setIsOpen(false);
   };
