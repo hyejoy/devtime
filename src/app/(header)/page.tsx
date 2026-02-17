@@ -47,11 +47,7 @@ export default function Page() {
           dialogType="need-login"
           alignButton="align-right"
           nextRoute={'/login'}
-          buttonChildren={
-            <Button variant="secondary" onClick={closeDialog}>
-              취소
-            </Button>
-          }
+          buttonChildren={<Button variant="secondary">취소</Button>}
         ></LoginDialog>
       )}
     </>
