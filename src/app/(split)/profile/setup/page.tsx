@@ -6,11 +6,6 @@ import UserFormContainer from '@/app/components/userform/UserFormContainer';
 import { useDialogStore } from '@/store/dialogStore';
 import { HelperLink } from '@/types/common';
 
-const helperLink: HelperLink = {
-  label: '다음에 하시겠어요?',
-  text: '건너뛰기',
-};
-
 export default function Page() {
   const { isOpen, openDialog } = useDialogStore();
   const SkipSetupDialog: HelperLink = {
@@ -20,6 +15,7 @@ export default function Page() {
       openDialog();
     },
   };
+
   return (
     <>
       <UserFormContainer
@@ -28,7 +24,7 @@ export default function Page() {
         footerAction={<ProfileSaveButton />}
         helperLink={SkipSetupDialog}
       />
-      {isOpen && <ProfileSkipDialog />}
+      {isOpen && <ProfileSkipDialog nextRoute="/timer" />}
     </>
   );
 }
