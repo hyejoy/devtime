@@ -2,9 +2,9 @@
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
 import TextLabel from '@/app/components/ui/TextLabel';
 import { techService } from '@/services/techService';
-import { ProfileUpdatePayload, useProfileStore } from '@/store/profileStore';
+import { useProfileStore } from '@/store/profileStore';
 import { TechStackGetResponse } from '@/types/api';
-import { TechStackItem } from '@/types/profile';
+import { OnChangeType } from '@/types/profile';
 import { Loader2, XIcon } from 'lucide-react';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 
@@ -18,21 +18,19 @@ export default function SearchTechStack() {
   const [isCreating, setIsCreating] = useState(false);
 
   /** 공통 필드 변경 핸들러 */
-  const handleFieldChange = <K extends keyof ProfileUpdatePayload>(
-    key: K,
-    value: ProfileUpdatePayload[K]
-  ) => {
+  const handleFieldChange: OnChangeType = (key, value) => {
     setProfile(key, value);
   };
+
   /** 1. 기존 리스트에서 기술 스택 선택 시 추가 */
-  const handleAddTech = (e: React.SyntheticEvent, tech: TechStackItem) => {
+  const handleAddTech = (e: React.SyntheticEvent, tech: string) => {
     e.preventDefault();
     e.stopPropagation();
 
     const currentStacks = profile?.techStacks || [];
 
     // 중복 체크
-    if (currentStacks.some((item) => item.id === tech.id)) {
+    if (currentStacks.some((item) => item === tech)) {
       setSearchKeword('');
       setSearchResult([]);
       return;
@@ -50,30 +48,29 @@ export default function SearchTechStack() {
   };
 
   /** 기술 스택 삭제 */
-  const handleRemoveTech = (techId: number | string) => {
+  const handleRemoveTech = (techName: string) => {
     const currentStacks = profile?.techStacks || [];
-    const newStacks = currentStacks.filter((item) => item.id !== techId);
+    const newStacks = currentStacks.filter((item) => item !== techName);
     handleFieldChange('techStacks', newStacks);
   };
 
   /** 2. 새로운 기술 스택 서버 등록 후 추가 (POST /api/tech-stacks) */
   const handleCreateAndAddTech = async (e?: React.SyntheticEvent) => {
     e?.preventDefault();
-    if (!searchKeyword.trim() || isCreating) return;
+    const newTech = searchKeyword.trim();
+    if (!newTech || isCreating) return;
 
     try {
       setIsCreating(true);
       // 서버 전송 (Request Body: { name: string })
-      const res = await techService.update({ name: searchKeyword.trim() });
+      const res = await techService.update({ name: newTech });
 
       // 서버 응답 구조: res.techStack.id, res.techStack.name
-      const newTech: TechStackItem = {
-        id: res.techStack.id,
-        name: res.techStack.name,
-      };
+
+      if (!res) throw new Error('새로운 기술 스택 서버 등록 실패');
 
       const currentStacks = profile?.techStacks || [];
-      if (!currentStacks.some((item) => item.name === newTech.name)) {
+      if (!currentStacks.some((item) => item === newTech)) {
         handleFieldChange('techStacks', [...currentStacks, newTech]);
       }
 
@@ -115,7 +112,7 @@ export default function SearchTechStack() {
           e.preventDefault();
           // 검색 결과가 있으면 첫 번째 항목 추가, 없으면 새로 생성
           if (searchResult.length > 0) {
-            handleAddTech(e, { id: searchResult[0].id, name: searchResult[0].name });
+            handleAddTech(e, searchResult[0].name);
           } else if (searchKeyword.trim() !== '') {
             handleCreateAndAddTech(e);
           }
@@ -138,7 +135,7 @@ export default function SearchTechStack() {
                   <button
                     type="button"
                     className="hover:bg-brand-primary-10 w-full cursor-pointer px-4 py-3 text-left transition-colors"
-                    onClick={(e) => handleAddTech(e, { id: tech.id, name: tech.name })}
+                    onClick={(e) => handleAddTech(e, tech.name)}
                   >
                     {tech.name}
                   </button>
@@ -163,16 +160,16 @@ export default function SearchTechStack() {
         </div>
 
         {/* 선택 완료된 기술 스택 태그 노출 */}
-        <div className="mt-4 flex flex-wrap gap-2 bg-red-200">
+        <div className="mt-4 flex flex-wrap gap-2">
           {profile?.techStacks.map((item) => (
             <div
-              key={item.id}
+              key={item}
               className="bg-brand-primary-10 text-brand-primary border-brand-primary flex items-center gap-2 rounded-[5px] border px-[12px] py-[8px]"
             >
-              <span className="text-sm font-medium">{item.name}</span>
+              <span className="text-sm font-medium">{item}</span>
               <XIcon
                 className="h-5 w-5 cursor-pointer transition-colors hover:text-red-500"
-                onClick={() => handleRemoveTech(item.id)}
+                onClick={() => handleRemoveTech(item)}
               />
             </div>
           ))}

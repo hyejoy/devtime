@@ -24,10 +24,10 @@ export default function UserFormContainer({ title, body, extra, footerAction, he
         // 2. 레이아웃: 내부 요소들을 세로로 정렬
         'flex flex-col',
         // 3. 기존 노란 배경 대신 실제 서비스 톤으로 예시 (필요시 bg-yellow-200 유지)
-        'box-border bg-yellow-200 transition-all select-none'
+        'box-border transition-all select-none'
       )}
     >
-      <div className="text-brand-primary mb-4 bg-red-300 text-center text-[1.3rem] leading-8 font-bold">
+      <div className="text-brand-primary mb-4 text-center text-[1.3rem] leading-8 font-bold">
         {title}
       </div>
       {body && <section>{body}</section>}

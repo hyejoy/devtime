@@ -8,6 +8,7 @@ import { PlusIcon } from 'lucide-react';
 import { API } from '@/constants/endpoints';
 import { ApiRequest, ApiResponse } from '@/types/api/helpers';
 import { useProfileActions } from '@/store/profileStore';
+import { profileService } from '@/services/profileService';
 
 export default function ProfileImage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,6 +21,27 @@ export default function ProfileImage() {
   };
 
   const [image, setImages] = useState<Image>();
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // 용량 및 형식 제한 검사
+    const MAX_SIZE = 5 * 1024 * 1024; //5MB
+    if (file.size > MAX_SIZE) return alert('5MB 이하의 파일만 업로드 가능합니다.');
+    if (!['image/jpg', ' image/jpeg', 'image/png'].includes(file.type)) {
+      return alert('jpg, png 형식만 업로드 가능합니다');
+    }
+
+    try {
+      const res = await profileService.imageUpload(file);
+      if (res.ok) {
+        setProfile('profileImage', res);
+      }
+    } catch (err) {
+      console.error('이미지 업로드 실패 : ', err);
+    }
+  };
+
   const handleSelectImage = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; // 한 개만 선택한다고 가정
     if (!file) return;
@@ -62,7 +84,7 @@ export default function ProfileImage() {
   };
   return (
     <div className="flex flex-col">
-      <div className="mt-[40px] mb-9 bg-green-200">
+      <div className="mb-9">
         <TextLabel label="프로필 이미지" name="ProfileImage" />
         <input
           type="file"
