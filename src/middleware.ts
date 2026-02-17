@@ -6,6 +6,8 @@ export function middleware(req: NextRequest) {
   const accessToken = req.cookies.get('accessToken')?.value;
   const refreshToken = req.cookies.get('refreshToken')?.value;
 
+  const isFirstLogin = req.cookies.get('isFirstLogin')?.value;
+
   const isLoginPage = ['/', '/login'].some(
     (path) => pathname === path || pathname.startsWith('/login')
   );
@@ -34,8 +36,14 @@ export function middleware(req: NextRequest) {
 
   // 2. 이미 로그인된 상태에서 로그인 페이지 접근 시 -> 홈(타이머)으로
   if (isLoginPage && (hasAccess || hasRefresh)) {
-    console.log('이미 로그인됨, 타이머 페이지로 리다이렉트');
-    return NextResponse.redirect(new URL('/timer', req.url));
+    // 첫 로그인인 경우에만
+    if (isFirstLogin) {
+      console.log('첫 로그인 시도, 프로필 설정 페이지로 리다이렉트');
+      return NextResponse.redirect(new URL('/profile/setup', req.url));
+    } else {
+      console.log('이미 로그인됨, 타이머 페이지로 리다이렉트');
+      return NextResponse.redirect(new URL('/timer', req.url));
+    }
   }
 
   return NextResponse.next();
