@@ -97,7 +97,7 @@ export default function ProfileImage() {
           <div
             className={clsx(
               'border-brand-primary h-[120px] w-[120px] rounded-md border bg-white text-2xl',
-              'flex cursor-pointer items-center justify-center',
+              'mt-[8px] flex cursor-pointer items-center justify-center',
               image ? 'border-none' : 'border-dashed'
             )}
             onClick={() => {

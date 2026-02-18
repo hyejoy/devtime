@@ -10,9 +10,19 @@ export const API = {
     SESSION: '/api/auth/session',
   },
   SIGNUP: {
-    CHECK_EMAIL_DUPLICATE: '/api/signup/check-email?email=',
-    CHECK_NICKNAME_DUPLICATE: '/api/signup/check-nickname?nickname=',
-    SIGNUP: '/api/signup',
+    CHECK_EMAIL_DUPLICATE: (email: string) => {
+      const params = new URLSearchParams();
+      params.append('email', email);
+      const queryString = params.toString();
+      return `${PROXY}/signup/check-email?${queryString}`;
+    },
+    CHECK_NICKNAME_DUPLICATE: (nickname: string) => {
+      const params = new URLSearchParams();
+      params.append('nickname', nickname);
+      const queryString = params.toString();
+      return `${PROXY}/signup/check-nickname?${queryString}`;
+    },
+    SIGNUP: `${PROXY}/signup`,
   },
   TIMER: {
     GETLIST: `${PROXY}/timers`,
