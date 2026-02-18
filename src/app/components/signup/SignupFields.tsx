@@ -48,7 +48,7 @@ const IdField = ({
 };
 
 // 닉네임 필드
-const NicknameField = ({
+export const NicknameField = ({
   value,
   isValid,
   isDuplicateChecked,
@@ -72,6 +72,7 @@ const NicknameField = ({
           feedbackMessage={feedback}
           isValid={isValid}
           hasFeedback={true}
+          autoComplete="one-time-code"
         />
         <Button
           variant="secondary"
@@ -86,35 +87,46 @@ const NicknameField = ({
 };
 
 // 비밀번호 그룹 (비밀번호 + 확인)
-const PasswordGroup = ({ values, validity, feedback, onChange, inputRefs }: any) => {
+export const PasswordGroup = ({
+  values,
+  validity,
+  feedback,
+  onChange,
+  inputRefs,
+  passwordLabel = '비밀번호',
+  checkPasswordLabel = '비밀번호 확인',
+  passwordPlaceholder = MESSAGE.REQUIRED.password,
+  checkPasswordPlaceholder = MESSAGE.REQUIRED.checkPassword,
+}: any) => {
   return (
     <div className="flex flex-col">
       <div>
-        <TextLabel name="password" label="비밀번호" />
+        <TextLabel name="password" label={passwordLabel} />
         <TextFieldInput
           ref={inputRefs.password}
           value={values.password}
           onChange={(e) => onChange(e, 'password')}
           name="password"
           type="password"
-          placeholder={MESSAGE.REQUIRED.password}
+          placeholder={passwordPlaceholder}
           feedbackMessage={feedback.password}
           isValid={validity.password}
           hasFeedback={true}
         />
       </div>
       <div>
-        <TextLabel name="checkPassword" label="비밀번호 확인" />
+        <TextLabel name="checkPassword" label={checkPasswordLabel} />
         <TextFieldInput
           ref={inputRefs.checkPassword}
           value={values.checkPassword}
           onChange={(e) => onChange(e, 'checkPassword')}
           name="checkPassword"
           type="password"
-          placeholder={MESSAGE.REQUIRED.checkPassword}
+          placeholder={checkPasswordPlaceholder}
           feedbackMessage={feedback.checkPassword}
           isValid={validity.checkPassword}
           hasFeedback={true}
+          autoComplete="one-time-code"
         />
       </div>
     </div>

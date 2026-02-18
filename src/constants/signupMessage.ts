@@ -19,9 +19,15 @@ export const MESSAGE = {
 
   /* 닉네임 */
   NICKNAME_AVAILABLE: '사용 가능한 닉네임입니다.',
+  NICKNAME_DUPLICATE_REQUIRED: '중복을 확인해 주세요.',
   NICKNAME_DUPLICATED: '이미 사용 중인 닉네임입니다.',
 
   /* 비밀번호 */
   PASSWORD_INVALID: '비밀번호는 8자 이상, 영문과 숫자 조합이어야 합니다.',
   PASSWORD_MISMATCH: '비밀번호가 일치하지 않습니다.',
+
+  PROFILE: {
+    PASSWORD_EDIT: '비밀번호를 입력해 주세요.',
+    CHECKPASSWORD_MISMATCH: '비밀번호를 한 번 더 입력해 주세요.',
+  },
 } as const;
