@@ -4,11 +4,10 @@ import TimeDisplay from '@/app/components/timer/TimeDisplay';
 import TimerButton from '@/app/components/timer/TimerButton';
 import LoginDialog from '../components/dialog/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
-import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
 
 export default function Page() {
-  const isDialogOpen = useIsDialogOpen();
-  const { openDialog, closeDialog } = useDialogActions();
+  const { isOpen, openDialog, closeDialog } = useDialogStore();
   const handleClickStartBtn = () => {
     openDialog();
   };
@@ -43,16 +42,12 @@ export default function Page() {
           <div className={'flex flex-1 justify-end'}></div>
         </div>
       </main>
-      {isDialogOpen && (
+      {isOpen && (
         <LoginDialog
           dialogType="need-login"
           alignButton="align-right"
           nextRoute={'/login'}
-          buttonChildren={
-            <Button variant="secondary" onClick={closeDialog}>
-              취소
-            </Button>
-          }
+          buttonChildren={<Button variant="secondary">취소</Button>}
         ></LoginDialog>
       )}
     </>

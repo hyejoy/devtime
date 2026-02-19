@@ -1,5 +1,3 @@
-import clsx from 'clsx';
-
 const TimeDisplay = ({ unit, value }: { unit: string; value: string }) => {
   return (
     <div className="bg-timer-block border-brand-primary box-border flex h-[298px] w-[264px] flex-col items-center rounded-2xl border px-[7px] pt-2">

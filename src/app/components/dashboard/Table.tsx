@@ -3,16 +3,16 @@
 'use client';
 
 import { StudyLog } from '@/types/dashboard';
-import { formated_Time } from '@/utils/formatTime';
 import TableRow from './TableRow';
+import { formattedTime } from '@/utils/formatTime';
+import { memo } from 'react';
 
 interface TableProps {
   studyLogs: StudyLog[];
-  onDelete: (id: string) => void;
   onClickRow: (id: string) => void;
+  onChangeDeletId: (id: string) => void;
 }
-
-export default function StudyTable({ studyLogs, onDelete, onClickRow }: TableProps) {
+const StudyTable = ({ studyLogs, onClickRow, onChangeDeletId }: TableProps) => {
   return (
     <div className="w-full overflow-hidden rounded-xl bg-white">
       <table className="w-full text-sm">
@@ -34,16 +34,17 @@ export default function StudyTable({ studyLogs, onDelete, onClickRow }: TablePro
               id={item.id}
               date={item.date}
               goal={item.todayGoal}
-              studyTime={formated_Time(item.studyTime)}
+              studyTime={formattedTime(item.studyTime)}
               totalTasks={item.totalTasks}
               pendingTasks={item.incompleteTasks}
               achievementRate={`${item.completionRate}%`}
-              onDelete={onDelete}
               onClickRow={onClickRow}
+              onChangeDeletId={onChangeDeletId}
             />
           ))}
         </tbody>
       </table>
     </div>
   );
-}
+};
+export default memo(StudyTable);

@@ -1,91 +1,128 @@
 'use client';
-import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
-import {
-  useIsRunning,
-  useTaskReview,
-  useTasks,
-  useTaskTitle,
-  useTimerActions,
-  useTimerStauts,
-} from '@/store/timer';
+import { timerService } from '@/services/timerService';
+import { useDialogStore } from '@/store/dialogStore';
+import { useTimerStore } from '@/store/timerStore';
 import classNames from 'classnames/bind';
+import clsx from 'clsx';
 import Image from 'next/image';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import Input from '../../input/Input';
 import TaskItem from '../../timer/TaskItem';
 import Button from '../../ui/Button';
 import DialogField from '../DialogField';
 import styles from './TimerDialog.module.css';
-import clsx from 'clsx';
+import { useShallow } from 'zustand/react/shallow';
 
 const cx = classNames.bind(styles);
 
-export default function TimerDialog() {
-  /** local state */
-  const [editingMode, setEditingMode] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [newTask, setNewTask] = useState('');
+interface TimerDialogProps {
+  isEditingMode: boolean;
+  onChangeEditingMode: (isEditing: boolean) => void;
+}
 
-  /** zustand state */
+export default function TimerDialog({ isEditingMode, onChangeEditingMode }: TimerDialogProps) {
+  /** zustand */
+
+  // useShallow를 사용하여 상태를 가져옵니다.
+  // 이렇게 하면 'unknown' 에러와 '인수 개수' 에러가 모두 해결됨
+  const {
+    studyLogId,
+    timerId,
+    timerStatus,
+    isRunning,
+    totalActiveMs,
+    lastStartTimestamp,
+    displayTime,
+    todayGoal,
+    tasks,
+    review,
+  } = useTimerStore(
+    useShallow((state) => ({
+      studyLogId: state.studyLogId,
+      timerId: state.timerId,
+      timerStatus: state.timerStatus,
+      isRunning: state.isRunning,
+      totalActiveMs: state.totalActiveMs,
+      lastStartTimestamp: state.lastStartTimestamp,
+      displayTime: state.displayTime,
+      todayGoal: state.todayGoal,
+      tasks: state.tasks,
+      review: state.review,
+    }))
+  );
+
   const {
     addTask,
-    updateTitle,
-    resetGoal,
-    resetReview,
-    startTimerOnServer,
+    updateTodayGoal,
     updateReview,
-    syncTasksWithSaved,
-    updateTaskList,
-    finishTimerOnServer, // ✅ 최종 종료 액션 추가
-  } = useTimerActions();
+    getSplitTimesForServer,
+    cancleCreateTimer,
+    cancleEditTasks,
+    cancleFinishTimer,
+    settingStartTimer,
+    settingDoneTimer,
+    snapshotTasks,
+    timerReset,
+  } = useTimerStore((state) => state.actions);
+  // 액션들은 따로 가져옵니다. (액션은 상태가 변해도 리렌더링을 유발하지 않음)
 
-  const { closeDialog, changeType } = useDialogActions();
-  const timerStatus = useTimerStauts();
-  const dialogOpen = useIsDialogOpen();
-  const title = useTaskTitle();
-  const tasks = useTasks();
-  const review = useTaskReview();
+  const { isOpen, openDialog, closeDialog } = useDialogStore();
 
-  const isReadyToStart = title.trim() !== '' && tasks.length !== 0;
+  /** state */
+  const [newTask, setNewTask] = useState('');
+
+  const isReadyToStart = todayGoal.trim() !== '' && tasks.length !== 0;
 
   /** handler */
-  useEffect(() => {
-    // console.log('Tilte ✏️ click? ', editingMode);
-  }, [editingMode]);
-
-  const changeEditingMode = (value: boolean) => {
-    setEditingMode(value);
+  const handleEditMode = (value: boolean) => {
+    onChangeEditingMode(value);
   };
+
+  // 할일 추가
   const handleAddTask = () => {
     if (newTask.trim() === '') return;
     addTask(newTask); // Zustand에 작업 추가
-    setEditingMode(true); // 즉시 편집 모드 활성화 (아이콘 노출)
+    // onChangeEditingMode(true); // 즉시 편집 모드 활성화 (아이콘 노출)
     setNewTask(''); // 입력창 비우기
   };
 
-  const saveChanges = () => {
-    if (editingMode) {
-      setEditingMode(false);
-    } else {
-      closeDialog();
+  // 할일 목록 전체 업데이트
+  const handleSaveTasks = async () => {
+    if (tasks.length === 0) return;
+    if (isEditingMode) {
+      onChangeEditingMode(false);
     }
-    updateTaskList();
+
+    const taskList = tasks.map((task) => ({
+      content: task.content,
+      isCompleted: task.isCompleted,
+    }));
+
+    try {
+      await timerService.updateTasks(studyLogId, {
+        tasks: taskList,
+      });
+      snapshotTasks(); // tasks -> saveTasks 스냅샷
+      if (!isEditingMode) closeDialog();
+    } catch (err) {
+      console.error('할일 업데이트 실패', err);
+    }
   };
 
   const handleCancelByStatus = () => {
+    closeDialog();
     switch (timerStatus) {
       case 'READY':
-        resetGoal();
-        closeDialog();
+        cancleCreateTimer();
         break;
       case 'DONE':
-        syncTasksWithSaved(); // 편집 중이던 내용 버리고 저장된 스냅샷으로 복구
-        resetReview();
-        closeDialog();
+        cancleFinishTimer(); // 편집 중이던 내용 버리고 저장된 스냅샷으로 복구
+        break;
+      case 'PAUSE':
+        cancleEditTasks();
         break;
       case 'RUNNING':
-        syncTasksWithSaved();
-        closeDialog();
+        cancleEditTasks();
         break;
     }
   };
@@ -101,10 +138,11 @@ export default function TimerDialog() {
         );
       case 'RUNNING':
         return (
-          <Button onClick={saveChanges} variant="secondary">
-            {editingMode ? '변경 사항 저장하기' : '저장하기'}
+          <Button onClick={handleSaveTasks} variant="secondary">
+            {isEditingMode ? '변경 사항 저장하기' : '저장하기'}
           </Button>
         );
+
       case 'DONE':
         return (
           <Button variant="secondary" disabled={review.length < 15} onClick={onClickDone}>
@@ -112,30 +150,53 @@ export default function TimerDialog() {
           </Button>
         );
       default:
-        return null;
+        return (
+          <Button onClick={handleSaveTasks} variant="secondary">
+            {isEditingMode ? '변경 사항 저장하기' : '저장하기'}
+          </Button>
+        );
     }
   };
 
   const onChangeNewTask = (e: ChangeEvent<HTMLInputElement>) => setNewTask(e.target.value);
 
+  // 타이머 시작하기
   const onStartTimer = async () => {
-    await startTimerOnServer();
+    const taskList: string[] = tasks.map((task) => task.content);
+    try {
+      const res = await timerService.start({
+        todayGoal: todayGoal,
+        tasks: taskList,
+      });
+
+      const { startTime, studyLogId, timerId } = res;
+      settingStartTimer(startTime, studyLogId, timerId);
+    } catch (err) {
+      console.error('타이머 시작 실패 : ', err);
+    }
     closeDialog();
   };
+
+  // 타이머 종료
   const onClickDone = async () => {
-    finishTimerOnServer();
+    const payload = getSplitTimesForServer();
+    if (!payload) return;
+    settingDoneTimer();
+
+    try {
+      await timerService.stop(timerId, payload);
+      timerReset();
+      closeDialog();
+      alert('학습이 종료 되었습니다.');
+    } catch (err) {
+      console.error('타이머 종료 실패 : ', err);
+    }
   };
 
-  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => updateTitle(e.target.value);
+  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => updateTodayGoal(e.target.value);
   const onReviewChange = (e: ChangeEvent<HTMLTextAreaElement>) => updateReview(e.target.value);
 
-  /** dialog값 고정 */
-  useEffect(() => {
-    changeType('custom');
-    return () => changeType('alert');
-  }, [changeType]);
-
-  if (!dialogOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <DialogField>
@@ -152,7 +213,7 @@ export default function TimerDialog() {
           <>
             <Input.Input
               onChange={onChangeTitle}
-              value={title}
+              value={todayGoal}
               size={'large'}
               placeholder="오늘의 목표"
               className={clsx('text-primary-900')}
@@ -178,11 +239,11 @@ export default function TimerDialog() {
 
       <DialogField.Content>
         <div className={cx('goalWrapper')}>
-          {(timerStatus === 'RUNNING' || timerStatus === 'DONE') && (
+          {timerStatus !== 'READY' && (
             <div className={cx('listHeader')}>
               <div className={cx('content')}>할 일 목록</div>
-              {!editingMode && (
-                <div className={cx('button')} onClick={() => changeEditingMode(true)}>
+              {!isEditingMode && (
+                <div className={cx('button')} onClick={() => handleEditMode(true)}>
                   <Image
                     src="/images/timerDialog/edit_black.png"
                     className={cx('iconButton')}
@@ -198,11 +259,10 @@ export default function TimerDialog() {
           <div className={cx('goalContainer')}>
             {tasks!.map((task) => (
               <TaskItem
-                isOnlyRead={false}
                 task={task}
                 key={task.id}
-                editingMode={editingMode}
-                changeEditingMode={changeEditingMode}
+                editingMode={isEditingMode}
+                onChangeEditMode={handleEditMode}
               />
             ))}
           </div>

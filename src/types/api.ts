@@ -1,6 +1,6 @@
-import { checkEmail, checkNickname } from '@/services/signup';
-import { DuplicateField } from './signup';
+import { ApiRequest, ApiResponse } from '@/types/api/helpers';
 import { BasicStructure } from './common';
+import { DuplicateField } from './signup';
 import { SplitTime } from './timer';
 
 export interface RefreshToken {
@@ -16,11 +16,6 @@ export interface SignUpCheckResponse {
 }
 // request
 export type DuplicateCheckApi = (value: string) => Promise<SignUpCheckResponse>;
-
-export const duplicateCheckApiMap: Record<DuplicateField, DuplicateCheckApi> = {
-  id: checkEmail,
-  nickName: checkNickname,
-};
 
 export interface SignupResponse {
   /** 회원가입 */
@@ -107,3 +102,9 @@ export interface StudyLogsDetailResponse {
   review: string;
   completionRate: number;
 }
+
+export type ProfileGetResponse = ApiResponse<'/api/profile', 'get'>;
+
+export type ProfilePostRequest = ApiRequest<'/api/profile', 'post'>;
+
+export type TechStackGetResponse = ApiResponse<'/api/tech-stacks', 'get'>['results'];

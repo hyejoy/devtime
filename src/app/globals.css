@@ -1,51 +1,15 @@
 @import "tailwindcss";
-@config "../../tailwind.config.ts";
 
-@layer components {
-  /*** 공부시간 바다 ***/
-  /* 기본 사각형(rect) 스타일 및 곡률 */
-  .react-calendar-heatmap rect {
-    rx: 2.5px;
-    ry: 2.5px;
-    transition:
-      fill 0.2s ease,
-      stroke 0.2s ease;
-    /* 사각형 테두리 설정 보강 */
-    stroke-width: 0.5px;
+/* global.css */
+@utility hide-scrollbar {
+  /* Chrome, Safari, Opera */
+  &::-webkit-scrollbar {
+    display: none;
   }
-
-  /* 호버 효과 */
-  .react-calendar-heatmap rect:hover {
-    stroke: #d1d5db; /* gray-300 */
-    stroke-width: 1.5px;
-    cursor: pointer;
-  }
-
-  /* 월 라벨 스타일 */
-  .react-calendar-heatmap .react-calendar-heatmap-month-label {
-    fill: var(--color-gray-600) !important;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .react-calendar-heatmap {
-    margin-left: 1rem;
-    padding: 2px;
-    overflow: visible !important;
-    /* 브라우저가 레이아웃을 계산할 때 테두리를 포함하도록 설정 */
-    box-sizing: content-box;
-  }
-
-  /* SVG 내부의 그룹(g) 요소도 밖으로 나가는 선을 허용하도록 설정 */
-  .react-calendar-heatmap g,
-  .react-calendar-heatmap svg {
-    overflow: visible !important;
-  }
-
-  /** pagination */
-  .pg-btn {
-    @apply flex h-6 w-6 items-center justify-center rounded-sm transition-colors;
-  }
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE and Edge */
+  -ms-overflow-style: none;
 }
 
 @theme {
@@ -142,7 +106,8 @@
   --btn-text-field-disabled-text: var(--color-gray-400);
 
   --color-active-link: var(--color-brand-primary);
-  --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #f0f2f9 40%, #e2e5f0 100%);
+  /* --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #f0f2f9 40%, #e2e5f0 100%); */
+  --background-image-main-layout: linear-gradient(180deg, #ffffff 0%, #dfe4f2 50%, #b8c1d9 100%);
 
   /* heatmap - 공부 시간 바다*/
   --color-heatmap0: var(--color-gray-50);
@@ -161,9 +126,6 @@
     rgba(76, 121, 255, 0) 0%,
     rgba(76, 121, 255, 0.2) 100%
   );
-}
-
-:root {
   --color-brand-primary-10: color-mix(in srgb, var(--color-brand-primary) 10%, transparent);
   --color-brand-primary-20: color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
   --color-brand-primary-30: color-mix(in srgb, var(--color-brand-primary) 30%, transparent);
@@ -189,7 +151,7 @@
     linear-gradient(0deg, var(--state-active-overlay), var(--state-active-overlay));
 
   /* Gradient */
-  --gradient-primary: linear-gradient(
+  --bg-gradient-primary: linear-gradient(
     119.36deg,
     var(--color-primary-500) 0%,
     var(--color-primary-900) 100%
