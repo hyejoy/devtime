@@ -1,4 +1,4 @@
-import { Profile, ProfileField, ProfilePostRes } from '@/types/profile';
+import { ClientProfilePostRequest, Profile, ProfileField, ProfilePostRes } from '@/types/profile';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
@@ -22,7 +22,7 @@ const initialState: Omit<ProfileState, 'actions'> = {
   email: '',
   nickname: '',
   profile: {
-    career: '' as ProfilePostRes['career'],
+    career: '' as ClientProfilePostRequest['career'],
     purpose: '' as ProfilePostRes['purpose'],
     goal: '',
     techStacks: [],
