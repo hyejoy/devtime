@@ -6,16 +6,17 @@ import '@/styles/tokens/colors.css';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://devtime-chi.vercel.app'),
   title: 'DevTime - 개발 학습 시간 관리',
   description: '개발 공부 시간을 측정하고 기록하는 타이머 기반 웹 애플리케이션',
   openGraph: {
     title: 'DevTime',
     description: '나의 성장을 기록하는 시간, DevTime',
-    url: 'https://devtime-chi.vercel.app/',
+    url: '/',
     siteName: 'DevTime',
     images: [
       {
-        url: 'https://devtime-chi.vercel.app/images/og-image.png',
+        url: '/og-image.png', // public/og-image.png 에 파일
         width: 1200,
         height: 630,
         alt: 'DevTime 서비스 미리보기 이미지',
@@ -26,9 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DevTime',
-    description: '나의 성장을 기록하는 시간, DevTime',
-    images: ['https://devtime-chi.vercel.app/images/og-image.png'],
+    images: ['/og-image.png'],
   },
 };
 
