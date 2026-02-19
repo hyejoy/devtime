@@ -1,7 +1,10 @@
+export type RoutePath = `/${string}`;
+
 export type HelperLink = {
   text: string;
   label: string;
-  href: `/${string}`;
+  href?: RoutePath;
+  onClick?: () => void;
 };
 export interface BasicStructure {
   success?: boolean;
@@ -9,4 +12,9 @@ export interface BasicStructure {
     message: string;
     statusCode: number;
   };
+}
+
+export interface SelectBoxOption {
+  value: string;
+  label: string;
 }

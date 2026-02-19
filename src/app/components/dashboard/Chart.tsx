@@ -1,7 +1,6 @@
 'use client';
-
 import { WeekdayStudyTime } from '@/types/api';
-import { formatTime_hours, formatTime_minutes, formatTime_seconds } from '@/utils/formatTime';
+import { formatTimeHours, formatTimeMinutes, formatTimeSeconds } from '@/utils/formatTime';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +10,7 @@ import {
   ChartOptions,
   ChartData,
 } from 'chart.js';
+import { memo } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 interface StudyAvgChartProps {
@@ -18,7 +18,7 @@ interface StudyAvgChartProps {
 }
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
-export default function StudyAvgChart({ weekdayStudyTime }: StudyAvgChartProps) {
+const StudyAvgChart = ({ weekdayStudyTime }: StudyAvgChartProps) => {
   const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   // 예시: 요일별 평균 공부시간(0~24)
@@ -36,12 +36,12 @@ export default function StudyAvgChart({ weekdayStudyTime }: StudyAvgChartProps) 
 
   const studySeconds = weekdayStudyTime ? days.map((day) => weekdayStudyTime[day]) : [];
 
-  const studyHours = studySeconds.map((s) => formatTime_hours(s));
+  const studyHours = studySeconds.map((s) => formatTimeHours(s));
   const remainHours = studyHours.map((h) => 24 - h);
   const studyHoursLabel = studySeconds.map((s) => {
-    const h = formatTime_hours(s);
-    const m = formatTime_minutes(s);
-    const sec = formatTime_seconds(s);
+    const h = formatTimeHours(s);
+    const m = formatTimeMinutes(s);
+    const sec = formatTimeSeconds(s);
 
     return `${h > 0 ? `${h}시 ` : ''}${m > 0 ? `${m}분 ` : '0분'}${sec > 0 ? `${sec}초` : ''}`.trim();
   });
@@ -173,4 +173,6 @@ export default function StudyAvgChart({ weekdayStudyTime }: StudyAvgChartProps) 
       </div>
     </div>
   );
-}
+};
+
+export default memo(StudyAvgChart);

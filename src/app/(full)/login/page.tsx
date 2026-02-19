@@ -13,16 +13,19 @@ import Image from 'next/image';
 import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
 import styles from './page.module.css';
 import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
-import { useDialogActions, useIsDialogOpen } from '@/store/dialog';
+import { useDialogStore } from '@/store/dialogStore';
+import { useTimerStore } from '@/store/timerStore';
+import { RoutePath } from '@/types/common';
+import { useRouter } from 'next/navigation';
 
 const cx = classNames.bind(styles);
 
 //  # 헤더 없고 전체 화면 사용하는 페이지
 export default function Page() {
   /** zustand */
-  const IsDialogOpen = useIsDialogOpen();
-  const { openDialog, closeDialog } = useDialogActions();
-
+  const router = useRouter();
+  const { openDialog, closeDialog, isOpen } = useDialogStore();
+  const { timerReset } = useTimerStore((state) => state.actions);
   /** state */
   const [values, setValues] = useState<LoginInput>({
     email: '',
@@ -39,7 +42,7 @@ export default function Page() {
 
   const [dialogType, setDialogType] = useState<LoginDialogType>(null);
 
-  const [nextRoute, setNextRoute] = useState<string | null>(null);
+  const [nextRoute, setNextRoute] = useState<RoutePath>();
 
   /**constants · maps */
   const LABEL_MAP: Record<LoginField, string> = {
@@ -96,7 +99,7 @@ export default function Page() {
     return;
   };
 
-  const onChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name as LoginField;
     const value = e.target.value;
     handleFieldChange(name, value);
@@ -109,11 +112,11 @@ export default function Page() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // 페이지 새로고침 방지
     if (!isLoginButtonDisabled()) {
-      onClickLoginButton();
+      handleLoginButton();
     }
   };
 
-  async function onClickLoginButton() {
+  async function handleLoginButton() {
     try {
       const res = await fetch(`${API.AUTH.LOGIN}`, {
         method: 'POST',
@@ -127,24 +130,31 @@ export default function Page() {
         credentials: 'include',
       });
       const data = await res.json();
-      // 로그인 실패 처리
+
       if (!res.ok) {
-        console.warn('로그인 실패:', data.message);
+        console.warn('로그인 실패:', data.error?.message || '알 수 없는 에러');
         setDialogType('login-failed');
         openDialog();
         return;
       }
-      //  로그인 성공 처리
-      if (data.isDuplicateLogin) {
-        setNextRoute('/timer');
-        setDialogType('duplicate-login');
-        openDialog();
-        return;
-      }
-      if (data.isFirstLogin) {
-        window.location.href = '/profile/setup';
-      } else {
-        window.location.href = '/timer';
+
+      if (res.ok) {
+        timerReset();
+
+        // 중복 로그인 체크
+        if (data.isDuplicateLogin) {
+          setDialogType('duplicate-login');
+          setNextRoute(data.isFirstLogin ? '/profile/setup' : '/timer');
+          openDialog();
+          return;
+        }
+
+        // 첫 로그인인 경우
+        if (data.isFirstLogin) {
+          router.replace('/profile/setup');
+        } else {
+          router.replace('/timer');
+        }
       }
     } catch (err) {
       // 네트워크 장애 등 예상치 못한 에러 발생 시
@@ -172,19 +182,20 @@ export default function Page() {
                     name={key}
                     value={values[key]}
                     placeholder={MESSAGE.LOGIN[key]}
-                    onChange={onChangeInput}
+                    onChange={handleChangeInput}
                     feedbackMessage={feedbackMessage[key]}
                     type={key === 'password' ? 'password' : 'text'}
+                    hasFeedback={true}
                   />
                 </React.Fragment>
               );
             })}
 
             <Button
-              className="w-full bg-red-200"
+              className="w-full"
               type="submit"
               disabled={isLoginButtonDisabled()}
-              onClick={onClickLoginButton}
+              onClick={handleLoginButton}
             >
               로그인
             </Button>
@@ -194,9 +205,7 @@ export default function Page() {
           </div>
         </form>
       </div>
-      {IsDialogOpen && (
-        <LoginDialog dialogType={dialogType} nextRoute={nextRoute} alignButton="full" />
-      )}
+      {isOpen && <LoginDialog dialogType={dialogType} nextRoute={nextRoute} alignButton="full" />}
     </div>
   );
 }

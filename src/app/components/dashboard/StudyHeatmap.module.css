@@ -1,0 +1,41 @@
+/*  v4 필수: 메인 CSS 파일을 참조하여 유틸리티(h-6 등)를 불러옵니다. */
+@reference "../../globals.css";
+
+/* Pagination.module.css */
+.heatmapContainer {
+  @apply mt-4 w-full rounded-lg bg-white p-6;
+}
+
+/* 2. 라이브러리가 생성하는 클래스들 (이름 유지) */
+.heatmapContainer :global(.react-calendar-heatmap) {
+  margin-left: 1rem;
+  padding: 2px;
+  overflow: visible !important;
+  box-sizing: content-box;
+}
+
+.heatmapContainer :global(.react-calendar-heatmap) rect {
+  rx: 2.5px;
+  ry: 2.5px;
+  transition:
+    fill 0.2s ease,
+    stroke 0.2s ease;
+  stroke-width: 0.5px;
+}
+
+.heatmapContainer :global(.react-calendar-heatmap) rect:hover {
+  stroke: #d1d5db;
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+
+.heatmapContainer :global(.react-calendar-heatmap-month-label) {
+  fill: var(--color-gray-600) !important;
+  font-weight: 500;
+  font-size: 10px;
+}
+
+.heatmapContainer :global(.react-calendar-heatmap) g,
+.heatmapContainer :global(.react-calendar-heatmap) svg {
+  overflow: visible !important;
+}

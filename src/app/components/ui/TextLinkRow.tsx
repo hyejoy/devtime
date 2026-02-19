@@ -1,30 +1,54 @@
 import Link from 'next/link';
-import styles from './TextLinkRow.module.css';
-import classNames from 'classnames/bind';
+import { ComponentPropsWithoutRef } from 'react';
+import clsx from 'clsx';
+import { RoutePath } from '@/types/common';
 
-type RoutePath = `/${string}`;
-
-interface Props {
+interface Props extends ComponentPropsWithoutRef<'div'> {
   question?: string;
   label: string;
-  href: RoutePath;
+  href?: RoutePath;
   isBold?: boolean;
+  onClick?: () => void;
 }
-
-const cx = classNames.bind(styles);
 
 export default function TextLinkRow({
   question,
   label,
   href,
   isBold = false,
+  onClick,
+  className,
+  ...props
 }: Props) {
+  // 공통 스타일: 텍스트 컬러, 호버 시 언더라인, 트랜지션
+  const linkStyle = clsx(
+    'text-brand-primary transition-all hover:underline focus:outline-none',
+    isBold ? 'text-base font-bold' : 'text-[14px] font-medium'
+  );
+
   return (
-    <div className={cx('linkContainer')}>
-      {question && <div>{question}</div>}
-      <Link href={href} className={cx({ bold: isBold, notBold: !isBold })}>
-        {label}
-      </Link>
+    <div
+      className={clsx(
+        'text-brand-primary flex items-center justify-center gap-[12px] text-base leading-5 font-normal',
+        className
+      )}
+      {...props}
+    >
+      {question && <span>{question}</span>}
+
+      {href ? (
+        <Link href={href} className={linkStyle}>
+          {label}
+        </Link>
+      ) : (
+        <button
+          type="button"
+          onClick={onClick}
+          className={clsx(linkStyle, 'cursor-pointer border-none bg-transparent p-0')}
+        >
+          {label}
+        </button>
+      )}
     </div>
   );
 }
