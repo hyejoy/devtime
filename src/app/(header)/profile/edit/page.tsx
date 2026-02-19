@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useCallback, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { XIcon } from 'lucide-react';
 
@@ -83,7 +83,18 @@ export default function Page() {
   };
 
   /** 2. 핸들러 함수들 */
-  const handleFieldChange = (e: ChangeEvent<HTMLInputElement>, name: keyof ValuesField) => {
+  const handleFieldChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    name: keyof (ValuesField & {
+      purpose:
+        | ''
+        | string
+        | {
+            type: '기타';
+            detail: string;
+          };
+    })
+  ) => {
     const nextValue = e.target.value;
     setValues((prev) => ({ ...prev, [name]: nextValue }));
 
@@ -97,6 +108,11 @@ export default function Page() {
       setFeedbackMessage((prev) => ({ ...prev, [name]: validateField(name, nextValue) }));
     } else if (name === 'goal') {
       setProfile('goal', nextValue);
+    } else if (name === 'purpose') {
+      setProfile('purpose', {
+        type: '기타',
+        detail: nextValue,
+      });
     }
   };
 
@@ -176,6 +192,11 @@ export default function Page() {
     setUpdateSuccess(false); // 다이얼로그가 닫힐 때 성공 상태도 초기화
   };
 
+  const isEtcObject = (val: any): val is { type: '기타'; detail: string } => {
+    return val !== null && typeof val === 'object' && val.type === '기타';
+  };
+  const isEtcMode = profile.purpose === '기타' || isEtcObject(profile.purpose);
+
   // 저장 버튼 비활성화 로직
   const isSaveDisabled =
     !nicknameCheck || // 닉네임 중복확인 미완료
@@ -231,14 +252,32 @@ export default function Page() {
               onConfirm={handleNicknameVerify}
               inpurRef={inputRefs.nickname}
             />
-            <SelectBox
-              keyType="purpose"
-              label="공부 목적"
-              options={PURPOSE_OPTIONS}
-              value={profile.purpose || ''}
-              onChange={(key, val) => setProfile(key, val as any)}
-              placeholder="공부의 목적을 선택해 주세요."
-            />
+            <div className="flex flex-col gap-2">
+              <SelectBox
+                keyType="purpose"
+                label="공부 목적"
+                options={PURPOSE_OPTIONS}
+                //객체 형태일 때 SelectBox에는 '기타'라는 텍스트가 찍혀야 함
+                value={isEtcObject(profile.purpose) ? '기타' : profile.purpose || ''}
+                onChange={(key, val) => setProfile(key, val as any)}
+                placeholder="공부의 목적을 선택해 주세요."
+              />
+              {isEtcMode && (
+                <TextFieldInput
+                  name="purpose"
+                  // 객체일 때만 detail을 보여주고, 아니면 빈 값
+                  value={isEtcObject(profile.purpose) ? profile.purpose.detail : ''}
+                  placeholder="구체적인 공부 목적을 입력해 주세요."
+                  onChange={(e) => {
+                    // 직접 setProfile을 호출하여 객체로 저장
+                    setProfile('purpose', {
+                      type: '기타',
+                      detail: e.target.value,
+                    });
+                  }}
+                />
+              )}
+            </div>
             <PasswordGroup
               inputRefs={inputRefs}
               values={values}
