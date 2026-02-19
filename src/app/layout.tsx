@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   description: '개발 공부 시간을 측정하고 기록하는 타이머 기반 웹 애플리케이션',
   openGraph: {
     title: 'DevTime',
-    description: '개발 공부 시간 관리 서비스',
+    description: '나의 성장을 기록하는 시간, DevTime',
     url: 'https://devtime-chi.vercel.app/',
     siteName: 'DevTime',
     images: [
       {
-        url: 'https://devtime-chi.vercel.app/og-image.png',
+        url: 'https://devtime-chi.vercel.app/images/og-image.png',
         width: 1200,
         height: 630,
         alt: 'DevTime 서비스 미리보기 이미지',
@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'DevTime',
-    description: '개발 공부 시간 관리 서비스',
-    images: ['https://devtime-chi.vercel.app/og-image.png'],
+    description: '나의 성장을 기록하는 시간, DevTime',
+    images: ['https://devtime-chi.vercel.app/images/og-image.png'],
   },
 };
 
