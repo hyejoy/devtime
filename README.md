@@ -1,79 +1,68 @@
 # DevTime – Frontend Challenge
 
-개발 학습 시간을 기록하고 관리하기 위한 타이머 기반 웹 애플리케이션
-
-Next.js(App Router) + TypeScript 기반으로 구현한 개인 프로젝트
-
----
+개발 학습 시간을 기록하고 관리하기 위한 타이머 기반 웹 애플리케이션입니다.  
+Next.js(App Router)와 TypeScript를 기반으로 안정적인 상태 관리와 사용자 경험을 고려하여
+개발되었습니다.
 
 ## 🧩 프로젝트 개요
 
-- 개발 공부 시간을 측정하고 기록하는 타이머 서비스
-- 로그인/회원가입 → 타이머 실행 → 학습 기록 관리 흐름 구현
-- JWT + HttpOnly Cookie 기반 인증 구조 설계
-- API Route / Middleware를 활용한 인증 중앙 처리
-
----
+- **타이머 기반 학습 관리**: 개발 공부 시간을 측정하고 일별/주별 기록을 관리합니다.
+- **맞춤형 프로필 설정**: 개발 경력, 공부 목적(기타 입력 기능 포함) 등 사용자별 맞춤 정보를
+  수집합니다.
+- **보안 강화**: JWT + HttpOnly Cookie 기반의 인증 구조 및 Middleware 접근 제어를 구현했습니다.
+- **유연한 API 연동**: Catch-all Proxy Route를 활용하여 백엔드 엔드포인트를 보호하고 효율적으로
+  통신합니다.
 
 ## 🛠 기술 스택
 
 - **Framework**: Next.js (App Router)
 - **Language**: TypeScript
-- **Styling**: CSS Modules, Design Token(colors.css)
-- **State / Data**: Server Component + Client Component + **Context API(Auth)**
+- **State Management**: Zustand (with Immer) - 복잡한 프로필 객체 상태를 불변성을 유지하며 관리
+- **Styling**: Tailwind CSS, CSS Modules
 - **Auth**: JWT, HttpOnly Cookie
-- **API**: Next.js Route Handler (**Catch-all Proxy Route**)
-- **Lint / Format**: ESLint, Prettier
+- **API**: Next.js Route Handler (Catch-all Proxy Route)
+- **Icons**: Lucide React
 
----
+## 📁 주요 폴더 구조
 
-## 📁 폴더 구조
+```plaintext
+public
+├─ fonts # Pretendard, Digital-7 등 폰트 에셋 관리
+└─ images # bg, profile, timer 등 도메인별 이미지 관리
 
-```text
 src
-├─ app
-│  ├─ (full) # 로그인 이후 보호된 페이지 그룹
-│  │  ├─ ...
-│  │  ├─ timer
-│  │  ├─ layout.tsx # AuthContext 적용 영역
-│  │  └─ page.tsx
-│  │
-│  ├─ api # Route Handler (BFF)
-│  │  ├─ auth
-│  │  └─ proxy
-│  │     └─ [...slug] # 캐치 올(Catch-all) 프록시 라우트
-│  │
-│  └─ middleware.ts # 인증/인가 및 타이머 라우트 제어
-│
-├─ constants # 상수 관리
-│  ├─ endpoints.ts # PROXY 상수 관리
-│  └─ ...
-└─ ...
-
+├─ app # App Router 기반 페이지 구성
+│  ├─ (full) # 로그인/프로필 설정 등 레이아웃 그룹
+│  ├─ api # Route Handler (Proxy & Auth)
+│  └─ components # 도메인/공통 UI 컴포넌트
+│     ├─ profileSetup # 프로필 설정 관련 컴포넌트
+│     └─ ui # SelectBox, TextFieldInput 등 공통 UI
+├─ constants # SelectBox 옵션, 메시지, 정규식 등 상수 관리
+├─ services # API 호출 로직 분리 (profileService, signupService)
+├─ store # Zustand 기반 전역 상태 관리 (profileStore, dialogStore)
+├─ types # TypeScript 인터페이스 및 유니온 타입 정의
+└─ middleware.ts # 인증 및 라우팅 접근 제어
 ```
 
----
+## ✨ 핵심 구현 사항
 
-## 🔐 인증 및 라우팅 구조
+### 1. 지능형 프로필 설정 폼
 
-- **중앙 집중형 인증**: `middleware.ts`에서 모든 보호 페이지 접근을 제어하며, `/api/auth/session`을
-  통해 세션 유효성을 확인합니다.
-- **전역 인증 상태**: `(full)` 그룹의 `layout`에 `AuthContext`를 적용하여, 로그인 이후의 모든
-  페이지에서 실시간으로 유저 상태를 공유합니다.
-- **API Proxy**: 백엔드 엔드포인트 노출을 최소화하기 위해 `[...slug]` 형태의 캐치 올 라우트를
-  구현하였으며, `PROXY` 상수를 활용해 엔드포인트를 안전하게 관리합니다.
+- **유연한 타입 시스템**: 공부 목적 선택 시 '기타' 항목을 통해 사용자 직접 입력을 지원합니다.
+- **동적 UI 렌더링**: 사용자가 선택한 값에 따라 입력 필드가 동적으로 나타나며, TypeScript의 Type
+  Guard를 활용하여 객체와 문자열 타입을 안전하게 처리합니다.
+- **UX 최적화**: 폼 요소 간의 간격(Gap)을 그룹화하여 시각적으로 연관된 정보(공부 목적 - 상세 입력)를
+  인지하기 쉽게 배치했습니다.
 
----
+### 2. Zustand 기반 전역 상태 관리
 
-## ✍️ 구현하면서 신경 쓴 점
+- **Immer 연동**: 중첩된 프로필 객체 구조를 Immer를 통해 직관적이고 안전하게 업데이트합니다.
+- **중앙 집중식 액션**: 프로필 초기화, 수정, 초기값 복구(Revert) 로직을 스토어 내부에 캡슐화하여
+  컴포넌트의 복잡도를 낮추었습니다.
 
-- **페이지 책임 분리**
-- Server Component: 초기 데이터 패칭
-- Client Component: 타이머 인터랙션 처리
+### 3. API Proxy 및 인증 보안
 
-- **인증 로직 고도화**
-- Middleware를 통한 단일 진입점 처리뿐만 아니라, `AuthContext`를 통한 클라이언트 사이드 상태 동기화
-
-- **확장 및 유지보수성**
-- `PROXY` 상수를 도입하여 API 주소 변경 시 대응이 용이하도록 설계
-- Catch-all route를 통한 유연한 API 프록시 구조 구축
+- **Proxy Route Handler**: 클라이언트에서 직접적인 백엔드 호출을 숨기고 `/api/proxy`를 통해 통신하여
+  보안성을 높였습니다.
+- **Middleware 보호**: 보호된 라우트에 대한 접근 권한을 중앙에서 제어하여 비인가 사용자의 접근을
+  차단합니다.
