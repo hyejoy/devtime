@@ -14,7 +14,7 @@ export const signupService = {
     if (!response.ok) throw new Error('이메일 중복 확인 실패');
 
     const data = await response.json();
-    console.log('아이디 중복 확인 조회 res : ', data);
+    // console.log('아이디 중복 확인 조회 res : ', data);
     return data;
   },
 
@@ -29,7 +29,7 @@ export const signupService = {
 
     if (!response.ok) throw new Error('닉네임 중복 확인 실패');
     const data = await response.json();
-    console.log('닉네임 중복 확인 조회 res :', data);
+    // console.log('닉네임 중복 확인 조회 res :', data);
     return data;
   },
 

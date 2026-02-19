@@ -130,7 +130,6 @@ export default function Page() {
         credentials: 'include',
       });
       const data = await res.json();
-      console.log(data);
 
       if (!res.ok) {
         console.warn('로그인 실패:', data.error?.message || '알 수 없는 에러');
@@ -144,7 +143,6 @@ export default function Page() {
 
         // 중복 로그인 체크
         if (data.isDuplicateLogin) {
-          console.log('중복 로그인 모달 유지 시도');
           setDialogType('duplicate-login');
           setNextRoute(data.isFirstLogin ? '/profile/setup' : '/timer');
           openDialog();

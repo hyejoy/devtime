@@ -37,8 +37,6 @@ const StudyAvgChart = ({ weekdayStudyTime }: StudyAvgChartProps) => {
 
   const studySeconds = weekdayStudyTime ? days.map((day) => weekdayStudyTime[day]) : [];
 
-  console.log('studySeconds😀', studySeconds);
-
   const studyHours = studySeconds.map((s) => formatTimeHours(s));
   const remainHours = studyHours.map((h) => 24 - h);
   const studyHoursLabel = studySeconds.map((s) => {
@@ -49,7 +47,6 @@ const StudyAvgChart = ({ weekdayStudyTime }: StudyAvgChartProps) => {
     return `${h > 0 ? `${h}시 ` : ''}${m > 0 ? `${m}분 ` : '0분'}${sec > 0 ? `${sec}초` : ''}`.trim();
   });
 
-  console.log('😼label : ', studyHoursLabel);
   const data: ChartData<'bar'> = {
     labels,
     datasets: [

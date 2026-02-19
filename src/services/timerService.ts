@@ -15,7 +15,6 @@ export const timerService = {
     if (!res.ok) throw new Error('시작 실패');
 
     const data = await res.json();
-    console.log('⭐타이머 시작 res: ', data);
 
     return data;
   },
@@ -32,7 +31,6 @@ export const timerService = {
     });
     if (!res.ok) throw new Error('업데이트 실패');
     const data = await res.json();
-    console.log('⭐ 타이머 업데이트 res : ', data);
     return data;
   },
 
@@ -53,7 +51,6 @@ export const timerService = {
     }
 
     const text = await res.text();
-    console.log('⭐ 타이머 정지 res : ', text);
     return text ? JSON.parse(text) : ({} as any);
   },
 
@@ -70,7 +67,6 @@ export const timerService = {
     }
 
     const text = await res.text();
-    console.log('⭐ 타이머 삭제 res : ', JSON.parse(text));
     return text ? JSON.parse(text) : ({} as any);
   },
 
@@ -84,7 +80,6 @@ export const timerService = {
     if (!res.ok) throw new Error('타이머 리스트 불러오기 실패');
 
     const data = await res.json();
-    console.log('⭐ 타이머 리스트 불러오기 res :', data);
     return data;
   },
 
@@ -102,7 +97,6 @@ export const timerService = {
     if (!res.ok) throw new Error('할일 목록 업데이트 실패');
 
     const data = await res.json();
-    console.log('⭐ 할일 목록 전체 업데이트 res : ', data);
     return data;
   },
 };

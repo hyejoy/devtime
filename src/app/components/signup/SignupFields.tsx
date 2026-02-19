@@ -38,6 +38,7 @@ const IdField = ({
           feedbackMessage={feedback}
           isValid={isValid}
           hasFeedback={true}
+          autoComplete="off"
         />
         <Button variant="secondary" disabled={isIdConfirmDisabled} onClick={() => onConfirm('id')}>
           중복확인
@@ -72,7 +73,7 @@ export const NicknameField = ({
           feedbackMessage={feedback}
           isValid={isValid}
           hasFeedback={true}
-          autoComplete="one-time-code"
+          autoComplete="off"
         />
         <Button
           variant="secondary"
@@ -112,6 +113,7 @@ export const PasswordGroup = ({
           feedbackMessage={feedback.password}
           isValid={validity.password}
           hasFeedback={true}
+          autoComplete="new-password"
         />
       </div>
       <div>
@@ -126,7 +128,7 @@ export const PasswordGroup = ({
           feedbackMessage={feedback.checkPassword}
           isValid={validity.checkPassword}
           hasFeedback={true}
-          autoComplete="one-time-code"
+          autoComplete="off"
         />
       </div>
     </div>

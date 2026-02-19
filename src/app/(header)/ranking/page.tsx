@@ -25,12 +25,11 @@ export default function Page() {
       if (isFetching.current || !hasNextPage) return;
       isFetching.current = true;
       setIsLoading(true);
-      console.log('fetchRankings 실행');
 
       try {
         const res = await rankingService.getRankings(sortBy, pageNum, 5);
         const newRankings = res.data.rankings;
-        console.log('가져온 랭킹 데이터:', newRankings);
+        // console.log('가져온 랭킹 데이터:', newRankings);
         setRankings((prev) => {
           // 중복 데이터 방지
           const existingIds = new Set(prev.map((r) => r.userId));
@@ -40,7 +39,6 @@ export default function Page() {
 
         setHasNextPage(res.data.pagination.hasNext);
       } catch (error) {
-        console.error('랭킹 데이터 로드 실패:', error);
       } finally {
         setIsLoading(false);
         isFetching.current = false;
@@ -70,7 +68,6 @@ export default function Page() {
 
   /**  3. Intersection Observer 최적화 */
   useEffect(() => {
-    console.log('실행', { hasNextPage, isLoading });
     const observer = new IntersectionObserver(
       (entries) => {
         // 가시성 검사 + 중복 실행 방지 조건

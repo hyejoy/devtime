@@ -17,7 +17,6 @@ export const rankingService = {
     if (!response.ok) throw new Error('랭킹 조회 실패');
 
     const data = await response.json();
-    console.log('⭐랭킹 조회 res: ', data);
     return data;
   },
 };

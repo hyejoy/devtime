@@ -23,17 +23,19 @@ export default function ProfileSaveButton() {
       techStacks: techStacks,
       profileImage: profileImage || '',
     };
-    console.log('🛫🛫🛫', body);
     try {
       const res = await profileService.create(body);
-      console.log('♥️ 저장되었습니다! . ', res);
       router.replace('/timer');
     } catch (err) {
-      console.log('회원정보 저장 에러:', err);
+      console.error('회원정보 저장 에러:', err);
     }
   };
+
+  const handleActiveButton = () => {
+    return Boolean(career && purpose && goal && techStacks.length > 0 && profileImage);
+  };
   return (
-    <Button onClick={handleSaveProfile} className="mb-4">
+    <Button onClick={handleSaveProfile} className="mb-4" disabled={!handleActiveButton()}>
       저장하기
     </Button>
   );
