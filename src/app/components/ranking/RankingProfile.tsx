@@ -39,7 +39,7 @@ const RankingProfile = (props: RankingProfileProps) => {
           <div className="mb-4">
             <div className="text-brand-primary text-[20px] font-bold">{nickname}</div>
             <div className="text-brand-primary text-[16px] font-medium">
-              {typeof purpose === 'string' ? purpose : '목적 없음'}
+              {typeof purpose === 'string' ? purpose : purpose.detail}
             </div>
           </div>
           <div className="flex gap-6">

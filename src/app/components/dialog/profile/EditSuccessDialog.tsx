@@ -7,7 +7,9 @@ export default function EditSuccessDialog({ onClick }: { onClick: () => void }) 
     <DialogField>
       <DialogField.Content>변경 사항이 저장되었습니다.</DialogField.Content>
       <DialogField.Button align="align-right">
-        <Button onClick={onClick}>확인</Button>
+        <Button nextRoute="/mypage" onClick={onClick}>
+          확인
+        </Button>
       </DialogField.Button>
     </DialogField>
   );

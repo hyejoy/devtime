@@ -43,5 +43,11 @@ type OriginalPostRequest = ApiRequest<'/api/profile', 'post'>;
 // 2. 특정 필드(career, purpose)에 빈 문자열("")을 허용하도록 개조
 export type ProfilePostRes = Omit<OriginalPostRequest, 'career' | 'purpose'> & {
   career: OriginalPostRequest['career'] | '';
-  purpose: OriginalPostRequest['purpose'] | '';
+  purpose: ClientProfilePostRequest['purpose'] | '';
+};
+
+/** * 클라이언트 화면 로직을 위해 'purpose'에 "기타" 문자열을 추가한 확장 타입
+ */
+export type ClientProfilePostRequest = Omit<OriginalPostRequest, 'purpose'> & {
+  purpose: OriginalPostRequest['purpose'] | '기타';
 };

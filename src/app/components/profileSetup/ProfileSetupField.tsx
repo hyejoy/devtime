@@ -20,6 +20,11 @@ export default function ProfileSetupField() {
     setProfile(key, value);
   };
 
+  /** '기타' 상태인지 확인 (문자열인 경우와 객체인 경우 모두 대응) */
+  const isEtcMode =
+    profile.purpose === '기타' ||
+    (typeof profile.purpose === 'object' && profile.purpose?.type === '기타');
+
   return (
     <div className="flex flex-col gap-10">
       {/* 개발 경력 선택 */}
@@ -33,15 +38,29 @@ export default function ProfileSetupField() {
       />
 
       {/* 공부 목적 선택 */}
-      <SelectBox
-        keyType="purpose"
-        label="공부 목적"
-        placeholder="공부의 목적을 선택해 주세요."
-        value={profile?.purpose || ''}
-        options={PURPOSE_OPTIONS}
-        onChange={handleFieldChange}
-      />
-
+      <div className="flex flex-col gap-2">
+        <SelectBox
+          keyType="purpose"
+          label="공부 목적"
+          placeholder="공부의 목적을 선택해 주세요."
+          value={typeof profile.purpose === 'object' ? '기타' : (profile.purpose as string)}
+          options={PURPOSE_OPTIONS}
+          onChange={handleFieldChange}
+        />
+        {isEtcMode && (
+          <TextFieldInput
+            placeholder="기타 목적을 입력해주세요."
+            // 객체일 때만 detail에 접근, 아니면 빈 문자열
+            value={typeof profile.purpose === 'object' ? profile.purpose.detail : ''}
+            onChange={(e) => {
+              handleFieldChange('purpose', {
+                type: '기타',
+                detail: e.target.value,
+              });
+            }}
+          />
+        )}
+      </div>
       {/* 공부 목표 입력 */}
       <div>
         <TextLabel name="goal" label="공부 목표" />
