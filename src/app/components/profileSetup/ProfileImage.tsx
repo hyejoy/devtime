@@ -77,7 +77,7 @@ export default function ProfileImage() {
       setProfile('profileImage', key);
       return key;
     } catch (error) {
-      console.log('이미지 업로드 에러', error);
+      console.error('이미지 업로드 에러', error);
     } finally {
       e.target.value = ''; // 같은 파일 재선택 가능하도록 초기화
     }
@@ -105,13 +105,17 @@ export default function ProfileImage() {
             }}
           >
             {image ? (
-              <Image src={image.previewUrl} alt="background" width={120} height={120} />
+              <div className="relative h-[120px] w-[120px] overflow-hidden rounded-md border border-gray-200">
+                <Image
+                  src={image.previewUrl}
+                  alt="profile Image"
+                  fill
+                  sizes="120px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
             ) : (
-              // <Image
-              //   className="object-cover"
-              //   src="/images/profile/addIcon.png"
-              //   alt="background"
-              // />
               <PlusIcon className="text-brand-primary h-[23.85px] w-[23.85px]" />
             )}
           </div>

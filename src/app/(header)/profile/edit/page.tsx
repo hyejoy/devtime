@@ -1,5 +1,9 @@
 'use client';
 
+import { ChangeEvent, useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
+import { XIcon } from 'lucide-react';
+
 import ProfileImage from '@/app/components/profileSetup/ProfileImage';
 import SearchTechStack from '@/app/components/profileSetup/SearchTechStack';
 import { NicknameField, PasswordGroup } from '@/app/components/signup/SignupFields';
@@ -8,6 +12,7 @@ import LoadingBar from '@/app/components/ui/LoadingBar';
 import { SelectBox } from '@/app/components/ui/SelectBox';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
 import TextLabel from '@/app/components/ui/TextLabel';
+
 import { passwordRegex } from '@/constants/regex';
 import { CAREER_OPTIONS, PURPOSE_OPTIONS } from '@/constants/selectbox';
 import { MESSAGE } from '@/constants/signupMessage';
@@ -16,318 +21,272 @@ import { profileService } from '@/services/profileService';
 import { signupService } from '@/services/signupService';
 import { useProfileActions, useProfileStore } from '@/store/profileStore';
 import { ProfileField } from '@/types/profile';
-import { DuplicateState, SignField, SignInput, SignValid } from '@/types/signup';
-import { XIcon } from 'lucide-react';
-import Image from 'next/image';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { SignInput } from '@/types/signup';
+import EditProfileConfirmDialog from '@/app/components/dialog/profile/EditProfileConfirmDialog';
+import { useDialogStore } from '@/store/dialogStore';
+import EditSuccessDialog from '@/app/components/dialog/profile/EditSuccessDialog';
+import { useRouter } from 'next/navigation';
+
+type ValuesField = Omit<SignInput, 'id'> & { goal: string };
+type BaseValue = Omit<ValuesField, 'goal'>;
 
 export default function Page() {
-  type ValuesField = Omit<SignInput, 'id'> & {
-    goal: string;
-  };
+  const router = useRouter();
+  const { profile, nickname: storeNickname } = useProfileStore();
+  const { setProfile, setNickname } = useProfileActions();
+  const { isOpen, openDialog, closeDialog } = useDialogStore();
 
-  type BaseValue = Omit<ValuesField, 'goal'>;
-  const { profile, nickname } = useProfileStore();
-  const { career, purpose, techStacks, goal, profileImage } = profile;
-  const { setProfile } = useProfileActions();
-  const inputRefs = {
-    nickname: useRef<HTMLInputElement>(null),
-    password: useRef<HTMLInputElement>(null),
-    checkPassword: useRef<HTMLInputElement>(null),
-  };
   const [isReverting, setIsReverting] = useState(false);
-  //  input values
+  const [nicknameCheck, setNicknameCheck] = useState(true);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+
+  // Input Values
   const [values, setValues] = useState<ValuesField>({
-    nickname: nickname,
+    nickname: storeNickname,
     password: '',
     checkPassword: '',
     goal: profile.goal || '',
   });
 
-  /* duplicate check */
-  const [nicknameCheck, setNicknameCheck] = useState(true);
+  // Feedback & Validity
   const [feedbackMessage, setFeedbackMessage] = useState<BaseValue>({
     nickname: '',
     password: '',
     checkPassword: '',
   });
-
   const [passwordValidity, setPasswordValidity] = useState({
     password: true,
     checkPassword: true,
   });
 
-  // feedbackMessage 업데이트
-  const updateFieldMessage = (name: keyof ValuesField, value: string) => {
-    setFeedbackMessage((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const inputRefs = {
+    nickname: useRef<HTMLInputElement>(null),
+    password: useRef<HTMLInputElement>(null),
+    checkPassword: useRef<HTMLInputElement>(null),
   };
 
-  // 비밀번호 유효성검사 업데이트
-  const updateValiditiy = (name: keyof Omit<ValuesField, 'nickname'>, value: boolean) => {
-    setPasswordValidity((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  /** 1. 유효성 검사 헬퍼 함수 */
+  const validateField = (name: keyof ValuesField, value: string, isCheck?: boolean) => {
+    switch (name) {
+      case 'nickname':
+        if (!value) return MESSAGE.REQUIRED.nickname;
+        if (!isCheck) return MESSAGE.NICKNAME_DUPLICATE_REQUIRED;
+        return MESSAGE.NICKNAME_AVAILABLE;
+      case 'password':
+        if (!value) return MESSAGE.PASSWORD_INVALID;
+        return passwordRegex.test(value) ? '' : MESSAGE.PASSWORD_INVALID;
+      case 'checkPassword':
+        return value === values.password ? '' : MESSAGE.PASSWORD_MISMATCH;
+      default:
+        return '';
+    }
   };
 
-  //  HELPER MESSAGE 변경
-  const handleFeedbackMessage = useCallback(
-    (
-      name: keyof ValuesField, //field
-      isDuplicateConfirmed: boolean //중복(id,nick)
-    ) => {
-      const value = values[name];
+  /** 2. 핸들러 함수들 */
+  const handleFieldChange = (e: ChangeEvent<HTMLInputElement>, name: keyof ValuesField) => {
+    const nextValue = e.target.value;
+    setValues((prev) => ({ ...prev, [name]: nextValue }));
 
-      switch (name) {
-        case 'nickname': {
-          if (!value) {
-            updateFieldMessage(name, MESSAGE.REQUIRED.nickname);
-            return;
-          }
-
-          if (!isDuplicateConfirmed) {
-            updateFieldMessage(name, MESSAGE.NICKNAME_DUPLICATE_REQUIRED);
-            return;
-          }
-
-          updateFieldMessage(
-            name,
-            isDuplicateConfirmed ? MESSAGE.NICKNAME_AVAILABLE : MESSAGE.NICKNAME_DUPLICATED
-          );
-          return;
-        }
-
-        case 'password': {
-          if (!value) {
-            updateFieldMessage(name, MESSAGE.PASSWORD_INVALID);
-            return;
-          }
-          const isValid = passwordRegex.test(values.password);
-          updateFieldMessage('password', isValid ? '' : MESSAGE.PASSWORD_INVALID);
-
-          updateFieldMessage(
-            'checkPassword',
-            value === values.checkPassword ? '' : MESSAGE.PASSWORD_MISMATCH
-          );
-          return;
-        }
-
-        case 'checkPassword': {
-          if (!value || value !== values.password) {
-            updateFieldMessage(name, MESSAGE.PASSWORD_MISMATCH);
-            return;
-          } else {
-            updateFieldMessage(name, '');
-            return;
-          }
-        }
-      }
-    },
-    [MESSAGE, passwordRegex, updateFieldMessage, values.password, values.checkPassword]
-  );
-
-  const handleFieldChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>, name: keyof ValuesField) => {
-      setValues((prev) => {
-        const next = { ...prev, [name]: e.target.value };
-
-        //  필드별 유효성 계산
-        const fieldValidMap: Record<keyof BaseValue, boolean> = {
-          nickname: nicknameCheck,
-          password: passwordRegex.test(next.password),
-          checkPassword: next.checkPassword.length > 0 && next.checkPassword === next.password,
-        };
-
-        if (name !== 'goal') {
-          const isValid = fieldValidMap[name];
-
-          // 중복확인 상태 리셋
-          if (name === 'nickname') {
-            setNicknameCheck(false);
-            handleFeedbackMessage(name, false);
-          } else if (name === 'password' || name === 'checkPassword') {
-            handleFeedbackMessage(name, isValid);
-            updateValiditiy(name, isValid);
-          }
-        }
-
-        if (name === 'goal') {
-          // zustand 업데이트
-          setProfile('goal', e.target.value);
-        }
-
-        return next;
-      });
-    },
-    [nicknameCheck, handleFeedbackMessage]
-  );
-  // 닉네임, 공부목적, 경력 등 문자열 값을 가지는 키들만 타겟팅
-  const handleChangeSelectedBox = (keytype: keyof ProfileField, value: string) => {
-    // 여기서 value는 string임이 보장되므로 setProfile 호출 시 타입 에러가 사라집니다.
-    setProfile(keytype, value as any);
+    if (name === 'nickname') {
+      setNicknameCheck(false);
+      setFeedbackMessage((prev) => ({ ...prev, nickname: MESSAGE.NICKNAME_DUPLICATE_REQUIRED }));
+    } else if (name === 'password' || name === 'checkPassword') {
+      const isValid =
+        name === 'password' ? passwordRegex.test(nextValue) : nextValue === values.password;
+      setPasswordValidity((prev) => ({ ...prev, [name]: isValid }));
+      setFeedbackMessage((prev) => ({ ...prev, [name]: validateField(name, nextValue) }));
+    } else if (name === 'goal') {
+      setProfile('goal', nextValue);
+    }
   };
 
   const handleNicknameVerify = async () => {
     const res = await signupService.checkNickname(values.nickname);
     if (res.available) {
       setNicknameCheck(true);
-      handleFeedbackMessage('nickname', true);
+      setFeedbackMessage((prev) => ({ ...prev, nickname: MESSAGE.NICKNAME_AVAILABLE }));
     }
-
-    console.log('닉네임 중복 확인 결과 : ', res);
   };
 
-  const removeProfileImage = () => {
-    setProfile('profileImage', '');
+  const profileBody = {
+    nickname: values.nickname, // 닉네임은 상위 필드지만 API 스펙에 따라 포함
+    career: profile.career as any,
+    purpose: profile.purpose as any,
+    techStacks: profile.techStacks,
+    goal: profile.goal,
+    profileImage: profile.profileImage || '',
+    password: values.password,
   };
 
   const saveProfile = async () => {
     try {
-      const res = await profileService.update({
-        nickname,
-        purpose,
-        techStacks,
-        career,
-        password: values.password,
-        profileImage: profileImage || '',
-      });
-    } catch (err) {
-      console.error('프로필 업데이트 실패 : ', err);
+      // 1. 일단 업데이트(PUT) 시도
+      closeDialog();
+      await profileService.update(profileBody);
+      setUpdateSuccess(true);
+      openDialog();
+    } catch (err: any) {
+      // 2. 만약 "프로필이 존재하지 않습니다" (400) 에러라면 생성(POST) 시도
+      if (err.message.includes('실패')) {
+        try {
+          await profileService.create(profileBody);
+        } catch (createErr) {
+          console.error('프로필 생성 실패:', createErr);
+        }
+      } else {
+        alert(err.message || '저장 중 오류가 발생했습니다.');
+      }
     }
   };
-
   const revertChanges = async () => {
     try {
-      setIsReverting(true); // 로딩 시작
+      setIsReverting(true);
+      const data = await profileService.get();
 
-      // 서버에서 최신(원본) 데이터를 다시 가져옴
-      const originalData = await profileService.get();
-
-      // 여기서는 기존에 store에 저장된 초기값을 다시 로드하는 로직이 필요합니다.
-
-      // 1. Local State 초기화
       setValues({
-        nickname: originalData.nickname,
-        goal: originalData.profile?.goal || '',
+        nickname: data.nickname,
+        goal: data.profile?.goal || '',
         password: '',
         checkPassword: '',
       });
-      setFeedbackMessage({
-        nickname: '',
-        password: '',
-        checkPassword: '',
-      });
-      setProfile('purpose', originalData.profile?.purpose || '');
-      setProfile('goal', originalData.profile?.goal || '');
-      setProfile('career', originalData.profile?.career || '');
-      setProfile('techStacks', originalData.profile?.techStacks || []);
-      setProfile('profileImage', originalData.profile?.profileImage);
+      setFeedbackMessage({ nickname: '', password: '', checkPassword: '' });
 
-      // 2. 만약 API 없이 Store만 원복하고 싶다면,
-      // 페이지 진입 시 데이터를 별도의 'initialProfile'로 저장해두었다가 꺼내쓰는 게 베스트입니다.
+      // Zustand Store 일괄 복구
+      const p = data.profile;
+      setProfile('purpose', p?.purpose || '');
+      setProfile('goal', p?.goal || '');
+      setProfile('career', p?.career || '');
+      setProfile('techStacks', p?.techStacks || []);
+      setProfile('profileImage', p?.profileImage || '');
     } catch (error) {
       console.error('복구 실패', error);
     } finally {
-      setIsReverting(false); // 로딩 종료
+      setIsReverting(false);
     }
   };
 
-  if (isReverting) {
-    return <LoadingBar />;
-  }
-  return (
-    <div className="mt-10 flex w-full flex-col justify-start rounded-lg bg-white p-9">
-      <section>
-        {/* 프로필 이미지 */}
-        {profile.profileImage && (
-          <div className="mb-9 flex flex-col gap-2">
-            <TextLabel label="프로필 이미지" name="profileImage" />
+  // 저장 완료 후 닫는 로직
+  const handleCloseDialog = () => {
+    Object.entries(profileBody).forEach(([key, value]) => {
+      if (key === 'nickname' || key === 'password') return;
+      setProfile(key as keyof ProfileField, value);
+    });
 
-            {/* 140x140 고정 컨테이너 */}
-            <div className="relative h-[140px] w-[140px] overflow-hidden rounded-md border border-gray-200">
-              <Image
-                src={`${S3_BASE_URL}/${profile.profileImage}`}
-                alt="profile Image"
-                fill
-                sizes="120px"
-                className="relative object-contain"
-                priority
-              />
-              <XIcon
-                className="absolute top-[8px] right-[8px] z-50 cursor-pointer text-gray-400 hover:text-red-400"
-                onClick={removeProfileImage}
-              />
-            </div>
+    setNickname(values.nickname);
+    setUpdateSuccess(false); // 다이얼로그가 닫힐 때 성공 상태도 초기화
+  };
+
+  // 저장 버튼 비활성화 로직
+  const isSaveDisabled =
+    !nicknameCheck || // 닉네임 중복확인 미완료
+    !values.nickname || // 닉네임 빈값
+    !values.password || // 비밀번호 빈값
+    !passwordValidity.password || // 비밀번호 유효성 미통과
+    values.password !== values.checkPassword || // 비밀번호 불일치
+    !profile.purpose || // 공부 목적 미선택
+    !profile.career || // 개발 경력 미선택
+    !profile.goal || // 공부 목표 빈값
+    !profile.profileImage || // 프로필이미지 빈값
+    profile.techStacks.length === 0; // 기술 스택이 비어있음
+
+  if (isReverting) return <LoadingBar />;
+
+  return (
+    <>
+      <div className="mt-10 flex w-full flex-col justify-start rounded-lg bg-white p-9">
+        {/* 📸 프로필 이미지 섹션 */}
+        <section className="mb-9">
+          <div className="mt-2">
+            {profile.profileImage ? (
+              <>
+                <TextLabel label="프로필 이미지" name="profileImage" />
+                <div className="relative h-[120px] w-[120px] overflow-hidden rounded-md border border-gray-200">
+                  <Image
+                    src={`${S3_BASE_URL}/${profile.profileImage}`}
+                    alt="profile"
+                    fill
+                    className="object-contain"
+                  />
+                  <XIcon
+                    className="absolute top-2 right-2 cursor-pointer text-gray-400 hover:text-red-500"
+                    onClick={() => setProfile('profileImage', '')}
+                  />
+                </div>
+              </>
+            ) : (
+              <ProfileImage />
+            )}
           </div>
-        )}
-        {!profile.profileImage && <ProfileImage />}
-      </section>
-      <section className="mb-9 grid grid-cols-2 gap-16">
-        <div>
-          <NicknameField
-            value={values.nickname}
-            isValid={nicknameCheck}
-            isDuplicateChecked={nicknameCheck}
-            feedback={feedbackMessage.nickname}
-            onChange={handleFieldChange}
-            onConfirm={handleNicknameVerify}
-            inpurRef={inputRefs.nickname}
-          />
-          <div className="mb-9">
+        </section>
+
+        {/* 📝 정보 입력 섹션 */}
+        <section className="mb-9 grid grid-cols-2 gap-16">
+          <div className="flex flex-col gap-6">
+            <NicknameField
+              value={values.nickname}
+              isValid={nicknameCheck}
+              isDuplicateChecked={nicknameCheck}
+              feedback={feedbackMessage.nickname}
+              onChange={handleFieldChange}
+              onConfirm={handleNicknameVerify}
+              inpurRef={inputRefs.nickname}
+            />
             <SelectBox
               keyType="purpose"
               label="공부 목적"
-              placeholder="공부의 목적을 선택해 주세요."
-              value={profile?.purpose || ''}
               options={PURPOSE_OPTIONS}
-              onChange={handleChangeSelectedBox}
+              value={profile.purpose || ''}
+              onChange={(key, val) => setProfile(key, val as any)}
+              placeholder="공부의 목적을 선택해 주세요."
+            />
+            <PasswordGroup
+              inputRefs={inputRefs}
+              values={values}
+              validity={passwordValidity}
+              feedback={feedbackMessage}
+              onChange={handleFieldChange}
+              passwordLabel="새 비밀번호"
+              checkPasswordLabel="새 비밀번호 재입력"
             />
           </div>
-          <PasswordGroup
-            inputRefs={inputRefs}
-            values={values}
-            validity={passwordValidity}
-            feedback={feedbackMessage}
-            onChange={handleFieldChange}
-            passwordLabel={'새 비밀번호'}
-            checkPasswordLabel={'새 비밀번호 재입력'}
-            passwordPlaceholder={MESSAGE.PROFILE.PASSWORD_EDIT}
-            checkPasswordPlaceholder={MESSAGE.PROFILE.CHECKPASSWORD_MISMATCH}
-          />
-        </div>
 
-        <div className="flex flex-col gap-6">
-          <SelectBox
-            keyType="career"
-            label="개발 경력"
-            placeholder="개발 경력을 선택해주세요"
-            value={profile?.career || ''}
-            options={CAREER_OPTIONS}
-            onChange={handleChangeSelectedBox}
-          />
-
-          <div>
-            <TextLabel name="goal" label="공부 목표" />
-            <TextFieldInput
-              name="goal"
-              value={profile?.goal || ''}
-              placeholder="공부 목표를 입력해 주세요."
-              onChange={(e) => handleFieldChange(e, 'goal')}
+          <div className="flex flex-col gap-6">
+            <SelectBox
+              keyType="career"
+              label="개발 경력"
+              options={CAREER_OPTIONS}
+              value={profile.career || ''}
+              onChange={(key, val) => setProfile(key, val as any)}
+              placeholder="개발 경력을 선택해주세요."
             />
+            <div>
+              <TextLabel name="goal" label="공부 목표" />
+              <TextFieldInput
+                name="goal"
+                value={profile.goal || ''}
+                placeholder="공부 목표를 입력해 주세요."
+                onChange={(e) => handleFieldChange(e, 'goal')}
+              />
+            </div>
+            <SearchTechStack />
           </div>
-          <SearchTechStack />
-        </div>
-      </section>
-      <section className="flex justify-end gap-4">
-        {/* 버튼 */}
-        <Button variant="secondary" onClick={revertChanges}>
-          취소
-        </Button>
-        <Button onClick={saveProfile}>변경 사항 저장하기</Button>
-      </section>
-    </div>
+        </section>
+
+        <footer className="flex justify-end gap-4">
+          <Button variant="secondary" onClick={revertChanges}>
+            취소
+          </Button>
+          <Button onClick={openDialog} disabled={isSaveDisabled}>
+            변경 사항 저장하기
+          </Button>
+        </footer>
+      </div>
+      {isOpen &&
+        (updateSuccess ? (
+          <EditSuccessDialog onClick={handleCloseDialog} />
+        ) : (
+          <EditProfileConfirmDialog onClickSaveButton={saveProfile} />
+        ))}
+    </>
   );
 }
