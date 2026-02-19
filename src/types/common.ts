@@ -13,3 +13,8 @@ export interface BasicStructure {
     statusCode: number;
   };
 }
+
+export interface SelectBoxOption {
+  value: string;
+  label: string;
+}

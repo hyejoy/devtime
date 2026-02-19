@@ -9,8 +9,6 @@ import Link from 'next/link';
 export default function Page() {
   const { profile, email, nickname } = useProfileStore();
   const { career, purpose, techStacks, profileImage, goal } = profile;
-  const imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${profileImage}`;
-  console.log(profileImage);
   return (
     <div className="mt-10 flex w-full rounded-lg bg-white p-9">
       <section>

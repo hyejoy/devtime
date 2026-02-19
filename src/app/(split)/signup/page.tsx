@@ -4,14 +4,13 @@ import Button from '@/app/components/ui/Button';
 import UserFormContainer from '@/app/components/userform/UserFormContainer';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
-import { signup } from '@/services/signup';
-import { duplicateCheckApiMap, SignupRequest } from '@/types/api';
 import { HelperLink } from '@/types/common';
 import { DuplicateField, DuplicateState, SignField, SignInput, SignValid } from '@/types/signup';
-import classNames from 'classnames/bind';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import SignupFields from '../../components/signup/SignupFields';
+import { signupService } from './../../../services/signupService';
+import { ApiRequest } from '@/types/api/helpers';
 
 export default function Page() {
   const router = useRouter();
@@ -203,13 +202,12 @@ export default function Page() {
     // 이미 중복 확인된 경우 실행하지 않음
     if (duplicateChecked[name]) return;
 
+    let response;
     const value = values[name];
-    const checkApi = duplicateCheckApiMap[name];
-
-    if (!checkApi) return;
-
-    const { success, available, message } = await checkApi(value);
-
+    if (name === 'id') response = await signupService.checkEmail(value);
+    if (name === 'nickname') response = await signupService.checkNickname(value);
+    if (!response) return;
+    const { available, message, success } = response;
     if (!success) return;
 
     updateDuplicateStatus(name, available);
@@ -256,14 +254,14 @@ export default function Page() {
       // false 하나라도 있으면 리턴
       if (invalidFields.length || !isTermChecked) return;
 
-      const signupInfo: SignupRequest = {
+      const signupInfo: ApiRequest<'/api/signup', 'post'> = {
         email: values['id'],
         nickname: values['nickname'],
         password: values['password'],
         confirmPassword: values['checkPassword'],
       };
       // 모든 유효성 통과
-      const res = await signup(signupInfo);
+      const res = await signupService.signup(signupInfo);
       if (res.success) {
         router.replace('/login');
       }

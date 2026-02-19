@@ -1,15 +1,18 @@
 'use client';
 
+import Logout from '@/app/components/logout/Logout';
+import Logo from '@/app/components/ui/Logo';
+import Image from 'next/image';
 import clsx from 'clsx';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import Image from 'next/image';
-import Logo from '../components/ui/Logo';
-import { useTimerStore } from '@/store/timerStore';
+
+import { S3_BASE_URL } from '@/constants/urls';
 import { useProfileActions, useProfileStore } from '@/store/profileStore';
-import { CircleUser, PlusIcon, User, LogOut } from 'lucide-react';
-import Logout from '@/app/components/logout/Logout';
+import { useTimerStore } from '@/store/timerStore';
+import { CircleUser, UserCircle2Icon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+
 const NAV_ITEMS = [
   { label: '대시보드', href: '/dashboard' },
   { label: '랭킹', href: '/ranking' },
@@ -29,11 +32,9 @@ export default function Header({
 }) {
   const { setLastStartTimestamp } = useTimerStore((state) => state.actions);
   const pathname = usePathname();
-  const { nickname, isDropdownOpen } = useProfileStore();
-  const profileActions = useProfileStore((state) => state.actions);
+  const { nickname, isDropdownOpen, profile } = useProfileStore();
   const { setDropdownClose, setDropdownOpen } = useProfileActions();
   const displayNickname = nickname || initialNickname;
-
   // 드롭다운 영역을 감지 ref
   const dropdownRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -91,12 +92,17 @@ export default function Header({
           onClick={setDropdownOpen}
         >
           <div className="relative h-10 w-10 rounded-full border border-gray-200">
-            <Image
-              className="cursor-pointer rounded-full object-cover"
-              src="/images/profile/profile.png"
-              alt="프로필"
-              fill // 부모 컨테이너를 꽉 채우도록 설정
-            />
+            {profile.profileImage && (
+              <Image
+                className="cursor-pointer rounded-full object-cover"
+                src={`${S3_BASE_URL}/${profile.profileImage}`}
+                alt="프로필"
+                fill // 부모 컨테이너를 꽉 채우도록 설정
+              />
+            )}
+            {!profile.profileImage && (
+              <UserCircle2Icon className="h-full w-full object-cover text-gray-300" />
+            )}
           </div>
           <div className="text-base leading-normal font-bold text-slate-900">{displayNickname}</div>
           {/* 마이페이지 드롭다운 */}

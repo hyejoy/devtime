@@ -20,7 +20,7 @@ export default function Logout() {
       });
 
       if (res.ok) {
-        console.log('로그아웃 성공!');
+        // console.log('로그아웃 성공!');
       } else {
         const errorData = await res.json().catch(() => ({}));
         console.error('로그아웃 서버 응답 실패:', errorData);

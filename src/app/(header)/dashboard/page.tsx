@@ -109,7 +109,7 @@ export default function DashboardPage() {
 
         if (res.ok) {
           const data: StatsResponse = await res.json();
-          console.log('요일별 공부시간 평균 데이터 : ', data);
+          // console.log('요일별 공부시간 평균 데이터 : ', data);
 
           setStats({
             consecutiveDays: data.consecutiveDays,
@@ -120,7 +120,7 @@ export default function DashboardPage() {
           setWeekdayStudyTime(data.weekdayStudyTime);
         }
       } catch (error) {
-        console.error('대시보드 데이터 로드 실패:', error);
+        // console.error('대시보드 데이터 로드 실패:', error);
       }
     };
 
@@ -138,11 +138,11 @@ export default function DashboardPage() {
 
         if (res.ok) {
           const data = await res.json();
-          console.log('학습 히트맵 데이터 조회 (바다):', data.heatmap);
+          // console.log('학습 히트맵 데이터 조회 (바다):', data.heatmap);
           setHeatmapData(data);
         }
       } catch (err) {
-        console.log('학습 히트맵 데이터 조회 (바다) err : ', err);
+        // console.log('학습 히트맵 데이터 조회 (바다) err : ', err);
       }
     };
 
@@ -165,11 +165,11 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         const result: StudyLogsResponse = data.data;
-        console.log('학습 기록 (GRID)조회 : ', result);
+        // console.log('학습 기록 (GRID)조회 : ', result);
         setStudyLogs(result);
       }
     } catch (err) {
-      console.log('학습 기록 (GRID)조회 err : ', err);
+      // console.log('학습 기록 (GRID)조회 err : ', err);
     }
   }, []);
 
@@ -192,7 +192,7 @@ export default function DashboardPage() {
         fetchStudyLogs(currentPage);
       }
     } catch (err) {
-      console.log('학습기록 로그 삭제 에러 : ', err);
+      // console.log('학습기록 로그 삭제 에러 : ', err);
     }
   }, [deleteId, currentPage, fetchStudyLogs]);
 
@@ -222,10 +222,9 @@ export default function DashboardPage() {
         if (res.ok) {
           const data = await res.json();
           setDetailLog(data.data);
-          console.log('detail res :::: ', data);
         }
       } catch (err) {
-        console.log('로그 디테일 에러 : ', err);
+        // console.log('로그 디테일 에러 : ', err);
       }
     };
     fetchLogDetail();

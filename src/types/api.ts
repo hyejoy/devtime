@@ -1,8 +1,7 @@
-import { checkEmail, checkNickname } from '@/services/signup';
-import { DuplicateField } from './signup';
-import { BasicStructure } from './common';
-import { SplitTime } from './timer';
 import { ApiRequest, ApiResponse } from '@/types/api/helpers';
+import { BasicStructure } from './common';
+import { DuplicateField } from './signup';
+import { SplitTime } from './timer';
 
 export interface RefreshToken {
   success: boolean;
@@ -17,11 +16,6 @@ export interface SignUpCheckResponse {
 }
 // request
 export type DuplicateCheckApi = (value: string) => Promise<SignUpCheckResponse>;
-
-export const duplicateCheckApiMap: Record<DuplicateField, DuplicateCheckApi> = {
-  id: checkEmail,
-  nickname: checkNickname,
-};
 
 export interface SignupResponse {
   /** 회원가입 */

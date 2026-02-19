@@ -10,6 +10,7 @@ interface ProfileState extends Profile {
     setLogin: (value: boolean) => void;
     initProfile: (data: Profile) => void;
     setProfile: <K extends keyof ProfileField>(key: K, value: ProfileField[K]) => void;
+    setNickname: (nickname: string) => void;
     resetProfile: () => void;
     setDropdownClose: () => void;
     setDropdownOpen: () => void;
@@ -53,6 +54,10 @@ export const useProfileStore = create<ProfileState>()(
           }
           // Immer 내부에서 안전하게 할당하기 위해 any 사용 또는 인덱스 시그니처 대응
           (state.profile as any)[key] = value;
+        }),
+      setNickname: (nickname: string) =>
+        set((state) => {
+          state.nickname = nickname;
         }),
       resetProfile: () =>
         set((state) => {

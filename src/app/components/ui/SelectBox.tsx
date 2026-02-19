@@ -16,8 +16,8 @@ interface CustomSelectProps {
   placeholder: string;
   options: Option[];
   keyType: keyof ProfilePostRequest;
-  value: any;
-  onChange: OnChangeType;
+  value: any; // SelectBox는 보통 string 기반이므로
+  onChange: (key: any, value: string) => void;
   error?: string;
 }
 

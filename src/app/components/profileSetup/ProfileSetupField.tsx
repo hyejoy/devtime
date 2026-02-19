@@ -5,24 +5,9 @@ import SearchTechStack from '@/app/components/profileSetup/SearchTechStack';
 import { SelectBox } from '@/app/components/ui/SelectBox';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
 import TextLabel from '@/app/components/ui/TextLabel';
+import { CAREER_OPTIONS, PURPOSE_OPTIONS } from '@/constants/selectbox';
 import { useProfileStore } from '@/store/profileStore';
 import { OnChangeType } from '@/types/profile';
-
-const CAREER_OPTIONS = [
-  { value: '경력 없음', label: '경력 없음' },
-  { value: '0 - 3년', label: '0 - 3년' },
-  { value: '4 - 7년', label: '4 - 7년' },
-  { value: '8 - 10년', label: '8 - 10년' },
-  { value: '11년 이상', label: '11년 이상' },
-];
-
-const PURPOSE_OPTIONS = [
-  { label: '취업 준비', value: '취업 준비' },
-  { label: '이직 준비', value: '이직 준비' },
-  { label: '단순 개발 역량 향상', value: '단순 개발 역량 향상' },
-  { label: '회사 내 프로젝트 원활하게 수행', value: '회사 내 프로젝트 원활하게 수행' },
-  { label: '기타(직접 입력)', value: '기타' },
-];
 
 export default function ProfileSetupField() {
   /** zustand */

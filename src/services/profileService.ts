@@ -12,11 +12,11 @@ export const profileService = {
 
     if (!res.ok) throw new Error('회원 정보 조회 실패');
     const data = await res.json();
-    console.log('👏 회원 정보 조회 : ', data);
+    // console.log('👏 회원 정보 조회 : ', data);
     return data;
   },
 
-  /**--- 프로필 생성 ---- */
+  /**--- 프로필 생성 (회원가입 후 최초 1회) ---- */
   create: async (body: ProfilePostRes): Promise<ApiResponse<'/api/profile', 'post'>> => {
     const res = await fetch(`${API.PROFILE.CREATE}`, {
       method: 'POST',
@@ -25,9 +25,7 @@ export const profileService = {
     });
 
     if (!res.ok) throw new Error('프로필 생성 실패');
-    const data = await res.json();
-    console.log('👏 프로필 생성  :', data);
-    return data;
+    return await res.json();
   },
 
   /**--- 회원 정보 수정 ---- */

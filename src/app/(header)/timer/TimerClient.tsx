@@ -85,7 +85,6 @@ export default function TimerClient() {
   const handleTimerStart = async () => {
     // 첫 타이머 실행
     if (!timerId) {
-      console.log('click');
       setTimerStatus('READY');
       openDialog(); // dialog에서 시작 실행 처리
     } else {
