@@ -8,6 +8,7 @@ import { useTimerStore } from '@/store/timerStore';
 import { useProfileActions, useProfileStore } from '@/store/profileStore';
 import { usePathname } from 'next/navigation';
 import { useDialogStore } from '@/store/dialogStore';
+import NextTopLoader from 'nextjs-toploader';
 
 //   fontFamily: 'var(--font-pretendard)',
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -41,6 +42,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body className="font-pretendard bg-main-layout relative min-h-screen">
+        <NextTopLoader
+          color="#4c79ff" // 프로젝트 브랜드 색상
+          showSpinner={false} // 우측 상단 스피너 노출 여부
+          shadow="0 0 10px #your-brand-color,0 0 5px #your-brand-color"
+        />
         <AuthSessionProvider>{children}</AuthSessionProvider>
       </body>
     </html>
