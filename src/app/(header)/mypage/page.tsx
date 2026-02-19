@@ -60,7 +60,7 @@ export default function Page() {
             {goal && <div className="text-lg font-semibold text-gray-600">{goal}</div>}
             {!goal && (
               <div className="text-lg font-semibold text-gray-300">
-                개발 경력을 업데이트 해주세요.
+                공부 목적을 업데이트 해주세요.
               </div>
             )}
           </div>

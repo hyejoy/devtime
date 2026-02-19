@@ -90,7 +90,7 @@ export const timerService = {
   ): Promise<ApiRequest<'/api/{studyLogId}/tasks', 'put'>> => {
     const res = await fetch(`${API.TASK.UPDATE(studyLogId)}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'applicaton/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 

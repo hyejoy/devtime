@@ -2,7 +2,7 @@ import { API_BASE_URL } from '@/config/env';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
 
   // 이미지 최적화를 위한 외부 도메인 설정 추가
   images: {
