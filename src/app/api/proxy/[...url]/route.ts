@@ -3,20 +3,19 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET, POST, PUT, DELETE 해당 헨들러 하나로 처리
-async function handleRequest(
-  req: NextRequest,
-  { params }: { params: Promise<{ url: string[] }> }
-) {
+async function handleRequest(req: NextRequest, { params }: { params: Promise<{ url: string[] }> }) {
+  // 1. Next.js 15 비동기 데이터 처리
   const { url } = await params;
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
+
+  // 경로 재구성
   const targetPath = url.join('/');
   const query = req.nextUrl.search;
-
   const externalApiUrl = `${API_BASE_URL}/api/${targetPath}${query}`;
   console.log('🧭 Next.js → Server 요청 경로 : ', externalApiUrl);
 
-  // 요청 본문(body)_ GET/DELETE 제외
+  // Body 처리 (GET/HEAD 제외)
   let body = null;
   if (!['GET', 'HEAD'].includes(req.method)) {
     try {
@@ -41,9 +40,7 @@ async function handleRequest(
     if (res.status === 401) {
       const { pathname } = req.nextUrl;
       // 토큰 갱신 핸들러로 리다이렉트 (돌아올 경로를 redirect 쿼리에 담아서!)
-      return NextResponse.redirect(
-        new URL(`/api/auth/refresh?redirect=${pathname}`, req.url)
-      );
+      return NextResponse.redirect(new URL(`/api/auth/refresh?redirect=${pathname}`, req.url));
     }
 
     // BE가 응답은 했으나 에러인 경우 (400, 404, 500 등)
@@ -65,8 +62,7 @@ async function handleRequest(
     console.error('Proxy Error:', error); // 디버깅용
     return NextResponse.json(
       {
-        message:
-          '현재 백엔드 서버와 통신할 수 없습니다. (Internal Server Error)',
+        message: '현재 백엔드 서버와 통신할 수 없습니다. (Internal Server Error)',
       },
       { status: 500 }
     );
