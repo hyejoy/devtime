@@ -6,8 +6,23 @@ export function middleware(req: NextRequest) {
 
   const accessToken = req.cookies.get('accessToken')?.value;
   const refreshToken = req.cookies.get('refreshToken')?.value;
-  const isFirstLogin = req.cookies.get('isFirstLogin')?.value === 'true'; // 문자열 비교 확인
 
+  // 쿠키값이 'true'일 때만 첫 로그인으로 간주
+  const isFirstLogin = req.cookies.get('isFirstLogin')?.value === 'true';
+  // 이미 첫 로그인이 아닌 사용자가 프로필 설정 페이지에 접근하려고 할 때
+  if (pathname === '/profile/setup') {
+    // 로그인이 안 되어 있다면 메인으로
+    if (!accessToken && !refreshToken) {
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+    // 이미 프로필 설정을 완료한 유저(isFirstLogin이 false)라면 타이머로 튕겨내기
+    if (!isFirstLogin) {
+      console.log('⚠️ 첫 로그인이 아닌 유저입니다. 타이머로 이동합니다.');
+      url.pathname = '/timer';
+      return NextResponse.redirect(url);
+    }
+  }
   const isLoginPage = pathname === '/' || pathname.startsWith('/login');
   const isProtectedPage =
     pathname.startsWith('/timer') ||
