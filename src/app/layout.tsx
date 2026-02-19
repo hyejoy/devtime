@@ -1,11 +1,10 @@
 'use client';
 import AuthSessionProvider from '@/context/AuthContext';
-import '@/styles/tokens/colors.css';
 import { ReactNode, useEffect } from 'react';
 import { digitalNumber, pretendard } from '../../public/fonts/font';
 import './globals.css';
 import { useTimerStore } from '@/store/timerStore';
-import { useProfileActions, useProfileStore } from '@/store/profileStore';
+import { useProfileStore } from '@/store/profileStore';
 import { usePathname } from 'next/navigation';
 import { useDialogStore } from '@/store/dialogStore';
 import NextTopLoader from 'nextjs-toploader';
