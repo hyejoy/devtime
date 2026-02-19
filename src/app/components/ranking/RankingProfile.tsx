@@ -2,11 +2,14 @@ import { ApiResponse } from '@/types/api/helpers';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { formattedTime } from '@/utils/formatTime';
+import { S3_BASE_URL } from '@/constants/urls';
 type RankingProfileProps = ApiResponse<'/api/rankings', 'get'>['data']['rankings'][0];
 
 const RankingProfile = (props: RankingProfileProps) => {
   const { averageStudyTime, nickname, profile, rank, totalStudyTime, userId } = props;
   const { career, profileImage, purpose, techStacks } = profile;
+
+  const imageSrc = profileImage ? `${S3_BASE_URL}/${profileImage}` : '/images/profile/profile.png';
   return (
     <>
       <div className="mt-3 flex h-auto gap-9 rounded-lg bg-white px-6 py-3">
@@ -24,7 +27,7 @@ const RankingProfile = (props: RankingProfileProps) => {
           </div>
           <div className="relative mt-4 h-20 w-20 overflow-hidden rounded-full">
             <Image
-              src={profileImage ?? '/images/profile/profile.png'}
+              src={imageSrc}
               alt="profile"
               fill // 부모 크기에 맞춤
               sizes="80px"
