@@ -17,7 +17,6 @@ import { useDialogStore } from '@/store/dialogStore';
 import { useTimerStore } from '@/store/timerStore';
 import { RoutePath } from '@/types/common';
 import { useRouter } from 'next/navigation';
-// 1. LoadingBar 컴포넌트 임포트 (경로는 실제 파일 위치에 맞게 수정하세요)
 import LoadingBar from '@/app/components/ui/LoadingBar';
 
 const cx = classNames.bind(styles);
@@ -37,7 +36,6 @@ export default function Page() {
   const [dialogType, setDialogType] = useState<LoginDialogType>(null);
   const [nextRoute, setNextRoute] = useState<RoutePath>();
 
-  // ✅ 2. 로딩 상태 추가
   const [isLoading, setIsLoading] = useState(false);
 
   const LABEL_MAP: Record<LoginField, string> = { email: '아이디', password: '비밀번호' };
@@ -83,7 +81,7 @@ export default function Page() {
   };
 
   const isLoginButtonDisabled = () => {
-    // ✅ 로딩 중일 때도 버튼 비활성화
+    // 로딩 중일 때도 버튼 비활성화
     return Object.values(regexValidity).some((v) => !v) || isLoading;
   };
 
@@ -95,7 +93,6 @@ export default function Page() {
   };
 
   async function handleLoginButton() {
-    // ✅ 3. 로딩 시작
     setIsLoading(true);
 
     try {
@@ -110,7 +107,7 @@ export default function Page() {
       if (!res.ok) {
         setDialogType('login-failed');
         openDialog();
-        setIsLoading(false); // 실패 시 로딩 종료
+        setIsLoading(false);
         return;
       }
 
@@ -118,25 +115,22 @@ export default function Page() {
 
       if (data.isDuplicateLogin) {
         setDialogType('duplicate-login');
-        setNextRoute(data.isFirstLogin ? '/profile/setup' : '/timer');
         openDialog();
-        setIsLoading(false); // 중복 로그인 안내 시 로딩 종료
+        setIsLoading(false);
         return;
       }
 
-      // 성공 시 페이지 이동 (이동 전까지 로딩 유지)
-      router.replace(data.isFirstLogin ? '/profile/setup' : '/timer');
+      // 성공 시 즉시 이동
+      const redirectUrl = data.isFirstLogin ? '/profile/setup' : '/timer';
+      window.location.href = redirectUrl;
     } catch (err) {
-      console.error('네트워크 에러:', err);
       setDialogType('login-failed');
       openDialog();
-      setIsLoading(false); // 에러 발생 시 로딩 종료
+      setIsLoading(false);
     }
   }
-
   return (
     <div className={cx('page')}>
-      {/* ✅ 4. 로딩 중일 때 로딩바 렌더링 */}
       {isLoading && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20">
           <LoadingBar />
