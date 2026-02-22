@@ -6,12 +6,12 @@ import classNames from 'classnames/bind';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { ChangeEvent, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import Input from '../../input/Input';
 import TaskItem from '../../timer/TaskItem';
 import Button from '../../ui/Button';
 import DialogField from '../DialogField';
 import styles from './TimerDialog.module.css';
-import { useShallow } from 'zustand/react/shallow';
 
 const cx = classNames.bind(styles);
 
@@ -22,21 +22,8 @@ interface TimerDialogProps {
 
 export default function TimerDialog({ isEditingMode, onChangeEditingMode }: TimerDialogProps) {
   /** zustand */
-
   // useShallow를 사용하여 상태를 가져옵니다.
-  // 이렇게 하면 'unknown' 에러와 '인수 개수' 에러가 모두 해결됨
-  const {
-    studyLogId,
-    timerId,
-    timerStatus,
-    isRunning,
-    totalActiveMs,
-    lastStartTimestamp,
-    displayTime,
-    todayGoal,
-    tasks,
-    review,
-  } = useTimerStore(
+  const { studyLogId, timerId, timerStatus, todayGoal, tasks, review } = useTimerStore(
     useShallow((state) => ({
       studyLogId: state.studyLogId,
       timerId: state.timerId,
@@ -64,9 +51,8 @@ export default function TimerDialog({ isEditingMode, onChangeEditingMode }: Time
     snapshotTasks,
     timerReset,
   } = useTimerStore((state) => state.actions);
-  // 액션들은 따로 가져옵니다. (액션은 상태가 변해도 리렌더링을 유발하지 않음)
 
-  const { isOpen, openDialog, closeDialog } = useDialogStore();
+  const { isOpen, closeDialog } = useDialogStore();
 
   /** state */
   const [newTask, setNewTask] = useState('');
@@ -81,6 +67,10 @@ export default function TimerDialog({ isEditingMode, onChangeEditingMode }: Time
   // 할일 추가
   const handleAddTask = () => {
     if (newTask.trim() === '') return;
+    if (newTask.length >= 30) {
+      alert('30자 이하로 작성해주세요.');
+      return;
+    }
     addTask(newTask); // Zustand에 작업 추가
     // onChangeEditingMode(true); // 즉시 편집 모드 활성화 (아이콘 노출)
     setNewTask(''); // 입력창 비우기
@@ -163,6 +153,10 @@ export default function TimerDialog({ isEditingMode, onChangeEditingMode }: Time
   // 타이머 시작하기
   const onStartTimer = async () => {
     const taskList: string[] = tasks.map((task) => task.content);
+    if (todayGoal.length >= 30) {
+      alert('목표를 30자 이하로 작성해주세요.');
+      return;
+    }
     try {
       const res = await timerService.start({
         todayGoal: todayGoal,

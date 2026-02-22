@@ -91,7 +91,7 @@ export default function TaskItem({ task, editingMode = false, onChangeEditMode }
       {/* 3. 버튼 영역 (편집/삭제/체크박스) */}
       <div className="flex items-center gap-4 pr-5">
         {/* 편집 모드: 연필 & 삭제 아이콘 */}
-        {editingMode && !isEditingTitle && timerStatus !== 'READY' && !isDashboard && (
+        {editingMode && !isEditingTitle && !isDashboard && (
           <div className="flex gap-3">
             <Image
               src="/images/timerDialog/edit.png"
