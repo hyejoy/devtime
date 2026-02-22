@@ -1,5 +1,7 @@
 'use client';
+import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
 import Button from '@/app/components/ui/Button';
+import LoadingBar from '@/app/components/ui/LoadingBar';
 import Logo from '@/app/components/ui/Logo';
 import TextFieldInput from '@/app/components/ui/TextFieldInput';
 import TextLabel from '@/app/components/ui/TextLabel';
@@ -7,22 +9,18 @@ import TextLinkRow from '@/app/components/ui/TextLinkRow';
 import { API } from '@/constants/endpoints';
 import { emailRegex, passwordRegex } from '@/constants/regex';
 import { MESSAGE } from '@/constants/signupMessage';
+import { useDialogStore } from '@/store/dialogStore';
+import { useTimerStore } from '@/store/timerStore';
+import { RoutePath } from '@/types/common';
 import { LoginField, LoginHelperMessage, LoginInput, LoginValid } from '@/types/login';
 import classNames from 'classnames/bind';
 import Image from 'next/image';
 import React, { ChangeEvent, useState } from 'react';
 import styles from './page.module.css';
-import LoginDialog, { LoginDialogType } from '@/app/components/dialog/login/LoginDialog';
-import { useDialogStore } from '@/store/dialogStore';
-import { useTimerStore } from '@/store/timerStore';
-import { RoutePath } from '@/types/common';
-import { useRouter } from 'next/navigation';
-import LoadingBar from '@/app/components/ui/LoadingBar';
 
 const cx = classNames.bind(styles);
 
 export default function Page() {
-  const router = useRouter();
   const { openDialog, isOpen } = useDialogStore();
   const { timerReset } = useTimerStore((state) => state.actions);
 
