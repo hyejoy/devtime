@@ -4,7 +4,7 @@ import { API } from '@/constants/endpoints';
 import { ReactNode, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation'; // useRouter 추가
 import { profileService } from '@/services/profileService';
-import { useIsLogin, useProfileActions } from '@/store/profileStore';
+import { useisLoggedIn, useProfileActions } from '@/store/profileStore';
 import { Profile } from '@/types/profile';
 import { useTimerStore } from '@/store/timerStore';
 import { timerService } from '@/services/timerService';
@@ -14,10 +14,10 @@ const EXCLUDING_PATH = ['/', '/login', '/signup'];
 export default function AuthSessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { initProfile, setLogin } = useProfileActions();
+  const { initProfile, setLoggedIn } = useProfileActions();
   const { timerStatus, timerId: currentTimerId, actions } = useTimerStore();
   const { getSplitTimesForServer } = actions;
-  const isLogin = useIsLogin();
+  const isLogin = useisLoggedIn();
 
   /** ✅ 세션 체크 및 프로필 업데이트 로직 분리 (재사용을 위해 useCallback 사용) */
   const checkSession = useCallback(async () => {
@@ -41,11 +41,11 @@ export default function AuthSessionProvider({ children }: { children: ReactNode 
         };
 
         initProfile(formattedData);
-        setLogin(true);
+        setLoggedIn(true);
         localStorage.setItem('user-nickname', resData.nickname);
       } else {
         // 세션 만료 시
-        setLogin(false);
+        setLoggedIn(false);
         await fetch(`${API.AUTH.LOGOUT}`, {
           method: 'POST',
           credentials: 'include',
@@ -55,7 +55,7 @@ export default function AuthSessionProvider({ children }: { children: ReactNode 
     } catch (err) {
       console.error('세션체크 중 에러 발생', err);
     }
-  }, [initProfile, setLogin, router]);
+  }, [initProfile, setLoggedIn, router]);
 
   /** 1️⃣ 페이지 이동 시 세션 체크 */
   useEffect(() => {

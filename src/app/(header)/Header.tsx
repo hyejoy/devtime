@@ -24,16 +24,27 @@ const LOGIN_ITEMS = [
 ];
 
 export default function Header({
-  isLoggedIn,
+  isLoggedIn: initialIsLoggedIn, // props 이름을 변경해서 내부 상태와 구분
   initialNickname,
 }: {
   isLoggedIn: boolean;
   initialNickname: string;
 }) {
-  const { setLastStartTimestamp } = useTimerStore((state) => state.actions);
   const pathname = usePathname();
-  const { nickname, isDropdownOpen, profile } = useProfileStore();
-  const { setDropdownClose, setDropdownOpen } = useProfileActions();
+  const { nickname, isDropdownOpen, profile, isLoggedIn } = useProfileStore();
+  const { setLastStartTimestamp } = useTimerStore((state) => state.actions);
+  const { setDropdownClose, setDropdownOpen, setLoggedIn } = useProfileActions();
+
+  // 1. 처음 마운트될 때 서버에서 받은 isLoggedIn 값이 true라면 Zustand도 업데이트
+  useEffect(() => {
+    if (initialIsLoggedIn) {
+      setLoggedIn(true);
+    }
+  }, [initialIsLoggedIn, setLoggedIn]);
+
+  // 이제 아래 렌더링 조건문에서 props로 받은 isLoggedIn 대신
+  // Zustand의 isLoggedIn이나 유동적인 상태값을 사용
+  const isUserAuthenticated = isLoggedIn || initialIsLoggedIn;
   const displayNickname = nickname || initialNickname;
   // 드롭다운 영역을 감지 ref
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -85,7 +96,7 @@ export default function Header({
       </nav>
 
       {/* 로그인(O) 프로필 영역 노출 */}
-      {isLoggedIn && (
+      {isUserAuthenticated && (
         <div
           ref={dropdownRef}
           className="relative flex w-auto cursor-pointer items-center gap-2 whitespace-nowrap"
@@ -125,7 +136,7 @@ export default function Header({
         </div>
       )}
       {/* 로그인(X) 프로필 영역 노출 */}
-      {!isLoggedIn && (
+      {!isUserAuthenticated && (
         <div className="flex w-auto items-center gap-2 whitespace-nowrap">
           <nav className="flex flex-1 items-center gap-[2.3rem] text-base leading-normal font-semibold">
             {LOGIN_ITEMS.map((item) => (

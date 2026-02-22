@@ -3,11 +3,11 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
 interface ProfileState extends Profile {
-  isLogin: boolean;
+  isLoggedIn: boolean;
   isDropdownOpen: boolean;
   isFirstLogin: boolean;
   actions: {
-    setLogin: (value: boolean) => void;
+    setLoggedIn: (value: boolean) => void;
     initProfile: (data: Profile) => void;
     setProfile: <K extends keyof ProfileField>(key: K, value: ProfileField[K]) => void;
     setNickname: (nickname: string) => void;
@@ -28,7 +28,7 @@ const initialState: Omit<ProfileState, 'actions'> = {
     techStacks: [],
     profileImage: undefined,
   }, // ✅ 여기서 as ProfilePostRes를 제거하거나 명확히 일치시킵니다.
-  isLogin: false,
+  isLoggedIn: false,
   isDropdownOpen: false,
   isFirstLogin: false,
 };
@@ -37,9 +37,9 @@ export const useProfileStore = create<ProfileState>()(
   immer((set) => ({
     ...initialState,
     actions: {
-      setLogin: (value) =>
+      setLoggedIn: (value) =>
         set((state) => {
-          state.isLogin = value;
+          state.isLoggedIn = value;
         }),
       initProfile: (data) =>
         set((state) => {
@@ -64,7 +64,7 @@ export const useProfileStore = create<ProfileState>()(
           state.email = initialState.email;
           state.nickname = initialState.nickname;
           state.profile = { ...initialState.profile } as ProfilePostRes;
-          state.isLogin = false;
+          state.isLoggedIn = false;
         }),
       setDropdownClose: () =>
         set((state) => {
@@ -82,6 +82,6 @@ export const useProfileStore = create<ProfileState>()(
   }))
 );
 
-export const useIsLogin = () => useProfileStore((state) => state.isLogin);
+export const useisLoggedIn = () => useProfileStore((state) => state.isLoggedIn);
 export const useIsFirstLogin = () => useProfileStore((state) => state.isFirstLogin);
 export const useProfileActions = () => useProfileStore((state) => state.actions);
