@@ -19,6 +19,7 @@ export default function ProfileSkipDialog({ nextRoute }: Props) {
       </DialogField.Content>
       <DialogField.Button align="align-right">
         <Button nextRoute={nextRoute}>건너뛰기</Button>
+        <Button variant="secondary">취소</Button>
       </DialogField.Button>
     </DialogField>
   );
