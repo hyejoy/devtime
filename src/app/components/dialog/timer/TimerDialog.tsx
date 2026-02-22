@@ -5,7 +5,7 @@ import { useTimerStore } from '@/store/timerStore';
 import classNames from 'classnames/bind';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import Input from '../../input/Input';
 import TaskItem from '../../timer/TaskItem';
@@ -190,6 +190,12 @@ export default function TimerDialog({ isEditingMode, onChangeEditingMode }: Time
   const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => updateTodayGoal(e.target.value);
   const onReviewChange = (e: ChangeEvent<HTMLTextAreaElement>) => updateReview(e.target.value);
 
+  // 타이머 시작전일때는 수정,삭제 모드 보여야함
+  useEffect(() => {
+    if (timerStatus === 'READY') {
+      handleEditMode(true);
+    }
+  }, [timerStatus]);
   if (!isOpen) return null;
 
   return (
