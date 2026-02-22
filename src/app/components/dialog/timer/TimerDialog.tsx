@@ -215,7 +215,7 @@ export default function TimerDialog({ isEditingMode, onChangeEditingMode }: Time
               onChange={onChangeTitle}
               value={todayGoal}
               size={'large'}
-              placeholder="오늘의 목표"
+              placeholder="여기에 오늘의 목표를 입력해 주세요."
               className={clsx('text-primary-900')}
             />
             <Input.Label name="todo">할 일 목록</Input.Label>
